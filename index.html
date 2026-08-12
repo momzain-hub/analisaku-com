@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Analisaku.com — market insight, technical analysis, tools investasi, dan edukasi saham untuk membantu investor membaca pasar dengan lebih terstruktur.">
+  <meta name="description" content="Analisaku.com membantu investor membaca kondisi pasar, memahami analisis teknikal, menyusun trading plan, dan mengelola risiko dengan lebih sederhana dan terstruktur.">
   <meta name="theme-color" content="#06101d">
-  <title>Analisaku.com | Market Insight, Technical Analysis & Edukasi Saham</title>
+  <title>Analisaku.com | Analisis Saham Jadi Lebih Sederhana</title>
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/home-v2.css">
 </head>
-<body>
+<body class="home-v2">
   <header class="site-header">
     <div class="container nav-wrap">
       <a class="brand" href="index.html" aria-label="Analisaku.com">analisaku<span>.com</span></a>
       <nav class="main-nav" id="mainNav">
-        <a href="#market">Market</a>
+        <a href="#market-context">Market</a>
         <a href="technical.html">Technical</a>
         <a href="tools.html">Tools</a>
         <a href="edukasi.html">Edukasi</a>
@@ -25,206 +26,246 @@
   </header>
 
   <main>
-    <section class="hero hero-premium">
+    <section class="hero hero-v2">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow"><span class="pulse-dot"></span> MARKET INTELLIGENCE • EDUCATION</div>
-          <h1>Baca pasar lebih jelas.<br><span>Ambil keputusan lebih terukur.</span></h1>
-          <p>Analisaku.com menggabungkan market insight, technical analysis, tools investasi, dan edukasi pasar modal dalam tampilan yang sederhana, terstruktur, dan mudah dipahami.</p>
+          <div class="eyebrow"><span class="pulse-dot"></span> ANALISIS • EDUKASI • RISK MANAGEMENT</div>
+          <h1>Analisis saham jadi <span>lebih sederhana.</span></h1>
+          <p>Baca kondisi pasar, pahami struktur harga, susun trading plan, dan kelola risiko dalam satu alur yang lebih mudah dipahami.</p>
           <div class="hero-actions">
-            <a class="btn primary" href="#market">Explore Market <b>→</b></a>
-            <a class="btn ghost" href="technical.html">Mulai Belajar</a>
+            <a class="btn primary" href="technical.html">Analisa Saham <b>→</b></a>
+            <a class="btn ghost" href="edukasi.html">Belajar dari Dasar</a>
           </div>
           <div class="hero-points">
-            <span>✓ Market Context</span><span>✓ Price Action</span><span>✓ Risk Management</span>
+            <span>✓ Konteks pasar</span>
+            <span>✓ Analisis teknikal</span>
+            <span>✓ Trading plan</span>
+            <span>✓ Kontrol risiko</span>
           </div>
         </div>
 
-        <div class="market-console" aria-label="Ilustrasi dashboard market Analisaku">
-          <div class="console-top">
+        <div class="product-console" aria-label="Contoh alur keputusan Analisaku">
+          <div class="product-console-top">
             <div class="console-dots"><i></i><i></i><i></i></div>
-            <b>ANALISAKU / MARKET VIEW</b>
-            <span>FRAMEWORK</span>
+            <b>ANALISAKU / DECISION FRAMEWORK</b>
+            <span>CONTOH FRAMEWORK</span>
           </div>
-          <div class="console-body">
-            <div class="console-title-row">
-              <div><small>INDONESIA EQUITY MARKET</small><h3>Market Structure</h3></div>
-              <div class="status-pill">● Context First</div>
+          <div class="product-console-body">
+            <div class="product-console-title">
+              <div><small>DARI DATA MENJADI KEPUTUSAN</small><h3>Ringkas. Terukur. Tidak berisik.</h3></div>
+              <div class="signal-pill">● WATCH</div>
             </div>
-            <div class="price-line"><strong>Trend Framework</strong><span>Context • Momentum • Risk</span></div>
-            <svg class="hero-chart" viewBox="0 0 620 230" role="img" aria-label="Ilustrasi struktur tren">
-              <defs>
-                <linearGradient id="heroFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f2b51d" stop-opacity=".28"/><stop offset="100%" stop-color="#f2b51d" stop-opacity="0"/></linearGradient>
-                <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-              </defs>
-              <g class="chart-grid-lines"><line x1="0" y1="45" x2="620" y2="45"/><line x1="0" y1="105" x2="620" y2="105"/><line x1="0" y1="165" x2="620" y2="165"/></g>
-              <path d="M0 194 C42 180 74 186 108 162 S172 147 202 154 S266 116 304 124 S367 96 406 105 S466 70 504 76 S565 49 620 30 L620 230 L0 230Z" fill="url(#heroFill)"/>
-              <path d="M0 194 C42 180 74 186 108 162 S172 147 202 154 S266 116 304 124 S367 96 406 105 S466 70 504 76 S565 49 620 30" fill="none" stroke="#f2b51d" stroke-width="4" filter="url(#glow)"/>
-              <g class="signal-dots"><circle cx="202" cy="154" r="5"/><circle cx="406" cy="105" r="5"/><circle cx="620" cy="30" r="5"/></g>
-            </svg>
-            <div class="console-metrics">
-              <div><small>STEP 01</small><strong>Context</strong><span>Market & macro</span></div>
-              <div><small>STEP 02</small><strong>Structure</strong><span>Trend & momentum</span></div>
-              <div><small>STEP 03</small><strong>Risk</strong><span>Plan before trade</span></div>
+            <div class="decision-mini">
+              <div class="decision-mini-row positive"><span>Trend</span><strong>BULLISH</strong><em>Arah utama</em></div>
+              <div class="decision-mini-row status"><span>Setup</span><strong>ACTIVE</strong><em>Skenario terbentuk</em></div>
+              <div class="decision-mini-row"><span>Entry</span><strong>Area keputusan</strong><em>Bukan kejar harga</em></div>
+              <div class="decision-mini-row"><span>Trigger</span><strong>Tunggu konfirmasi</strong><em>Validasi skenario</em></div>
+              <div class="decision-mini-row risk"><span>Risk</span><strong>Batas skenario</strong><em>Invalidation</em></div>
+              <div class="decision-mini-row status"><span>Decision</span><strong>WATCH</strong><em>Tunggu kondisi sesuai</em></div>
             </div>
+            <div class="console-summary"><b>Analisaku menyederhanakan proses analisis.</b>Anda tetap melihat konteks, level penting, risiko, dan keputusan tanpa harus membaca semua indikator satu per satu.</div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-start">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="kicker">MULAI DARI SINI</div><h2>Apa yang ingin Anda lakukan?</h2></div>
+          <p>Pilih kebutuhan Anda. Analisaku dirancang agar investor tidak harus membuka terlalu banyak sumber hanya untuk menyusun satu keputusan.</p>
+        </div>
+        <div class="quick-start-grid">
+          <a class="quick-card" href="technical.html"><span class="num">01 / ANALISA</span><h3>Analisa Saham</h3><p>Lihat chart, struktur teknikal, dan ringkasan keputusan dalam satu halaman.</p><b>Buka Technical →</b></a>
+          <a class="quick-card" href="#market-context"><span class="num">02 / MARKET</span><h3>Market View</h3><p>Susun konteks IHSG, kekuatan pasar, rupiah, dan sentimen global sebelum memilih saham.</p><b>Lihat konteks pasar →</b></a>
+          <a class="quick-card" href="tools.html"><span class="num">03 / TOOLS</span><h3>Trading Tools</h3><p>Hitung average price, risk/reward, position size, target investasi, dan compound return.</p><b>Buka kalkulator →</b></a>
+          <a class="quick-card" href="edukasi.html"><span class="num">04 / BELAJAR</span><h3>Belajar Teknikal</h3><p>Pelajari analisis teknikal dari trend sampai trading plan dengan urutan yang lebih mudah.</p><b>Mulai belajar →</b></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section framework-section">
+      <div class="container framework-shell">
+        <div class="framework-head">
+          <div><div class="kicker">ANALISAKU DECISION FRAMEWORK</div><h2>Banyak data. Satu alur keputusan.</h2></div>
+          <p>Analisaku tidak berhenti pada indikator. Informasi disusun menjadi tahapan yang membantu Anda memahami apa yang sedang terjadi, apa yang ditunggu, dan di mana skenario dianggap salah.</p>
+        </div>
+        <div class="framework-steps">
+          <div class="framework-step"><small>01</small><b>Trend</b><span>Arah utama harga</span></div>
+          <div class="framework-step"><small>02</small><b>Setup</b><span>Skenario mulai terbentuk</span></div>
+          <div class="framework-step"><small>03</small><b>Entry</b><span>Area yang dipantau</span></div>
+          <div class="framework-step"><small>04</small><b>Trigger</b><span>Konfirmasi sebelum aksi</span></div>
+          <div class="framework-step"><small>05</small><b>Risk</b><span>Batas skenario / invalidation</span></div>
+          <div class="framework-step"><small>06</small><b>Target</b><span>Area evaluasi hasil</span></div>
+          <div class="framework-step"><small>07</small><b>Decision</b><span>Ringkasan kondisi</span></div>
+        </div>
+        <div class="framework-result">
+          <strong>STATUS YANG MUDAH DIBACA</strong>
+          <p>Daripada memenuhi layar dengan istilah teknikal, Analisaku merangkum kondisi menjadi status yang lebih praktis.</p>
+        </div>
+        <div class="status-strip" aria-label="Contoh status Analisaku">
+          <span>WAIT</span><span>WATCH</span><span>BUY SETUP</span><span>HOLD</span><span>TAKE PROFIT</span><span>EXIT</span>
         </div>
       </div>
     </section>
 
     <section class="market-lens-strip">
       <div class="container market-lens-grid">
-        <div class="market-lens-item"><small>IHSG</small><b>Equity Context</b><span>Trend • breadth • leadership</span></div>
-        <div class="market-lens-item"><small>USD / IDR</small><b>Macro Pressure</b><span>Currency • liquidity</span></div>
-        <div class="market-lens-item"><small>GOLD</small><b>Safe Haven</b><span>Risk perception</span></div>
-        <div class="market-lens-item"><small>US MARKET</small><b>Global Sentiment</b><span>Risk-on / risk-off</span></div>
+        <div class="market-lens-item"><small>IHSG</small><b>Arah Pasar</b><span>Trend • breadth • leadership</span></div>
+        <div class="market-lens-item"><small>USD / IDR</small><b>Tekanan Rupiah</b><span>Currency • liquidity</span></div>
+        <div class="market-lens-item"><small>GOLD</small><b>Persepsi Risiko</b><span>Safe haven</span></div>
+        <div class="market-lens-item"><small>GLOBAL</small><b>Sentimen Pasar</b><span>Risk-on / risk-off</span></div>
         <div class="market-lens-item"><small>BITCOIN</small><b>Risk Appetite</b><span>High-beta sentiment</span></div>
       </div>
     </section>
 
-    <section class="section context-builder-section" id="market">
+    <section class="section context-builder-section" id="market-context">
       <div class="container context-builder">
         <div class="context-intro">
           <div>
-            <div class="kicker">INTERACTIVE MARKET FRAMEWORK</div>
-            <h2>Susun konteks pasar sebelum melihat saham.</h2>
-            <p>Pilih kondisi yang menurut Anda sedang terjadi. Analisaku akan merangkum bias pasar secara sederhana. Ini bukan data live dan bukan sinyal transaksi—fitur ini dirancang untuk melatih cara berpikir berbasis konteks.</p>
+            <div class="kicker">MARKET CONTEXT</div>
+            <h2>Pahami pasar sebelum memilih saham.</h2>
+            <p>Nilai kondisi pasar berdasarkan pengamatan Anda. Analisaku akan membantu merangkum apakah kondisi cenderung defensif, netral, atau konstruktif. Fitur ini adalah mode latihan, bukan data live dan bukan sinyal transaksi.</p>
           </div>
-          <div class="context-note"><b>Cara pakai:</b> nilai empat faktor → lihat bias pasar → baru lanjut ke stock selection, technical setup, dan risk management.</div>
+          <div class="context-note"><b>Urutan berpikir:</b> kondisi pasar → pilih saham → cari setup → tentukan risiko → baru ambil keputusan.</div>
         </div>
 
         <div class="context-panel">
           <div class="context-panel-head">
-            <div><div class="kicker">MARKET CONTEXT BUILDER</div><h3>Bagaimana kondisi pasar menurut Anda?</h3></div>
+            <div><div class="kicker">MODE LATIHAN</div><h3>Bagaimana kondisi pasar menurut Anda?</h3></div>
             <span class="framework-badge">EDUCATION MODE</span>
           </div>
 
           <div class="context-row" data-context-group="trend">
-            <div class="context-label"><b>IHSG Trend</b><span>Arah struktur harga indeks</span></div>
+            <div class="context-label"><b>Arah IHSG</b><span>Struktur harga indeks saat ini</span></div>
             <div class="context-options">
               <button class="context-btn" data-score="-1">Bearish</button>
-              <button class="context-btn active" data-score="0">Neutral</button>
+              <button class="context-btn active" data-score="0">Netral</button>
               <button class="context-btn" data-score="1">Bullish</button>
             </div>
           </div>
 
           <div class="context-row" data-context-group="breadth">
-            <div class="context-label"><b>Market Breadth</b><span>Seberapa luas saham ikut menguat</span></div>
+            <div class="context-label"><b>Kekuatan Pasar</b><span>Seberapa luas saham ikut bergerak</span></div>
             <div class="context-options">
-              <button class="context-btn" data-score="-1">Weak</button>
-              <button class="context-btn active" data-score="0">Mixed</button>
-              <button class="context-btn" data-score="1">Strong</button>
+              <button class="context-btn" data-score="-1">Lemah</button>
+              <button class="context-btn active" data-score="0">Campuran</button>
+              <button class="context-btn" data-score="1">Kuat</button>
             </div>
           </div>
 
           <div class="context-row" data-context-group="macro">
-            <div class="context-label"><b>Rupiah / Macro Pressure</b><span>Tekanan eksternal dan likuiditas</span></div>
+            <div class="context-label"><b>Tekanan Rupiah / Makro</b><span>Tekanan eksternal dan kondisi likuiditas</span></div>
             <div class="context-options">
-              <button class="context-btn" data-score="1">Low</button>
+              <button class="context-btn" data-score="1">Rendah</button>
               <button class="context-btn active" data-score="0">Normal</button>
-              <button class="context-btn" data-score="-1">High</button>
+              <button class="context-btn" data-score="-1">Tinggi</button>
             </div>
           </div>
 
           <div class="context-row" data-context-group="global">
-            <div class="context-label"><b>Global Risk Sentiment</b><span>Risk-on, mixed, atau risk-off</span></div>
+            <div class="context-label"><b>Sentimen Global</b><span>Apakah pasar global mendukung risk appetite</span></div>
             <div class="context-options">
               <button class="context-btn" data-score="-1">Risk-off</button>
-              <button class="context-btn active" data-score="0">Mixed</button>
+              <button class="context-btn active" data-score="0">Netral</button>
               <button class="context-btn" data-score="1">Risk-on</button>
             </div>
           </div>
 
           <div class="context-result">
             <div class="context-result-top">
-              <div><small>FRAMEWORK RESULT</small><strong id="contextResultTitle">Neutral / Selective</strong></div>
+              <div><small>HASIL FRAMEWORK</small><strong id="contextResultTitle">Neutral / Selective</strong></div>
               <div class="context-score" id="contextScore">0 / 4</div>
             </div>
             <p id="contextResultCopy">Belum ada dominasi faktor yang kuat. Prioritaskan kualitas setup dan tunggu konfirmasi tambahan.</p>
             <div class="context-meter"><i id="contextMeterFill"></i></div>
-            <div class="context-axis"><span>Defensive</span><span>Neutral</span><span>Constructive</span></div>
+            <div class="context-axis"><span>Defensif</span><span>Netral</span><span>Konstruktif</span></div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section market-intelligence">
-      <div class="container">
-        <div class="section-head">
-          <div><div class="kicker">MARKET INTELLIGENCE</div><h2>Bukan sekadar melihat harga.<br>Pahami konteksnya.</h2></div>
-          <p>Kerangka Analisaku membantu investor membaca pasar dari konteks makro, struktur harga, momentum, sampai risiko sebelum mengambil keputusan.</p>
-        </div>
-        <div class="cards three feature-cards">
-          <article class="card premium-card"><div class="card-icon">⌁</div><div class="tag">01 / MARKET</div><h3>Market Insight</h3><p>IHSG, sentimen global, makroekonomi, sector rotation, dan konteks yang memengaruhi risk appetite.</p><a href="artikel.html">Explore insight →</a></article>
-          <article class="card premium-card"><div class="card-icon">⌁</div><div class="tag">02 / TECHNICAL</div><h3>Analisis Saham</h3><p>Trend, momentum, support resistance, price action, volume, dan struktur harga untuk membangun probabilitas.</p><a href="technical.html">Belajar technical →</a></article>
-          <article class="card premium-card"><div class="card-icon">⌁</div><div class="tag">03 / STRATEGY</div><h3>Trading Strategy</h3><p>Satukan setup, entry, invalidation, target, position sizing, dan evaluasi menjadi trading plan yang disiplin.</p><a href="edukasi.html">Bangun framework →</a></article>
         </div>
       </div>
     </section>
 
     <section class="section alt learning-section">
       <div class="container">
-        <div class="section-head"><div><div class="kicker">LEARNING PATH</div><h2>Technical analysis yang disusun<br>dari dasar sampai eksekusi.</h2></div><a class="text-link" href="technical.html">Lihat roadmap lengkap →</a></div>
-        <div class="learning-flow">
-          <a href="technical.html#trend"><span>01</span><b>Trend</b><small>Kenali arah utama market</small></a>
-          <a href="technical.html#support"><span>02</span><b>Support & Resistance</b><small>Tentukan area keputusan</small></a>
-          <a href="technical.html#candlestick"><span>03</span><b>Candlestick</b><small>Baca respons buyer & seller</small></a>
-          <a href="technical.html#pattern"><span>04</span><b>Chart Pattern</b><small>Pahami continuation/reversal</small></a>
-          <a href="technical.html#volume"><span>05</span><b>Volume</b><small>Konfirmasi partisipasi market</small></a>
-          <a href="technical.html#risk"><span>06</span><b>Risk Management</b><small>Jaga modal sebelum mengejar return</small></a>
+        <div class="section-head">
+          <div><div class="kicker">BELAJAR DARI DASAR</div><h2>Analisis teknikal dengan urutan yang masuk akal.</h2></div>
+          <p>Jangan mulai dari mencari indikator terbaik. Mulai dari membaca arah harga, area penting, respons pasar, lalu susun trading plan dan risiko.</p>
         </div>
+        <div class="learning-flow">
+          <a href="technical.html#trend"><span>01</span><b>Trend</b><small>Kenali arah utama harga</small></a>
+          <a href="technical.html#support"><span>02</span><b>Support & Resistance</b><small>Tentukan area keputusan</small></a>
+          <a href="technical.html#candlestick"><span>03</span><b>Candlestick</b><small>Baca respons buyer dan seller</small></a>
+          <a href="technical.html#pattern"><span>04</span><b>Chart Pattern</b><small>Pahami struktur pola harga</small></a>
+          <a href="technical.html#volume"><span>05</span><b>Volume</b><small>Lihat kualitas partisipasi pasar</small></a>
+          <a href="technical.html"><span>06</span><b>Indikator</b><small>Gunakan sebagai konfirmasi, bukan ramalan</small></a>
+          <a href="articles/trading-plan.html"><span>07</span><b>Trading Plan</b><small>Entry, trigger, target, dan evaluasi</small></a>
+          <a href="technical.html#risk"><span>08</span><b>Risk Management</b><small>Jaga modal sebelum mengejar return</small></a>
+        </div>
+        <div style="margin-top:24px"><a class="btn ghost" href="edukasi.html">Buka Materi Edukasi →</a></div>
       </div>
     </section>
 
     <section class="section tools-showcase">
       <div class="container split split-premium">
         <div>
-          <div class="kicker">INVESTMENT TOOLS</div>
-          <h2>Hitung dulu.<br>Baru ambil keputusan.</h2>
-          <p>Gunakan kalkulator sederhana untuk menghitung average price, risk/reward, position size, dan estimasi pertumbuhan investasi.</p>
-          <div class="mini-list"><span>Average Price</span><span>Risk / Reward</span><span>Position Size</span><span>Compound Return</span></div>
-          <a class="btn primary" href="tools.html">Buka semua tools</a>
+          <div class="kicker">TRADING & INVESTMENT TOOLS</div>
+          <h2>Hitung dulu. Baru ambil keputusan.</h2>
+          <p>Perhitungan sederhana dapat membantu keputusan menjadi lebih objektif. Gunakan tools untuk mengukur harga rata-rata, risiko, ukuran posisi, dan target investasi.</p>
+          <div class="mini-list"><span>Average Price</span><span>Risk / Reward</span><span>Position Size</span><span>Target Investasi</span><span>Compound Return</span></div>
+          <a class="btn primary" href="tools.html">Buka Semua Tools</a>
         </div>
-        <div class="tool-window">
-          <div class="tool-window-head"><b>POSITION SIZE</b><span>Risk Control</span></div>
-          <div class="risk-gauge">
-            <div class="gauge-ring"><strong>1%</strong><span>Risk / Trade</span></div>
-            <div class="gauge-copy"><small>FRAMEWORK</small><h3>Capital preservation first.</h3><p>Ukuran posisi sebaiknya mengikuti batas risiko, bukan sekadar keyakinan terhadap saham.</p></div>
+        <div class="tool-window-v2">
+          <div class="tool-title"><b>ALUR PERHITUNGAN</b><span>RISK FIRST</span></div>
+          <div class="tool-cards-mini">
+            <div><small>01 / ENTRY</small><strong>Tentukan harga</strong><span>Di mana skenario mulai menarik?</span></div>
+            <div><small>02 / STOP</small><strong>Tentukan batas risiko</strong><span>Di mana skenario dianggap salah?</span></div>
+            <div><small>03 / SIZE</small><strong>Hitung ukuran posisi</strong><span>Sesuaikan dengan batas risiko modal.</span></div>
+            <div><small>04 / TARGET</small><strong>Evaluasi risk/reward</strong><span>Apakah potensi hasil sepadan?</span></div>
           </div>
-          <div class="risk-bars"><div><span>Entry</span><b>Plan</b></div><div><span>Stop</span><b>Define</b></div><div><span>Size</span><b>Calculate</b></div><div><span>Target</span><b>Evaluate</b></div></div>
         </div>
       </div>
     </section>
 
     <section class="section alt article-home">
       <div class="container">
-        <div class="section-head"><div><div class="kicker">INSIGHTS & EDUCATION</div><h2>Konten yang membantu Anda<br>berpikir lebih terstruktur.</h2></div><a class="text-link" href="artikel.html">Semua artikel →</a></div>
+        <div class="section-head">
+          <div><div class="kicker">ARTIKEL & INSIGHT</div><h2>Belajar memahami alasan di balik keputusan.</h2></div>
+          <a class="text-link" href="artikel.html">Lihat Semua Artikel →</a>
+        </div>
         <div class="editorial-grid">
-          <article class="editorial-main"><div class="editorial-tag">MARKET INSIGHT</div><h3>Memahami Trend Pasar Sebelum Memilih Saham</h3><p>Konteks market dapat membantu menentukan kapan sebaiknya agresif, selektif, atau defensif.</p><a href="articles/memahami-trend.html">Baca insight →</a></article>
+          <article class="editorial-main"><div class="editorial-tag">KONTEKS PASAR</div><h3>Memahami Trend Pasar Sebelum Memilih Saham</h3><p>Konteks pasar membantu menentukan kapan lebih agresif, selektif, atau defensif.</p><a href="articles/memahami-trend.html">Baca Artikel →</a></article>
           <div class="editorial-side">
-            <article><span>TECHNICAL ANALYSIS</span><h3>Support & Resistance untuk Pemula</h3><p>Area harga penting sebagai dasar membaca peluang dan risiko.</p><a href="articles/support-resistance.html">Baca →</a></article>
-            <article><span>TRADING STRATEGY</span><h3>Membuat Trading Plan yang Terukur</h3><p>Entry, stop, target, sizing, dan evaluasi dalam satu framework.</p><a href="articles/trading-plan.html">Baca →</a></article>
+            <article><span>ANALISIS TEKNIKAL</span><h3>Support & Resistance untuk Pemula</h3><p>Kenali area harga penting sebagai dasar membaca peluang dan risiko.</p><a href="articles/support-resistance.html">Baca →</a></article>
+            <article><span>TRADING PLAN</span><h3>Membuat Trading Plan yang Terukur</h3><p>Satukan entry, invalidation, target, sizing, dan evaluasi dalam satu rencana.</p><a href="articles/trading-plan.html">Baca →</a></article>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section philosophy-section">
-      <div class="container philosophy-box">
-        <div><div class="kicker">ANALISAKU PRINCIPLE</div><h2>Probabilitas, bukan kepastian.</h2></div>
-        <p>Tujuan analisis bukan meramal harga dengan sempurna. Tujuannya adalah membangun skenario, mengukur risiko, dan membuat keputusan yang konsisten ketika kondisi pasar berubah.</p>
+    <section class="trust-section">
+      <div class="container trust-box">
+        <div><div class="kicker">PRINSIP ANALISAKU</div><h2>Data membantu keputusan. Keputusan tetap milik investor.</h2></div>
+        <div>
+          <p>Analisis bukan alat untuk memastikan masa depan. Analisaku membantu menyusun informasi menjadi skenario yang lebih terukur agar keputusan dapat dibuat dengan disiplin.</p>
+          <div class="trust-points">
+            <span>Fokus pada probabilitas, bukan kepastian.</span>
+            <span>Risiko ditentukan sebelum mengejar potensi return.</span>
+            <span>Konten dan tools bersifat analisis serta edukasi, bukan rekomendasi personal.</span>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="container footer-grid">
-      <div><div class="brand">analisaku<span>.com</span></div><p>Market insight, technical analysis, tools investasi, dan edukasi pasar modal.</p></div>
-      <div><b>Explore</b><a href="technical.html">Technical</a><a href="tools.html">Tools</a><a href="artikel.html">Artikel</a></div>
+      <div><div class="brand">analisaku<span>.com</span></div><p>Analisis saham, market context, trading tools, dan edukasi pasar modal dalam alur yang lebih sederhana dan terstruktur.</p></div>
+      <div><b>Jelajahi</b><a href="technical.html">Technical</a><a href="tools.html">Tools</a><a href="edukasi.html">Edukasi</a><a href="artikel.html">Artikel</a></div>
       <div><b>Analisaku</b><a href="about.html">About</a><a href="about.html#disclaimer">Disclaimer</a><a href="about.html#contact">Contact</a></div>
     </div>
-    <div class="container footer-note">Informasi di Analisaku.com bersifat edukasi dan bukan rekomendasi membeli atau menjual efek tertentu. © <span id="year"></span> Analisaku.com.</div>
+    <div class="container footer-note">Informasi di Analisaku.com bersifat analisis dan edukasi, bukan rekomendasi membeli atau menjual efek tertentu. © <span id="year"></span> Analisaku.com.</div>
   </footer>
+
   <script src="assets/js/main.js"></script>
 </body>
 </html>
