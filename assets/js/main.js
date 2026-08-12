@@ -273,3 +273,11 @@ techChecks.forEach(btn=>btn.addEventListener('click',()=>{
   updateTechReadiness();
 }));
 updateTechReadiness();
+
+/* ---------- Technical page: TradingView Advanced Chart ---------- */
+if(document.querySelector('.technical-hero')){
+  const tvModule=document.createElement('script');
+  tvModule.src=assetUrl('tradingview.js','assets/js/tradingview.js');
+  tvModule.async=true;
+  document.body.appendChild(tvModule);
+}
