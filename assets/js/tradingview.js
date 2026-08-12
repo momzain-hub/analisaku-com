@@ -25,27 +25,27 @@
         </div>
         <div class="tv-presets" aria-label="Contoh ticker"><button class="tv-chip active" data-tv-symbol="RAJA">RAJA</button><button class="tv-chip" data-tv-symbol="BBCA">BBCA</button><button class="tv-chip" data-tv-symbol="BMRI">BMRI</button><button class="tv-chip" data-tv-symbol="TLKM">TLKM</button><button class="tv-chip" data-tv-symbol="ANTM">ANTM</button></div>
         <div class="tv-chart-frame" id="tvChartFrame" aria-label="TradingView Advanced Chart"></div>
-        <div class="tv-note"><div><b>Catatan:</b> data dan chart disediakan oleh TradingView. Fitur ini untuk analisis dan edukasi; bukan rekomendasi beli/jual. Pine Script pribadi belum terhubung ke website.</div><div class="tv-status" id="tvStatus">IDX:RAJA • 1D</div></div>
+        <div class="tv-note"><div><b>Catatan:</b> data dan chart disediakan oleh TradingView. Fitur ini untuk analisis dan edukasi; bukan rekomendasi beli/jual. Metodologi indikator proprietary Analisaku tidak ditampilkan pada website.</div><div class="tv-status" id="tvStatus">IDX:RAJA • 1D</div></div>
 
         <section class="decision-panel" id="decisionPanel" aria-label="Analisaku Decision Panel">
           <div class="decision-head">
             <div>
               <div class="kicker">ANALISAKU DECISION PANEL</div>
               <h3><span id="decisionTicker">RAJA</span> <small id="decisionTf">1D</small></h3>
-              <p>Tujuan panel ini adalah menerjemahkan output indikator menjadi keputusan yang singkat, terukur, dan mudah dibaca.</p>
+              <p>Tujuan panel ini adalah menerjemahkan output indikator menjadi keputusan yang singkat, terukur, dan mudah dibaca tanpa membuka formula internal.</p>
             </div>
             <div class="decision-status waiting" id="decisionStatus"><span></span><b>WAITING</b><small>Signal engine belum terhubung</small></div>
           </div>
 
           <div class="decision-source" id="decisionSource">
-            <div><span>DATA SOURCE</span><b>Belum terhubung ke Master Pine Signal</b></div>
+            <div><span>DATA SOURCE</span><b>Belum terhubung ke Master Signal</b></div>
             <button type="button" id="tvDemo">Preview format RAJA</button>
           </div>
 
           <div class="decision-grid">
             <div class="decision-card"><span>TREND / REGIME</span><strong id="dTrend">—</strong><small id="dTrendNote">Menunggu indikator trend</small></div>
-            <div class="decision-card"><span>SETUP</span><strong id="dSetup">—</strong><small id="dSetupNote">Menunggu setup utama</small></div>
-            <div class="decision-card"><span>ENTRY ZONE</span><strong id="dEntry">—</strong><small id="dEntryNote">Pullback / breakout</small></div>
+            <div class="decision-card"><span>SETUP</span><strong id="dSetup">—</strong><small id="dSetupNote">Metodologi disembunyikan</small></div>
+            <div class="decision-card"><span>ENTRY ZONE</span><strong id="dEntry">—</strong><small id="dEntryNote">Area keputusan</small></div>
             <div class="decision-card"><span>BREAKOUT TRIGGER</span><strong id="dBreakout">—</strong><small id="dBreakoutNote">Konfirmasi harga</small></div>
             <div class="decision-card risk"><span>INVALIDATION / STOP</span><strong id="dStop">—</strong><small id="dStopNote">Batas skenario dianggap salah</small></div>
             <div class="decision-card"><span>TARGET 1</span><strong id="dTp1">—</strong><small>Target terdekat</small></div>
@@ -55,9 +55,9 @@
 
           <div class="decision-action">
             <div><span>DECISION</span><strong id="dDecision">Belum ada keputusan otomatis.</strong></div>
-            <p id="dDecisionCopy">Setelah tiga Pine Script digabung, bagian ini akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT berdasarkan rule Anda.</p>
+            <p id="dDecisionCopy">Setelah tiga Pine Script digabung, bagian ini akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT berdasarkan rule internal Analisaku.</p>
           </div>
-          <div class="decision-demo-note" id="decisionDemoNote" hidden>Preview ini memakai level dari screenshot RAJA yang Anda lampirkan, bukan data live dan bukan rekomendasi transaksi.</div>
+          <div class="decision-demo-note" id="decisionDemoNote" hidden>Preview ini memakai level dari screenshot RAJA yang Anda lampirkan, bukan data live dan bukan rekomendasi transaksi. Formula dan metodologi internal tidak ditampilkan.</div>
         </section>
       </div>
     </div>`;
@@ -80,17 +80,17 @@
 
   function resetDecision(){
     text('dTrend','—'); text('dTrendNote','Menunggu indikator trend');
-    text('dSetup','—'); text('dSetupNote','Menunggu setup utama');
-    text('dEntry','—'); text('dEntryNote','Pullback / breakout');
+    text('dSetup','—'); text('dSetupNote','Metodologi disembunyikan');
+    text('dEntry','—'); text('dEntryNote','Area keputusan');
     text('dBreakout','—'); text('dBreakoutNote','Konfirmasi harga');
     text('dStop','—'); text('dStopNote','Batas skenario dianggap salah');
     text('dTp1','—'); text('dTp2','—'); text('dTp3','—');
     text('dDecision','Belum ada keputusan otomatis.');
-    text('dDecisionCopy','Setelah tiga Pine Script digabung, bagian ini akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT berdasarkan rule Anda.');
+    text('dDecisionCopy','Setelah tiga Pine Script digabung, bagian ini akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT berdasarkan rule internal Analisaku.');
     const badge=document.getElementById('decisionStatus');
     badge.className='decision-status waiting';
     badge.innerHTML='<span></span><b>WAITING</b><small>Signal engine belum terhubung</small>';
-    const source=document.querySelector('#decisionSource b');if(source)source.textContent='Belum terhubung ke Master Pine Signal';
+    const source=document.querySelector('#decisionSource b');if(source)source.textContent='Belum terhubung ke Master Signal';
     const note=document.getElementById('decisionDemoNote');if(note)note.hidden=true;
   }
 
@@ -106,13 +106,13 @@
       return;
     }
     text('dTrend','BULLISH'); text('dTrendNote','Struktur masih constructive');
-    text('dSetup','FIB CONTINUATION'); text('dSetupNote','Contoh interpretasi manual');
-    text('dEntry','864 – 880'); text('dEntryNote','Area pullback yang dipantau');
-    text('dBreakout','> 936 / > 955'); text('dBreakoutNote','Konfirmasi continuation');
+    text('dSetup','ACTIVE'); text('dSetupNote','Setup proprietary Analisaku');
+    text('dEntry','864 – 880'); text('dEntryNote','Area yang dipantau');
+    text('dBreakout','> 936 / > 955'); text('dBreakoutNote','Konfirmasi lanjutan');
     text('dStop','< 852'); text('dStopNote','Major invalidation lebih bawah: 832–810');
     text('dTp1','936 – 955'); text('dTp2','1.028 – 1.040'); text('dTp3','1.090 – 1.105');
     text('dDecision','WATCH — jangan chase.');
-    text('dDecisionCopy','Tunggu pullback valid ke area entry atau breakout terkonfirmasi. Ini hanya preview format keputusan dari screenshot yang Anda kirim.');
+    text('dDecisionCopy','Tunggu harga masuk area keputusan atau konfirmasi lanjutan. Formula pembentuk setup tidak ditampilkan pada website.');
     const badge=document.getElementById('decisionStatus');
     badge.className='decision-status watch';
     badge.innerHTML='<span></span><b>WATCH</b><small>Preview manual, bukan signal live</small>';
