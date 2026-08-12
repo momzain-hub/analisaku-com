@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://momzain-hub.github.io/analisaku-com/sitemap.xml
