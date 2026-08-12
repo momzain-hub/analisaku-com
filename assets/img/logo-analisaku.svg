@@ -1,9 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" role="img" aria-labelledby="title desc">
-  <title id="title">Analisaku.com</title>
-  <desc id="desc">Logo Analisaku dengan simbol geometris merah dan hitam serta wordmark putih.</desc>
-  <g transform="translate(4 5)">
-    <path d="M0 23 L28 0 L28 48 L0 48 Z" fill="#d20b0b"/>
-    <path d="M34 14 L62 14 L62 42 L34 64 Z" fill="#050505" stroke="#f3b21a" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 58" role="img" aria-labelledby="title desc">
+  <title id="title">analisaku.com</title>
+  <desc id="desc">Logo Analisaku dark mode dengan simbol geometris merah dan charcoal serta aksen emas.</desc>
+  <g transform="translate(2 3)">
+    <path d="M4 18 L31 0 L31 19 L4 37 Z" fill="#ef1b22"/>
+    <path d="M4 37 L31 19 L31 31 L4 49 Z" fill="#c81017"/>
+    <path d="M24 30 L51 12 L51 32 L24 50 Z" fill="#252a30"/>
+    <path d="M24 30 L51 12 L51 23 L24 41 Z" fill="#3b424a"/>
   </g>
-  <text x="82" y="47" fill="#ffffff" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" letter-spacing="-1.2">analisaku.com</text>
+  <text x="67" y="39" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" letter-spacing="-1.15">
+    <tspan fill="#f8f7f2">analisaku.</tspan><tspan fill="#f2b51d">com</tspan>
+  </text>
 </svg>
