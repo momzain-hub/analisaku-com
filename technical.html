@@ -35,6 +35,31 @@
       </div>
     </section>
 
+    <section class="section tech-check-section">
+      <div class="container">
+        <div class="tech-check-card">
+          <div class="tech-check-head">
+            <div>
+              <div class="kicker">PRE-TRADE READINESS</div>
+              <h2>Apakah analisis Anda sudah cukup lengkap?</h2>
+              <p>Klik poin yang sudah Anda cek. Tujuannya bukan menghasilkan sinyal beli/jual, tetapi membiasakan proses analisis yang konsisten sebelum transaksi.</p>
+            </div>
+            <div class="tech-progress-number"><strong id="techProgressCount">0 / 6</strong><span>Checklist selesai</span></div>
+          </div>
+          <div class="tech-check-grid">
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>01 / CONTEXT</span><b>Trend utama sudah teridentifikasi</b></button>
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>02 / AREA</span><b>Support / resistance sudah ditandai</b></button>
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>03 / TRIGGER</span><b>Price action / breakout sudah terkonfirmasi</b></button>
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>04 / VOLUME</span><b>Volume mendukung skenario</b></button>
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>05 / RISK</span><b>Invalidation / stop sudah jelas</b></button>
+            <button class="tech-check-item" data-tech-check aria-pressed="false"><span>06 / PLAN</span><b>Risk / reward dan position size sudah dicek</b></button>
+          </div>
+          <div class="tech-progress-track"><i id="techProgressBar"></i></div>
+          <div class="tech-check-message" id="techCheckMessage">Mulai dari trend dan area harga. Jangan buru-buru mencari sinyal.</div>
+        </div>
+      </div>
+    </section>
+
     <section class="section technical-intro">
       <div class="container technical-layout">
         <aside class="technical-sidebar">
@@ -59,6 +84,7 @@
               <div class="concept-card"><b>Sideways</b><div class="mini-structure flat"><i></i><i></i><i></i><i></i></div><p>Harga bergerak dalam range. Tunggu arah berikutnya lebih jelas.</p></div>
             </div>
             <div class="lesson-note"><b>Prinsip:</b> trend sebaiknya dibaca sebelum indikator. Indikator membantu mengonfirmasi, bukan menggantikan struktur harga.</div>
+            <div class="practice-box"><div class="practice-icon">01</div><div><b>Latihan chart</b><p>Buka satu saham dan tandai minimal dua swing high serta dua swing low. Coba tentukan apakah strukturnya HH-HL, LH-LL, atau masih range.</p></div></div>
           </section>
 
           <section class="lesson-block" id="support">
@@ -66,10 +92,11 @@
             <div class="lesson-title-row"><div><h2>Support & Resistance</h2><p>Anggap sebagai <b>zona reaksi</b>, bukan satu angka yang selalu presisi.</p></div><span class="level-badge">Pemula</span></div>
             <div class="sr-visual">
               <div class="sr-zone resistance"><span>RESISTANCE ZONE</span></div>
-              <svg viewBox="0 0 700 210" aria-label="Ilustrasi support dan resistance"><path d="M10 162 C80 157 105 118 155 130 S230 84 282 101 S365 65 420 82 S505 43 570 66 S625 38 690 49" fill="none" stroke="#66a6ff" stroke-width="4"/><circle cx="155" cy="130" r="5"/><circle cx="420" cy="82" r="5"/><circle cx="570" cy="66" r="5"/></svg>
+              <svg viewBox="0 0 700 210" aria-label="Ilustrasi support dan resistance"><path d="M10 162 C80 157 105 118 155 130 S230 84 282 101 S365 65 420 82 S505 43 570 66 S625 38 690 49" fill="none" stroke="#f2b51d" stroke-width="4"/><circle cx="155" cy="130" r="5"/><circle cx="420" cy="82" r="5"/><circle cx="570" cy="66" r="5"/></svg>
               <div class="sr-zone support"><span>SUPPORT ZONE</span></div>
             </div>
             <div class="principle-grid"><div><strong>Area</strong><p>Gunakan range harga, bukan garis yang terlalu kaku.</p></div><div><strong>Reaction</strong><p>Perhatikan respons harga saat kembali menguji area.</p></div><div><strong>Confluence</strong><p>Gabungkan dengan trend, volume, atau price action.</p></div></div>
+            <div class="practice-box"><div class="practice-icon">02</div><div><b>Latihan chart</b><p>Tandai dua area yang beberapa kali memicu reaksi harga. Hindari menggambar terlalu banyak garis; fokus pada zona yang paling jelas.</p></div></div>
           </section>
 
           <section class="lesson-block" id="candlestick">
@@ -79,6 +106,7 @@
               <div class="candle-demo"><div class="wick"></div><div class="body green"></div><div class="wick lower"></div><span class="c-label high">High</span><span class="c-label open">Open</span><span class="c-label close">Close</span><span class="c-label low">Low</span></div>
               <div class="candle-copy"><h3>Jangan hafal pola tanpa konteks.</h3><p>Hammer di support dalam uptrend tidak memiliki makna yang sama dengan hammer di tengah area sideways. Selalu lihat lokasi, trend, volume, dan candle sebelum/sesudahnya.</p><div class="check-list"><span>✓ Body = dominasi</span><span>✓ Wick = rejection</span><span>✓ Range = volatilitas</span><span>✓ Close = posisi akhir</span></div></div>
             </div>
+            <div class="practice-box"><div class="practice-icon">03</div><div><b>Latihan chart</b><p>Pilih tiga candle dengan wick panjang. Catat lokasinya: dekat support, resistance, breakout, atau justru di tengah range. Konteks lebih penting dari nama polanya.</p></div></div>
           </section>
 
           <section class="lesson-block" id="pattern">
@@ -91,6 +119,7 @@
               <div class="pattern-card"><div class="pattern-icon hs"><i></i><i></i><i></i></div><b>Head & Shoulders</b><p>Perubahan struktur yang perlu dikonfirmasi neckline.</p></div>
             </div>
             <div class="lesson-note"><b>Validasi breakout:</b> perhatikan close di luar pola, peningkatan volume, retest, serta posisi breakout terhadap trend utama.</div>
+            <div class="practice-box"><div class="practice-icon">04</div><div><b>Latihan chart</b><p>Jangan cari pola yang sempurna. Cari struktur konsolidasi lalu tandai batas atas, batas bawah, dan kondisi yang membuat breakout dianggap valid.</p></div></div>
           </section>
 
           <section class="lesson-block" id="volume">
@@ -98,6 +127,7 @@
             <div class="lesson-title-row"><div><h2>Volume</h2><p>Harga menunjukkan arah; volume membantu membaca seberapa besar partisipasi di balik pergerakan itu.</p></div><span class="level-badge">Menengah</span></div>
             <div class="volume-visual"><div class="vbar" style="height:26%"></div><div class="vbar" style="height:38%"></div><div class="vbar" style="height:31%"></div><div class="vbar" style="height:48%"></div><div class="vbar" style="height:44%"></div><div class="vbar hot" style="height:78%"></div><div class="vbar hot" style="height:92%"></div><div class="vbar" style="height:62%"></div><div class="vbar" style="height:55%"></div></div>
             <div class="principle-grid"><div><strong>Breakout</strong><p>Volume menguat dapat menambah kualitas breakout.</p></div><div><strong>Accumulation</strong><p>Perhatikan kenaikan volume ketika harga mulai membangun struktur naik.</p></div><div><strong>Divergence</strong><p>Harga naik dengan volume melemah dapat menjadi sinyal kewaspadaan.</p></div></div>
+            <div class="practice-box"><div class="practice-icon">05</div><div><b>Latihan chart</b><p>Bandingkan volume saat harga breakout dengan rata-rata beberapa hari sebelumnya. Tanyakan: apakah partisipasi pasar benar-benar bertambah?</p></div></div>
           </section>
 
           <section class="lesson-block" id="indicator">
@@ -105,28 +135,52 @@
             <div class="lesson-title-row"><div><h2>Indicators</h2><p>Gunakan indikator untuk menjawab pertanyaan spesifik, bukan menumpuk indikator sebanyak mungkin.</p></div><span class="level-badge">Menengah</span></div>
             <div class="indicator-table"><div><b>Moving Average</b><span>Trend</span><p>Membantu melihat arah dan rata-rata harga.</p></div><div><b>RSI</b><span>Momentum</span><p>Membantu membaca kekuatan momentum dan divergence.</p></div><div><b>MACD</b><span>Momentum + Trend</span><p>Membantu melihat perubahan momentum dan crossover.</p></div><div><b>ATR</b><span>Volatility</span><p>Membantu mengukur volatilitas untuk stop dan position sizing.</p></div></div>
             <div class="lesson-note"><b>Rule of thumb:</b> Price structure → area → price action → volume → indikator. Jangan dibalik.</div>
+            <div class="practice-box"><div class="practice-icon">06</div><div><b>Latihan chart</b><p>Pilih satu indikator saja dan tulis pertanyaan yang ingin dijawab. Contoh: moving average untuk arah trend atau RSI untuk momentum—bukan untuk mencari kepastian.</p></div></div>
           </section>
 
           <section class="lesson-block" id="risk">
             <div class="lesson-label">07 / RISK CONTROL</div>
             <div class="lesson-title-row"><div><h2>Risk Management</h2><p>Setup terbaik sekalipun bisa gagal. Karena itu risiko ditentukan <b>sebelum</b> transaksi dilakukan.</p></div><span class="level-badge important">Wajib</span></div>
             <div class="risk-framework"><div><span>1</span><b>Define Entry</b><p>Tentukan area masuk yang logis.</p></div><div><span>2</span><b>Define Invalidation</b><p>Tentukan kapan analisis dianggap salah.</p></div><div><span>3</span><b>Calculate Size</b><p>Sesuaikan ukuran posisi dengan batas risiko.</p></div><div><span>4</span><b>Evaluate Reward</b><p>Pastikan potensi reward layak dibanding risikonya.</p></div></div>
-            <a class="btn ghost lesson-cta" href="tools.html">Gunakan Risk / Reward & Position Size Calculator →</a>
+            <a class="btn ghost lesson-cta" href="tools.html#riskreward">Gunakan Risk / Reward & Position Size Calculator →</a>
+            <div class="practice-box"><div class="practice-icon">07</div><div><b>Latihan sebelum entry</b><p>Tulis nominal maksimum kerugian yang masih bisa diterima. Dari angka itu, baru hitung ukuran posisi—bukan sebaliknya.</p></div></div>
           </section>
 
           <section class="lesson-block" id="plan">
             <div class="lesson-label">08 / EXECUTION</div>
             <div class="lesson-title-row"><div><h2>Trading Plan</h2><p>Satukan seluruh analisis menjadi keputusan yang bisa dieksekusi dan dievaluasi.</p></div><span class="level-badge important">Final Step</span></div>
             <div class="plan-template"><div><small>SETUP</small><strong>Trend + Trigger</strong></div><div><small>ENTRY</small><strong>Area, bukan kejar harga</strong></div><div><small>INVALIDATION</small><strong>Kapan analisis salah?</strong></div><div><small>TARGET</small><strong>Area objektif berikutnya</strong></div><div><small>POSITION SIZE</small><strong>Sesuai risk budget</strong></div><div><small>REVIEW</small><strong>Catat proses & hasil</strong></div></div>
+            <div class="practice-box"><div class="practice-icon">08</div><div><b>Latihan final</b><p>Sebelum simulasi atau transaksi, tulis keenam komponen di atas dalam satu catatan. Setelah selesai, review apakah Anda mengikuti rencana atau berubah karena emosi.</p></div></div>
           </section>
         </div>
       </div>
     </section>
 
     <section class="section alt">
+      <div class="container">
+        <div class="section-head"><div><div class="kicker">COMMON MISTAKES</div><h2>Kesalahan yang sering membuat technical analysis membingungkan.</h2></div><p>Semakin banyak indikator tidak selalu membuat keputusan lebih baik. Fokus pada struktur, konteks, dan risiko.</p></div>
+        <div class="common-mistakes">
+          <div class="mistake-card"><span>MISTAKE 01</span><b>Mulai dari indikator</b><p>Mencari RSI/MACD “terbaik” sebelum memahami trend dan struktur harga.</p></div>
+          <div class="mistake-card"><span>MISTAKE 02</span><b>Terlalu banyak garis</b><p>Support resistance terlalu padat membuat area keputusan justru tidak jelas.</p></div>
+          <div class="mistake-card"><span>MISTAKE 03</span><b>Menghafal candlestick</b><p>Nama pola diingat, tetapi lokasi dan konteks market diabaikan.</p></div>
+          <div class="mistake-card"><span>MISTAKE 04</span><b>Breakout tanpa validasi</b><p>Masuk hanya karena harga menembus garis tanpa melihat close, volume, atau retest.</p></div>
+          <div class="mistake-card"><span>MISTAKE 05</span><b>Stop ditentukan belakangan</b><p>Risiko baru dipikirkan setelah posisi sudah berjalan melawan arah.</p></div>
+          <div class="mistake-card"><span>MISTAKE 06</span><b>Tidak review proses</b><p>Hanya menilai profit/loss tanpa mengecek apakah keputusan sesuai trading plan.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
       <div class="container technical-summary">
-        <div><div class="kicker">URUTAN BELAJAR</div><h2>Flow sederhana untuk pemula.</h2><p>Jangan mulai dari mencari indikator paling “akurat”. Mulai dari memahami struktur market, kemudian baru tambah alat bantu.</p></div>
-        <div class="flow-line"><span>Trend</span><i>→</i><span>Area</span><i>→</i><span>Price Action</span><i>→</i><span>Pattern</span><i>→</i><span>Volume</span><i>→</i><span>Risk</span><i>→</i><span>Plan</span></div>
+        <div><div class="kicker">PRACTICE WORKFLOW</div><h2>Flow sederhana dari chart sampai review.</h2><p>Gunakan urutan yang sama berulang kali. Konsistensi proses lebih penting daripada mencari setup yang selalu benar.</p></div>
+        <div class="practice-workflow">
+          <div class="practice-step"><span>01</span><b>Context</b><small>Trend & market condition</small></div>
+          <div class="practice-step"><span>02</span><b>Area</b><small>Support / resistance</small></div>
+          <div class="practice-step"><span>03</span><b>Trigger</b><small>Price action / breakout</small></div>
+          <div class="practice-step"><span>04</span><b>Confirm</b><small>Volume / momentum</small></div>
+          <div class="practice-step"><span>05</span><b>Risk</b><small>Stop & position size</small></div>
+          <div class="practice-step"><span>06</span><b>Review</b><small>Process, not only P/L</small></div>
+        </div>
       </div>
     </section>
   </main>
