@@ -1,0 +1,74 @@
+{
+  "timezone": "Asia/Jakarta",
+  "symbol_legend": "◆ = Key Timing Window",
+  "weeks": [
+    {
+      "id": "2026-08-w1",
+      "label": "WEEK 1",
+      "display_range": "3–7 AGUSTUS 2026",
+      "start": "2026-08-03",
+      "end": "2026-08-07",
+      "bias": "Bullish → Caution",
+      "weekly_call": "Bullish → Caution",
+      "strategy": "Hold winner, TP bertahap.",
+      "days": [
+        {"date":"2026-08-03","label":"3 Agu","text":"Momentum bullish","key":false,"closed":false},
+        {"date":"2026-08-04","label":"4 Agu","text":"Trend naik berlanjut","key":false,"closed":false},
+        {"date":"2026-08-05","label":"5 Agu","text":"Momentum mulai penuh","key":false,"closed":false},
+        {"date":"2026-08-06","label":"6 Agu","text":"Mulai selektif","key":false,"closed":false},
+        {"date":"2026-08-07","label":"7 Agu","text":"Peak Watch / mulai amankan profit","key":true,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-08-w2",
+      "label": "WEEK 2",
+      "display_range": "10–14 AGUSTUS 2026",
+      "start": "2026-08-10",
+      "end": "2026-08-14",
+      "bias": "Volatile → Consolidation",
+      "weekly_call": "Neutral → Volatile",
+      "strategy": "Selective trading, hindari chase.",
+      "days": [
+        {"date":"2026-08-10","label":"10 Agu","text":"Reversal / Peak Confirmation","key":true,"closed":false},
+        {"date":"2026-08-11","label":"11 Agu","text":"Selling pressure","key":false,"closed":false},
+        {"date":"2026-08-12","label":"12 Agu","text":"Technical rebound","key":false,"closed":false},
+        {"date":"2026-08-13","label":"13 Agu","text":"Momentum test","key":false,"closed":false},
+        {"date":"2026-08-14","label":"14 Agu","text":"Konsolidasi / profit taking","key":false,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-08-w3",
+      "label": "WEEK 3",
+      "display_range": "18–21 AGUSTUS 2026",
+      "start": "2026-08-17",
+      "end": "2026-08-21",
+      "bias": "Pressure → Reversal Watch",
+      "weekly_call": "Bearish → Reversal Watch",
+      "strategy": "Cash ready, mulai cari reversal.",
+      "days": [
+        {"date":"2026-08-17","label":"17 Agu","text":"Bursa libur","key":false,"closed":true},
+        {"date":"2026-08-18","label":"18 Agu","text":"Wait & see","key":false,"closed":false},
+        {"date":"2026-08-19","label":"19 Agu","text":"Volatility meningkat","key":true,"closed":false},
+        {"date":"2026-08-20","label":"20 Agu","text":"Pressure zone","key":true,"closed":false},
+        {"date":"2026-08-21","label":"21 Agu","text":"Bottom Watch / Potential Reversal","key":true,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-08-w4",
+      "label": "WEEK 4",
+      "display_range": "24–28 AGUSTUS 2026",
+      "start": "2026-08-24",
+      "end": "2026-08-28",
+      "bias": "Recovery → Bullish",
+      "weekly_call": "Recovery → Bullish",
+      "strategy": "Akumulasi bertahap.",
+      "days": [
+        {"date":"2026-08-24","label":"24 Agu","text":"Bottom Confirmation Watch","key":true,"closed":false},
+        {"date":"2026-08-25","label":"25 Agu","text":"Bursa libur","key":false,"closed":true},
+        {"date":"2026-08-26","label":"26 Agu","text":"Rebound confirmation","key":false,"closed":false},
+        {"date":"2026-08-27","label":"27 Agu","text":"Recovery momentum","key":false,"closed":false},
+        {"date":"2026-08-28","label":"28 Agu","text":"Bullish continuation","key":false,"closed":false}
+      ]
+    }
+  ]
+}
