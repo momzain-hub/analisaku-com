@@ -1,0 +1,105 @@
+/* =========================================================
+   ANALISAKU — FUNCTIONAL UX LAYER
+   Homepage market context builder + technical practice tools
+   ========================================================= */
+
+/* ---------- Market lens / context builder ---------- */
+.market-lens-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg2) 78%,transparent)}
+.market-lens-grid{display:grid;grid-template-columns:repeat(5,1fr)}
+.market-lens-item{padding:18px 16px;border-right:1px solid var(--line)}
+.market-lens-item:last-child{border-right:0}
+.market-lens-item small{display:block;color:var(--gold);font-size:10px;font-weight:850;letter-spacing:1px;text-transform:uppercase}
+.market-lens-item b{display:block;margin-top:4px;color:var(--heading);font-size:15px}
+.market-lens-item span{display:block;color:var(--muted2);font-size:10px;margin-top:2px}
+
+.context-builder-section{padding-top:56px}
+.context-builder{display:grid;grid-template-columns:.82fr 1.18fr;gap:24px;align-items:stretch}
+.context-intro,.context-panel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(155deg,var(--surface),var(--surface2));box-shadow:var(--soft-shadow)}
+.context-intro{padding:30px;display:flex;flex-direction:column;justify-content:space-between}
+.context-intro h2{font-size:clamp(32px,4vw,48px);line-height:1.08;letter-spacing:-1.5px;margin:10px 0 14px;color:var(--heading)}
+.context-intro p{color:var(--muted);font-size:14px;max-width:520px}
+.context-note{margin-top:24px;padding:14px 15px;border:1px solid color-mix(in srgb,var(--gold) 22%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--gold) 6%,var(--surface));color:var(--muted);font-size:11px}
+.context-note b{color:var(--heading)}
+.context-panel{padding:24px}
+.context-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.context-panel-head h3{font-size:22px;color:var(--heading);margin:2px 0 0}
+.framework-badge{flex:0 0 auto;border:1px solid color-mix(in srgb,var(--gold) 34%,var(--line));color:var(--gold);background:color-mix(in srgb,var(--gold) 6%,var(--surface));border-radius:999px;padding:6px 9px;font-size:9px;font-weight:850;letter-spacing:.8px}
+.context-row{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+.context-row:last-of-type{border-bottom:0}
+.context-label b{display:block;color:var(--heading);font-size:13px}
+.context-label span{display:block;color:var(--muted2);font-size:10px;margin-top:2px}
+.context-options{display:flex;gap:6px}
+.context-btn{border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:10px;padding:7px 10px;font-size:10px;font-weight:780;cursor:pointer;transition:.18s ease}
+.context-btn:hover{border-color:color-mix(in srgb,var(--gold) 42%,var(--line));color:var(--heading)}
+.context-btn.active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--surface));color:var(--gold)}
+.context-result{margin-top:20px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));background:color-mix(in srgb,var(--gold) 6%,var(--surface));border-radius:17px;padding:18px}
+.context-result-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.context-result small{color:var(--muted2);font-size:9px;font-weight:800;letter-spacing:.9px}
+.context-result strong{display:block;color:var(--heading);font-size:22px;margin-top:2px}
+.context-score{color:var(--gold);font-weight:850;font-size:13px}
+.context-result p{color:var(--muted);font-size:11px;margin:10px 0 13px}
+.context-meter{height:7px;background:color-mix(in srgb,var(--line) 70%,transparent);border-radius:999px;overflow:hidden}
+.context-meter i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:999px;transition:width .25s ease}
+.context-axis{display:flex;justify-content:space-between;color:var(--muted2);font-size:8px;margin-top:6px}
+
+/* ---------- Technical readiness check ---------- */
+.tech-check-section{padding-top:34px;padding-bottom:26px}
+.tech-check-card{border:1px solid var(--line);border-radius:24px;background:linear-gradient(155deg,var(--surface),var(--surface2));padding:26px;box-shadow:var(--soft-shadow)}
+.tech-check-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:19px}
+.tech-check-head h2{font-size:clamp(27px,3.6vw,40px);line-height:1.12;color:var(--heading);margin:6px 0 8px}
+.tech-check-head p{max-width:670px;color:var(--muted);font-size:12px}
+.tech-progress-number{flex:0 0 auto;min-width:82px;text-align:center;border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));border-radius:17px;padding:11px;background:color-mix(in srgb,var(--gold) 6%,var(--surface))}
+.tech-progress-number strong{display:block;color:var(--gold);font-size:24px;line-height:1}
+.tech-progress-number span{display:block;color:var(--muted2);font-size:9px;margin-top:5px}
+.tech-check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tech-check-item{border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:14px;padding:14px;text-align:left;cursor:pointer;transition:.18s ease;min-height:82px}
+.tech-check-item:hover{border-color:color-mix(in srgb,var(--gold) 38%,var(--line));transform:translateY(-1px)}
+.tech-check-item.active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 9%,var(--surface));color:var(--heading)}
+.tech-check-item span{display:block;color:var(--gold);font-size:9px;font-weight:850;letter-spacing:.8px;margin-bottom:5px}
+.tech-check-item b{display:block;font-size:12px;line-height:1.3}
+.tech-progress-track{height:8px;border-radius:999px;background:color-mix(in srgb,var(--line) 70%,transparent);overflow:hidden;margin-top:16px}
+.tech-progress-track i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:999px;transition:width .24s ease}
+.tech-check-message{margin-top:10px;color:var(--muted);font-size:11px}
+
+/* ---------- Technical study enhancements ---------- */
+.practice-box{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-top:18px;padding:16px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--gold) 5%,var(--surface))}
+.practice-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--gold) 12%,var(--surface));color:var(--gold);font-weight:900}
+.practice-box b{display:block;color:var(--heading);font-size:12px;margin-bottom:3px}
+.practice-box p{color:var(--muted);font-size:11px;margin:0}
+.common-mistakes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mistake-card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(155deg,var(--surface),var(--surface2));padding:18px}
+.mistake-card span{display:block;color:var(--red);font-size:9px;font-weight:850;letter-spacing:.8px}
+.mistake-card b{display:block;color:var(--heading);font-size:15px;margin:7px 0 5px}
+.mistake-card p{color:var(--muted);font-size:11px;margin:0}
+.practice-workflow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:18px}
+.practice-step{border:1px solid var(--line);border-radius:14px;background:var(--field);padding:14px;min-height:105px;display:flex;flex-direction:column}
+.practice-step span{font-size:9px;color:var(--gold);font-weight:850}
+.practice-step b{margin-top:auto;color:var(--heading);font-size:12px}
+.practice-step small{color:var(--muted2);font-size:9px;margin-top:3px}
+
+@media(max-width:900px){
+  .market-lens-grid{grid-template-columns:repeat(3,1fr)}
+  .market-lens-item:nth-child(3){border-right:0}
+  .context-builder{grid-template-columns:1fr}
+  .tech-check-grid,.common-mistakes{grid-template-columns:repeat(2,1fr)}
+  .practice-workflow{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:700px){
+  .market-lens-grid{grid-template-columns:1fr 1fr}
+  .market-lens-item{border-bottom:1px solid var(--line)}
+  .market-lens-item:nth-child(2n){border-right:0}
+  .market-lens-item:nth-last-child(-n+1){border-bottom:0}
+  .context-builder-section{padding-top:38px}
+  .context-intro,.context-panel{padding:20px;border-radius:19px}
+  .context-row{grid-template-columns:1fr;gap:9px}
+  .context-options{display:grid;grid-template-columns:repeat(3,1fr)}
+  .context-btn{padding:9px 7px}
+  .tech-check-head{flex-direction:column}
+  .tech-progress-number{min-width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left}
+  .tech-progress-number strong{font-size:21px}
+  .tech-progress-number span{margin:0}
+  .tech-check-grid,.common-mistakes{grid-template-columns:1fr}
+  .tech-check-item{min-height:68px}
+  .practice-workflow{grid-template-columns:1fr 1fr}
+}
