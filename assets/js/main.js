@@ -1,24 +1,51 @@
-/* Global theme bootstrap */
+/* =========================================================
+   ANALISAKU GLOBAL JS
+   Theme + adaptive brand + mobile nav + calculators + filters
+   ========================================================= */
+
 const activeScript=document.currentScript;
 const assetUrl=(relative,fallback)=>activeScript?new URL(relative,activeScript.src).href:fallback;
 const themeCssUrl=assetUrl('../css/theme.css','assets/css/theme.css');
-if(!document.querySelector('link[data-analisaku-theme]')){
-  const themeLink=document.createElement('link');
-  themeLink.rel='stylesheet';
-  themeLink.href=themeCssUrl;
-  themeLink.dataset.analisakuTheme='true';
-  document.head.appendChild(themeLink);
+const darkLogoUrl=assetUrl('../img/logo-analisaku.svg','assets/img/logo-analisaku.svg');
+const lightLogoUrl=assetUrl('../img/logo-analisaku-light.svg','assets/img/logo-analisaku-light.svg');
+
+/* Load the global theme last so it cleanly overrides legacy page CSS. */
+if(!document.querySelector('link[data-analisaku-theme],link[href$="theme.css"]')){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=themeCssUrl;
+  link.dataset.analisakuTheme='true';
+  document.head.appendChild(link);
 }
 
 const THEME_KEY='analisaku-theme';
-const systemTheme=()=>window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
-const storedTheme=()=>{try{const value=localStorage.getItem(THEME_KEY);return value==='light'||value==='dark'?value:null}catch(e){return null}};
-const darkLogoUrl=assetUrl('../img/logo-analisaku.svg','assets/img/logo-analisaku.svg');
-const lightLogoUrl=assetUrl('../img/logo-analisaku-light.svg','assets/img/logo-analisaku-light.svg');
-let themeToggle=null;
+const mediaQuery=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null;
+const systemTheme=()=>mediaQuery&&mediaQuery.matches?'light':'dark';
+const storedTheme=()=>{
+  try{
+    const value=localStorage.getItem(THEME_KEY);
+    return value==='light'||value==='dark'?value:null;
+  }catch(e){return null}
+};
+
+function ensureBrandLogos(){
+  document.querySelectorAll('.brand').forEach(brand=>{
+    let img=brand.querySelector('img');
+    if(!img){
+      brand.textContent='';
+      img=document.createElement('img');
+      img.alt='analisaku.com';
+      brand.appendChild(img);
+    }
+    brand.classList.add('brand-logo');
+    img.dataset.themeLogo='true';
+    img.decoding='async';
+  });
+}
 
 function updateThemeLogo(theme){
-  document.querySelectorAll('img[src*="logo-analisaku"],img[data-theme-logo]').forEach(img=>{
+  ensureBrandLogos();
+  document.querySelectorAll('img[data-theme-logo],img[src*="logo-analisaku"]').forEach(img=>{
     img.dataset.themeLogo='true';
     img.src=theme==='light'?lightLogoUrl:darkLogoUrl;
   });
@@ -26,55 +53,77 @@ function updateThemeLogo(theme){
 
 function updateThemeMeta(theme){
   let meta=document.querySelector('meta[name="theme-color"]');
-  if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.appendChild(meta)}
-  meta.content=theme==='light'?'#fbf7ee':'#07111c';
+  if(!meta){
+    meta=document.createElement('meta');
+    meta.name='theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.content=theme==='light'?'#fbf7ef':'#06111d';
 }
 
+function themeIcon(theme){
+  return theme==='dark'
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>';
+}
+
+let themeToggle=null;
 function applyTheme(theme,{persist=false}={}){
-  document.documentElement.dataset.theme=theme;
-  if(persist){try{localStorage.setItem(THEME_KEY,theme)}catch(e){}}
-  updateThemeMeta(theme);
-  updateThemeLogo(theme);
+  const safeTheme=theme==='light'?'light':'dark';
+  document.documentElement.dataset.theme=safeTheme;
+  if(persist){try{localStorage.setItem(THEME_KEY,safeTheme)}catch(e){}}
+  updateThemeMeta(safeTheme);
+  updateThemeLogo(safeTheme);
   if(themeToggle){
-    const isDark=theme==='dark';
-    themeToggle.textContent=isDark?'☀':'☾';
+    const isDark=safeTheme==='dark';
+    themeToggle.innerHTML=themeIcon(safeTheme);
     themeToggle.setAttribute('aria-label',isDark?'Ganti ke mode terang':'Ganti ke mode gelap');
     themeToggle.title=isDark?'Mode terang':'Mode gelap';
   }
 }
 
+/* Set theme as soon as this script runs. */
 applyTheme(storedTheme()||systemTheme());
 
 const menuBtn=document.getElementById('menuBtn');
 const mainNav=document.getElementById('mainNav');
 if(menuBtn&&mainNav){
-  menuBtn.addEventListener('click',()=>mainNav.classList.toggle('open'));
-  mainNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mainNav.classList.remove('open')));
+  menuBtn.addEventListener('click',()=>{
+    const open=mainNav.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded',String(open));
+  });
+  mainNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+    mainNav.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+  }));
 }
 
 const navWrap=document.querySelector('.nav-wrap');
 if(navWrap){
-  themeToggle=document.createElement('button');
-  themeToggle.type='button';
-  themeToggle.className='theme-toggle';
-  themeToggle.setAttribute('aria-live','polite');
-  navWrap.insertBefore(themeToggle,menuBtn||null);
+  themeToggle=navWrap.querySelector('.theme-toggle');
+  if(!themeToggle){
+    themeToggle=document.createElement('button');
+    themeToggle.type='button';
+    themeToggle.className='theme-toggle';
+    themeToggle.setAttribute('aria-live','polite');
+    navWrap.insertBefore(themeToggle,menuBtn||null);
+  }
   themeToggle.addEventListener('click',()=>{
     const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
     applyTheme(next,{persist:true});
   });
-  applyTheme(document.documentElement.dataset.theme||systemTheme());
+  applyTheme(document.documentElement.dataset.theme||storedTheme()||systemTheme());
 }
 
-if(window.matchMedia){
-  const mq=window.matchMedia('(prefers-color-scheme: light)');
+if(mediaQuery){
   const onSystemChange=()=>{if(!storedTheme())applyTheme(systemTheme())};
-  if(mq.addEventListener)mq.addEventListener('change',onSystemChange);
+  if(mediaQuery.addEventListener)mediaQuery.addEventListener('change',onSystemChange);
 }
 
 const year=document.getElementById('year');
 if(year)year.textContent=new Date().getFullYear();
 
+/* ---------- Investment calculators ---------- */
 function num(id){const el=document.getElementById(id);return el?parseFloat(el.value):NaN}
 function show(id,text){const el=document.getElementById(id);if(!el)return;el.textContent=text;el.style.display='block'}
 function rupiah(v){return 'Rp '+Math.round(v).toLocaleString('id-ID')}
@@ -85,7 +134,7 @@ window.calcAverage=function(){
   if(!validPositive([p1,l1,p2,l2])||p1<=0||p2<=0||l1<=0||l2<=0)return show('avgResult','Isi seluruh data dengan benar.');
   const totalLot=l1+l2,avg=((p1*l1)+(p2*l2))/totalLot;
   show('avgResult','Average baru '+rupiah(avg)+' • Total posisi '+totalLot.toLocaleString('id-ID')+' lot.');
-}
+};
 
 window.calcRR=function(){
   const entry=num('rrEntry'),stop=num('rrStop'),target=num('rrTarget'),capital=num('rrCapital');
@@ -94,9 +143,9 @@ window.calcRR=function(){
   if(risk===0)return show('rrResult','Stop loss tidak boleh sama dengan entry.');
   const ratio=reward/risk;
   let text='Risk : Reward = 1 : '+ratio.toFixed(2)+' • Risiko harga '+((risk/entry)*100).toFixed(2)+'% • Potensi '+((reward/entry)*100).toFixed(2)+'%.';
-  if(Number.isFinite(capital)&&capital>0){text+=' Estimasi risiko nominal '+rupiah(capital*risk/entry)+' dan potensi reward '+rupiah(capital*reward/entry)+'.'}
+  if(Number.isFinite(capital)&&capital>0)text+=' Estimasi risiko nominal '+rupiah(capital*risk/entry)+' dan potensi reward '+rupiah(capital*reward/entry)+'.';
   show('rrResult',text);
-}
+};
 
 window.calcPosition=function(){
   const capital=num('psCapital'),riskPct=num('psRisk'),entry=num('psEntry'),stop=num('psStop');
@@ -106,10 +155,9 @@ window.calcPosition=function(){
   const lotsByRisk=Math.floor((riskCash/riskPerShare)/100);
   const lotsByCapital=Math.floor(capital/(entry*100));
   const lots=Math.max(0,Math.min(lotsByRisk,lotsByCapital));
-  const estValue=lots*100*entry;
-  const estRisk=lots*100*riskPerShare;
+  const estValue=lots*100*entry,estRisk=lots*100*riskPerShare;
   show('psResult','Estimasi maksimal '+lots.toLocaleString('id-ID')+' lot • Nilai posisi '+rupiah(estValue)+' • Risiko jika stop tersentuh sekitar '+rupiah(estRisk)+'.');
-}
+};
 
 window.calcCompound=function(){
   const initial=num('cpInitial'),rate=num('cpRate'),years=num('cpYears'),annualRaw=num('cpAnnual');
@@ -121,20 +169,20 @@ window.calcCompound=function(){
   else final=initial*Math.pow(1+r,years)+annual*((Math.pow(1+r,years)-1)/r);
   const contributed=initial+(annual*years);
   show('cpResult','Estimasi nilai akhir '+rupiah(final)+' • Total modal disetor '+rupiah(contributed)+' • Selisih pertumbuhan '+rupiah(final-contributed)+'.');
-}
+};
 
 window.calcGoal=function(){
   const target=num('goalTarget'),initial=num('goalInitial'),rate=num('goalRate'),years=num('goalYears');
   if(!validPositive([target,initial,years])||!Number.isFinite(rate)||target<=0||years<=0)return show('goalResult','Isi seluruh data dengan benar.');
-  const months=Math.round(years*12),r=rate/100/12;
-  const growth=Math.pow(1+r,months),futureInitial=initial*growth;
+  const months=Math.round(years*12),r=rate/100/12,growth=Math.pow(1+r,months),futureInitial=initial*growth;
   let monthly;
   if(futureInitial>=target)monthly=0;
   else if(r===0)monthly=(target-initial)/months;
   else monthly=(target-futureInitial)*r/(growth-1);
   show('goalResult','Estimasi investasi bulanan '+rupiah(Math.max(0,monthly))+' selama '+months.toLocaleString('id-ID')+' bulan untuk mengejar target '+rupiah(target)+'.');
-}
+};
 
+/* ---------- Article search / filter ---------- */
 const articleSearch=document.getElementById('articleSearch');
 const filterChips=[...document.querySelectorAll('[data-filter]')];
 const stories=[...document.querySelectorAll('[data-story]')];
