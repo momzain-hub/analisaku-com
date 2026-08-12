@@ -64,35 +64,52 @@
 
   const clean=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20)||'RAJA';
   const price=v=>{if(v===undefined||v===null||v==='')return '—';const n=Number(v);return Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:2}):String(v)};
-  function decisionText(status){
-    return ({WATCH:'Pantau area keputusan. Tunggu konfirmasi dan hindari chase.',WAIT:'Belum ada setup yang cukup kuat. Tidak perlu memaksakan transaksi.','BUY SETUP':'Trigger terkonfirmasi. Kelola risiko dan ukuran posisi.','HOLD':'Setup masih valid. Ikuti invalidation dan target.','TAKE PROFIT':'Target tercapai. Evaluasi take profit bertahap.',EXIT:'Setup tidak valid atau tekanan bearish. Prioritaskan proteksi risiko.'})[status]||'Menunggu output Master Signal.';
+  const publicStatus=status=>({
+    'WAIT':'WAIT',
+    'WATCH':'WATCH',
+    'BUY SETUP':'SETUP ACTIVE',
+    'HOLD':'ACTIVE',
+    'TAKE PROFIT':'TARGET REACHED',
+    'EXIT':'INVALID'
+  })[status]||status||'—';
+
+  function contextText(status){
+    return ({
+      'WATCH':'Area keputusan sedang dipantau; tunggu konfirmasi lanjutan.',
+      'WAIT':'Belum ada kondisi teknikal yang cukup kuat.',
+      'BUY SETUP':'Trigger teknikal sudah terkonfirmasi.',
+      'HOLD':'Struktur teknikal masih aktif.',
+      'TAKE PROFIT':'Harga sudah mencapai area target.',
+      'EXIT':'Skenario teknikal sebelumnya sudah tidak valid.'
+    })[status]||'Menunggu output Master Signal.';
   }
 
-  function resetQuick(note='Pilih ticker lalu cek signal terakhir.'){
-    ['hqTrend','hqStatus','hqEntry','hqTrigger','hqStop','hqTarget'].forEach(id=>$(id).textContent='—');
-    $('hqDecision').textContent=note;
-    $('hqSource').textContent='Master Signal';
+  function resetQuick(note='Pilih ticker lalu cek technical snapshot terakhir.'){
+    ['hqTrend','hqStatus','hqEntry','hqTrigger','hqStop','hqTarget'].forEach(id=>{if($(id))$(id).textContent='—'});
+    if($('hqDecision'))$('hqDecision').textContent=note;
+    if($('hqSource'))$('hqSource').textContent='Master Signal';
   }
 
   async function fetchQuick(){
     const symbol=clean(ticker.value);ticker.value=symbol;
     if(!api){resetQuick('Signal API belum tersedia.');return}
-    $('hqSource').textContent='Mengambil signal…';
+    $('hqSource').textContent='Mengambil technical snapshot…';
     try{
       const url=new URL(api);url.searchParams.set('ticker',symbol);url.searchParams.set('timeframe',tf.value||'D');
       const r=await fetch(url,{cache:'no-store'});
-      if(r.status===404){resetQuick('Belum ada signal tersimpan untuk ticker/timeframe ini.');return}
+      if(r.status===404){resetQuick('Belum ada snapshot tersimpan untuk ticker/timeframe ini.');return}
       if(!r.ok)throw new Error();
       const d=await r.json();
+      const raw=String(d.status||'').toUpperCase();
       $('hqTrend').textContent=String(d.trend||'—').toUpperCase();
-      $('hqStatus').textContent=String(d.status||'—').toUpperCase();
+      $('hqStatus').textContent=publicStatus(raw);
       $('hqEntry').textContent=(d.entry_low||d.entry_high)?`${price(d.entry_low)} – ${price(d.entry_high)}`:'—';
       $('hqTrigger').textContent=price(d.trigger);
       $('hqStop').textContent=price(d.invalidation);
       $('hqTarget').textContent=price(d.target1);
-      $('hqDecision').textContent=decisionText(String(d.status||'').toUpperCase());
+      $('hqDecision').textContent=contextText(raw);
       const ts=Number(d.received_at||d.updated_at);
-      $('hqSource').textContent='Signal terakhir'+(Number.isFinite(ts)?' • '+new Date(ts).toLocaleString('id-ID'):'');
+      $('hqSource').textContent='Technical snapshot'+(Number.isFinite(ts)?' • '+new Date(ts).toLocaleString('id-ID'):'');
     }catch(e){resetQuick('Signal API belum dapat diakses.');}
   }
 
