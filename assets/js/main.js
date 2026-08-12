@@ -1,20 +1,29 @@
 /* =========================================================
    ANALISAKU GLOBAL JS
    Theme + adaptive brand + mobile nav + calculators + filters
+   + homepage market context + technical readiness tools
    ========================================================= */
 
 const activeScript=document.currentScript;
 const assetUrl=(relative,fallback)=>activeScript?new URL(relative,activeScript.src).href:fallback;
 const themeCssUrl=assetUrl('../css/theme.css','assets/css/theme.css');
+const functionalCssUrl=assetUrl('../css/functional.css','assets/css/functional.css');
 const darkLogoUrl=assetUrl('../img/logo-analisaku.svg','assets/img/logo-analisaku.svg');
 const lightLogoUrl=assetUrl('../img/logo-analisaku-light.svg','assets/img/logo-analisaku-light.svg');
 
-/* Load the global theme last so it cleanly overrides legacy page CSS. */
+/* Load global visual layers last so they cleanly override legacy page CSS. */
 if(!document.querySelector('link[data-analisaku-theme],link[href$="theme.css"]')){
   const link=document.createElement('link');
   link.rel='stylesheet';
   link.href=themeCssUrl;
   link.dataset.analisakuTheme='true';
+  document.head.appendChild(link);
+}
+if(!document.querySelector('link[data-analisaku-functional],link[href$="functional.css"]')){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=functionalCssUrl;
+  link.dataset.analisakuFunctional='true';
   document.head.appendChild(link);
 }
 
@@ -82,7 +91,6 @@ function applyTheme(theme,{persist=false}={}){
   }
 }
 
-/* Set theme as soon as this script runs. */
 applyTheme(storedTheme()||systemTheme());
 
 const menuBtn=document.getElementById('menuBtn');
@@ -204,3 +212,64 @@ filterChips.forEach(chip=>chip.addEventListener('click',()=>{
   filterChips.forEach(c=>c.classList.toggle('active',c===chip));
   applyArticleFilter();
 }));
+
+/* ---------- Homepage: Market Context Builder ---------- */
+const contextGroups=[...document.querySelectorAll('[data-context-group]')];
+const contextTitle=document.getElementById('contextResultTitle');
+const contextCopy=document.getElementById('contextResultCopy');
+const contextScore=document.getElementById('contextScore');
+const contextMeter=document.getElementById('contextMeterFill');
+
+function updateMarketContext(){
+  if(!contextGroups.length)return;
+  let score=0;
+  contextGroups.forEach(group=>{
+    const active=group.querySelector('.context-btn.active');
+    if(active)score+=Number(active.dataset.score||0);
+  });
+  let title='Neutral / Selective';
+  let copy='Belum ada dominasi faktor yang kuat. Prioritaskan kualitas setup dan tunggu konfirmasi tambahan.';
+  if(score>=3){title='Constructive';copy='Mayoritas faktor mendukung risk appetite. Tetap gunakan entry, invalidation, dan position sizing yang terukur.'}
+  else if(score>=1){title='Selective Positive';copy='Konteks cukup mendukung, tetapi belum sepenuhnya kuat. Fokus pada saham dengan struktur dan momentum terbaik.'}
+  else if(score<=-3){title='Defensive';copy='Beberapa faktor menekan risk appetite. Kurangi agresivitas, jaga cash, dan utamakan perlindungan modal.'}
+  else if(score<=-1){title='Cautious / Selective';copy='Konteks cenderung hati-hati. Hindari memaksakan transaksi dan tunggu risk/reward yang lebih menarik.'}
+  if(contextTitle)contextTitle.textContent=title;
+  if(contextCopy)contextCopy.textContent=copy;
+  if(contextScore)contextScore.textContent=(score>0?'+':'')+score+' / 4';
+  if(contextMeter)contextMeter.style.width=Math.max(0,Math.min(100,((score+4)/8)*100))+'%';
+}
+
+contextGroups.forEach(group=>{
+  group.querySelectorAll('.context-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    group.querySelectorAll('.context-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    updateMarketContext();
+  }));
+});
+updateMarketContext();
+
+/* ---------- Technical page: Readiness Checklist ---------- */
+const techChecks=[...document.querySelectorAll('[data-tech-check]')];
+const techProgressCount=document.getElementById('techProgressCount');
+const techProgressBar=document.getElementById('techProgressBar');
+const techCheckMessage=document.getElementById('techCheckMessage');
+
+function updateTechReadiness(){
+  if(!techChecks.length)return;
+  const done=techChecks.filter(btn=>btn.classList.contains('active')).length;
+  const total=techChecks.length;
+  const pct=Math.round((done/total)*100);
+  if(techProgressCount)techProgressCount.textContent=done+' / '+total;
+  if(techProgressBar)techProgressBar.style.width=pct+'%';
+  let message='Mulai dari trend dan area harga. Jangan buru-buru mencari sinyal.';
+  if(done>=2)message='Fondasi mulai terbentuk. Lanjutkan dengan trigger dan konfirmasi.';
+  if(done>=4)message='Setup sudah lebih terstruktur. Pastikan invalidation dan risk/reward jelas.';
+  if(done===total)message='Checklist lengkap. Fokus berikutnya adalah disiplin eksekusi dan review.';
+  if(techCheckMessage)techCheckMessage.textContent=message;
+}
+techChecks.forEach(btn=>btn.addEventListener('click',()=>{
+  btn.classList.toggle('active');
+  btn.setAttribute('aria-pressed',String(btn.classList.contains('active')));
+  updateTechReadiness();
+}));
+updateTechReadiness();
