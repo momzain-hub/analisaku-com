@@ -1,7 +1,79 @@
+/* Global theme bootstrap */
+const activeScript=document.currentScript;
+const assetUrl=(relative,fallback)=>activeScript?new URL(relative,activeScript.src).href:fallback;
+const themeCssUrl=assetUrl('../css/theme.css','assets/css/theme.css');
+if(!document.querySelector('link[data-analisaku-theme]')){
+  const themeLink=document.createElement('link');
+  themeLink.rel='stylesheet';
+  themeLink.href=themeCssUrl;
+  themeLink.dataset.analisakuTheme='true';
+  document.head.appendChild(themeLink);
+}
+
+const THEME_KEY='analisaku-theme';
+const systemTheme=()=>window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+const storedTheme=()=>{try{const value=localStorage.getItem(THEME_KEY);return value==='light'||value==='dark'?value:null}catch(e){return null}};
+const darkLogoUrl=assetUrl('../img/logo-analisaku.svg','assets/img/logo-analisaku.svg');
+const lightLogoUrl=assetUrl('../img/logo-analisaku-light.svg','assets/img/logo-analisaku-light.svg');
+let themeToggle=null;
+
+function updateThemeLogo(theme){
+  document.querySelectorAll('img[src*="logo-analisaku"],img[data-theme-logo]').forEach(img=>{
+    img.dataset.themeLogo='true';
+    img.src=theme==='light'?lightLogoUrl:darkLogoUrl;
+  });
+}
+
+function updateThemeMeta(theme){
+  let meta=document.querySelector('meta[name="theme-color"]');
+  if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.appendChild(meta)}
+  meta.content=theme==='light'?'#fbf7ee':'#07111c';
+}
+
+function applyTheme(theme,{persist=false}={}){
+  document.documentElement.dataset.theme=theme;
+  if(persist){try{localStorage.setItem(THEME_KEY,theme)}catch(e){}}
+  updateThemeMeta(theme);
+  updateThemeLogo(theme);
+  if(themeToggle){
+    const isDark=theme==='dark';
+    themeToggle.textContent=isDark?'☀':'☾';
+    themeToggle.setAttribute('aria-label',isDark?'Ganti ke mode terang':'Ganti ke mode gelap');
+    themeToggle.title=isDark?'Mode terang':'Mode gelap';
+  }
+}
+
+applyTheme(storedTheme()||systemTheme());
+
 const menuBtn=document.getElementById('menuBtn');
 const mainNav=document.getElementById('mainNav');
-if(menuBtn&&mainNav){menuBtn.addEventListener('click',()=>mainNav.classList.toggle('open'));mainNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mainNav.classList.remove('open')))}
-const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();
+if(menuBtn&&mainNav){
+  menuBtn.addEventListener('click',()=>mainNav.classList.toggle('open'));
+  mainNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mainNav.classList.remove('open')));
+}
+
+const navWrap=document.querySelector('.nav-wrap');
+if(navWrap){
+  themeToggle=document.createElement('button');
+  themeToggle.type='button';
+  themeToggle.className='theme-toggle';
+  themeToggle.setAttribute('aria-live','polite');
+  navWrap.insertBefore(themeToggle,menuBtn||null);
+  themeToggle.addEventListener('click',()=>{
+    const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+    applyTheme(next,{persist:true});
+  });
+  applyTheme(document.documentElement.dataset.theme||systemTheme());
+}
+
+if(window.matchMedia){
+  const mq=window.matchMedia('(prefers-color-scheme: light)');
+  const onSystemChange=()=>{if(!storedTheme())applyTheme(systemTheme())};
+  if(mq.addEventListener)mq.addEventListener('change',onSystemChange);
+}
+
+const year=document.getElementById('year');
+if(year)year.textContent=new Date().getFullYear();
 
 function num(id){const el=document.getElementById(id);return el?parseFloat(el.value):NaN}
 function show(id,text){const el=document.getElementById(id);if(!el)return;el.textContent=text;el.style.display='block'}
