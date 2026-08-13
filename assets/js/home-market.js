@@ -155,7 +155,8 @@
       const r=await fetch(url,{cache:'no-store'});
       if(r.status===404){resetQuick('Belum ada snapshot tersimpan untuk ticker/timeframe ini.');return}
       if(!r.ok)throw new Error();
-      const d=await r.json();
+      const body=await r.json();
+      const d=body.data||body;
       const raw=String(d.status||'').toUpperCase();
       $('hqTrend').textContent=String(d.trend||'—').toUpperCase();
       $('hqStatus').textContent=publicStatus(raw);
