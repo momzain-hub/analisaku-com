@@ -1,19 +1,16 @@
 /* Analisaku Signal API configuration.
-   Public endpoint only. Never put API secrets, tokens, or Pine logic here. */
+   Public endpoint only. Never put API secrets, tokens, or proprietary Pine logic here. */
 window.ANALISAKU_SIGNAL_API = "https://analisaku-signal.pitizain.workers.dev/signal";
 
-/* Technical page add-on: wait for Decision Panel, then force-load Signal Monitor V2. */
 (function(){
   if(!document.querySelector('.technical-hero'))return;
-
   let tries=0;
   const maxTries=150;
-  const VERSION='20260813-1204';
+  const VERSION='20260813-1458';
 
   function loadMonitor(){
     if(document.querySelector('script[data-analisaku-monitor-loader-v2]'))return true;
     if(!document.getElementById('decisionPanel'))return false;
-
     const base=document.currentScript?.src||location.href;
     const s=document.createElement('script');
     s.src=new URL('signal-monitor-v2-loader.js',base).href+'?v='+VERSION;
@@ -24,7 +21,6 @@ window.ANALISAKU_SIGNAL_API = "https://analisaku-signal.pitizain.workers.dev/sig
   }
 
   if(loadMonitor())return;
-
   const timer=setInterval(()=>{
     tries+=1;
     if(loadMonitor()||tries>=maxTries)clearInterval(timer);
