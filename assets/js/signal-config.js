@@ -6,7 +6,7 @@ window.ANALISAKU_SIGNAL_API = "https://analisaku-signal.pitizain.workers.dev/sig
   if(!document.querySelector('.technical-hero'))return;
   let tries=0;
   const maxTries=150;
-  const VERSION='20260813-1510';
+  const VERSION='20260813-1525';
 
   function loadMonitor(){
     if(document.querySelector('script[data-analisaku-monitor-loader-v2]'))return true;
