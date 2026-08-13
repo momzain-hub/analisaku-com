@@ -1,0 +1,315 @@
+//@version=6
+indicator("ANALISAKU SIGNAL HUB V1.4 — 20 TICKER BATCH", overlay=false, max_bars_back=5000, dynamic_requests=true)
+
+//==============================================================================
+// ANALISAKU.COM — SIGNAL HUB V1.4
+// 20 ticker / 1 TradingView alert / 1 batch webhook.
+// Website menerima output generik saja: trend, setup, status, entry, trigger,
+// invalidation, target, price, timestamp. Formula proprietary tidak dikirim.
+// Daftar ticker adalah watchlist monitoring dan bukan rekomendasi transaksi.
+//==============================================================================
+
+grpHub = "01. SIGNAL HUB — 20 TICKER"
+hubEnabled = input.bool(true, "Aktifkan Signal Hub", group=grpHub)
+showTable = input.bool(true, "Tampilkan tabel validasi", group=grpHub)
+
+sym01 = input.symbol("IDX:RAJA", "01", inline="R01", group=grpHub)
+sym02 = input.symbol("IDX:BBCA", "02", inline="R01", group=grpHub)
+sym03 = input.symbol("IDX:BMRI", "03", inline="R02", group=grpHub)
+sym04 = input.symbol("IDX:BBRI", "04", inline="R02", group=grpHub)
+sym05 = input.symbol("IDX:BBNI", "05", inline="R03", group=grpHub)
+sym06 = input.symbol("IDX:TLKM", "06", inline="R03", group=grpHub)
+sym07 = input.symbol("IDX:ASII", "07", inline="R04", group=grpHub)
+sym08 = input.symbol("IDX:ANTM", "08", inline="R04", group=grpHub)
+sym09 = input.symbol("IDX:AMMN", "09", inline="R05", group=grpHub)
+sym10 = input.symbol("IDX:MDKA", "10", inline="R05", group=grpHub)
+sym11 = input.symbol("IDX:TPIA", "11", inline="R06", group=grpHub)
+sym12 = input.symbol("IDX:BUMI", "12", inline="R06", group=grpHub)
+sym13 = input.symbol("IDX:BRMS", "13", inline="R07", group=grpHub)
+sym14 = input.symbol("IDX:ADRO", "14", inline="R07", group=grpHub)
+sym15 = input.symbol("IDX:PGAS", "15", inline="R08", group=grpHub)
+sym16 = input.symbol("IDX:INCO", "16", inline="R08", group=grpHub)
+sym17 = input.symbol("IDX:UNTR", "17", inline="R09", group=grpHub)
+sym18 = input.symbol("IDX:ICBP", "18", inline="R09", group=grpHub)
+sym19 = input.symbol("IDX:ITMG", "19", inline="R10", group=grpHub)
+sym20 = input.symbol("IDX:GOTO", "20", inline="R10", group=grpHub)
+
+grpEngine = "02. MASTER DECISION"
+leftBars = input.int(5, "Pivot Left", minval=1, maxval=50, inline="PIV", group=grpEngine)
+rightBars = input.int(5, "Pivot Right", minval=1, maxval=50, inline="PIV", group=grpEngine)
+pivotSource = input.string("Wick", "Sumber Pivot", options=["Wick", "Close"], group=grpEngine)
+directionMode = input.string("Auto", "Arah Pola", options=["Auto", "Bullish saja", "Bearish saja"], group=grpEngine)
+strictPattern = input.bool(true, "Validasi struktur A-B-C ketat", group=grpEngine)
+breakoutMethod = input.string("Close", "Konfirmasi breakout", options=["Close", "Wick"], group=grpEngine)
+oneSignalPerPattern = input.bool(true, "Satu sinyal breakout per pola", group=grpEngine)
+watchPct = input.float(4.0, "WATCH jika jarak ke Trigger ≤ (%)", minval=0.1, maxval=20.0, step=0.1, group=grpEngine)
+
+grpWeb = "03. WEBSITE AUTO SYNC"
+webAlert = input.bool(false, "Aktifkan Website Alert", group=grpWeb)
+initialSync = input.bool(true, "Kirim Snapshot Awal 20 Saham", group=grpWeb,
+     tooltip="ON = kirim seluruh watchlist dalam SATU batch webhook pada update realtime pertama. Berikutnya hanya ticker yang state-nya berubah saat candle close.")
+
+//------------------------------------------------------------------------------
+// HELPERS
+//------------------------------------------------------------------------------
+f_plainTicker(string symbol) =>
+    str.replace_all(symbol, "IDX:", "")
+
+f_num(float v) =>
+    na(v) ? "" : str.tostring(v, "#.########")
+
+f_trend(int code) =>
+    code == 1 ? "BULLISH" : code == -1 ? "BEARISH" : "NEUTRAL"
+
+f_setup(int code) =>
+    code == 1 ? "ACTIVE" : "INACTIVE"
+
+f_status(int code) =>
+    code == 1 ? "WATCH" :
+     code == 2 ? "BUY SETUP" :
+     code == 3 ? "HOLD" :
+     code == 4 ? "TAKE PROFIT" :
+     code == 5 ? "EXIT" : "WAIT"
+
+//------------------------------------------------------------------------------
+// COMPACT MASTER ENGINE
+// Berjalan di konteks masing-masing ticker melalui request.security().
+//------------------------------------------------------------------------------
+f_engine() =>
+    float e12 = ta.ema(close, 12)
+    float e36 = ta.ema(close, 36)
+    float e60 = ta.ema(close, 60)
+    float e200 = ta.ema(close, 200)
+    bool bullStrong = close > e200 and e12 > e36 and e36 > e60
+    bool bearStrong = close < e200 and e12 < e36 and e36 < e60
+
+    float phSrc = pivotSource == "Wick" ? high : close
+    float plSrc = pivotSource == "Wick" ? low : close
+    float ph = ta.pivothigh(phSrc, leftBars, rightBars)
+    float pl = ta.pivotlow(plSrc, leftBars, rightBars)
+
+    var array<int> pTypes = array.new<int>()
+    var array<float> pPrices = array.new<float>()
+    var array<int> pBars = array.new<int>()
+
+    bool hasHigh = not na(ph)
+    bool hasLow = not na(pl)
+    if hasHigh or hasLow
+        int pBar = bar_index - rightBars
+        int pType = 0
+        float pPrice = na
+
+        if hasHigh and hasLow
+            int lastStoredType = array.size(pTypes) > 0 ? array.get(pTypes, array.size(pTypes) - 1) : 0
+            if lastStoredType == 1
+                pType := -1
+                pPrice := pl
+            else
+                pType := 1
+                pPrice := ph
+        else if hasHigh
+            pType := 1
+            pPrice := ph
+        else
+            pType := -1
+            pPrice := pl
+
+        int sz = array.size(pTypes)
+        if sz == 0
+            array.push(pTypes, pType)
+            array.push(pPrices, pPrice)
+            array.push(pBars, pBar)
+        else
+            int lastType = array.get(pTypes, sz - 1)
+            float lastPrice = array.get(pPrices, sz - 1)
+            if pType == lastType
+                bool moreExtreme = (pType == 1 and pPrice > lastPrice) or (pType == -1 and pPrice < lastPrice)
+                if moreExtreme
+                    array.set(pPrices, sz - 1, pPrice)
+                    array.set(pBars, sz - 1, pBar)
+            else
+                array.push(pTypes, pType)
+                array.push(pPrices, pPrice)
+                array.push(pBars, pBar)
+
+        while array.size(pTypes) > 38
+            array.shift(pTypes)
+            array.shift(pPrices)
+            array.shift(pBars)
+
+    int n = array.size(pTypes)
+    int typeA = 0
+    int typeB = 0
+    int typeC = 0
+    float priceA = na
+    float priceB = na
+    float priceC = na
+    int barC = na
+
+    if n >= 3
+        typeA := array.get(pTypes, n - 3)
+        typeB := array.get(pTypes, n - 2)
+        typeC := array.get(pTypes, n - 1)
+        priceA := array.get(pPrices, n - 3)
+        priceB := array.get(pPrices, n - 2)
+        priceC := array.get(pPrices, n - 1)
+        barC := array.get(pBars, n - 1)
+
+    bool bullSeq = typeA == -1 and typeB == 1 and typeC == -1
+    bool bearSeq = typeA == 1 and typeB == -1 and typeC == 1
+    bool bullStruct = not strictPattern or (priceA < priceB and priceC > priceA and priceC < priceB)
+    bool bearStruct = not strictPattern or (priceA > priceB and priceC < priceA and priceC > priceB)
+    bool bullAllowed = directionMode == "Auto" or directionMode == "Bullish saja"
+    bool bearAllowed = directionMode == "Auto" or directionMode == "Bearish saja"
+    bool validBull = n >= 3 and bullAllowed and bullSeq and bullStruct
+    bool validBear = n >= 3 and bearAllowed and bearSeq and bearStruct
+    bool valid = validBull or validBear
+
+    float impulse = validBull ? priceB - priceA : validBear ? priceA - priceB : na
+    float entryA = valid ? (validBull ? priceC + impulse * 0.500 : priceC - impulse * 0.500) : na
+    float entryB = valid ? (validBull ? priceC + impulse * 0.618 : priceC - impulse * 0.618) : na
+    float entryLow = valid ? math.min(entryA, entryB) : na
+    float entryHigh = valid ? math.max(entryA, entryB) : na
+    float tp1 = valid ? (validBull ? priceC + impulse * 1.272 : priceC - impulse * 1.272) : na
+    float tp2 = valid ? (validBull ? priceC + impulse * 1.618 : priceC - impulse * 1.618) : na
+    float tp3 = valid ? (validBull ? priceC + impulse * 2.000 : priceC - impulse * 2.000) : na
+
+    float bullBreakSrc = breakoutMethod == "Close" ? close : high
+    float bearBreakSrc = breakoutMethod == "Close" ? close : low
+    int patternId = valid ? barC : na
+    bool newPattern = valid and (na(patternId[1]) or patternId != patternId[1])
+    bool rawBullBreak = validBull and not newPattern and ta.crossover(bullBreakSrc, priceB)
+    bool rawBearBreak = validBear and not newPattern and ta.crossunder(bearBreakSrc, priceB)
+
+    var int lastBullPattern = na
+    var int lastBearPattern = na
+    bool bullBreak = rawBullBreak and (not oneSignalPerPattern or na(lastBullPattern) or lastBullPattern != patternId)
+    bool bearBreak = rawBearBreak and (not oneSignalPerPattern or na(lastBearPattern) or lastBearPattern != patternId)
+    if bullBreak
+        lastBullPattern := patternId
+    if bearBreak
+        lastBearPattern := patternId
+
+    bool bullTP1 = validBull and not newPattern and ta.crossover(high, tp1)
+    bool bullTP2 = validBull and not newPattern and ta.crossover(high, tp2)
+    bool bullishActive = validBull and close > priceB
+    bool bearishActive = validBear and close < priceB
+
+    bool invalid = validBull ? close < priceC : validBear ? close > priceC : false
+    float distTrigger = valid and not na(priceB) and priceB != 0.0 ? math.abs(close - priceB) / math.abs(priceB) * 100.0 : na
+    bool nearTrigger = valid and not na(distTrigger) and distTrigger <= watchPct
+
+    int trendCode = bullStrong ? 1 : bearStrong ? -1 : 0
+    int setupCode = valid and not invalid ? 1 : 0
+    int statusCode =
+         not valid ? 0 :
+         invalid ? 5 :
+         validBear and (bearBreak or bearishActive) ? 5 :
+         bullTP2 ? 4 :
+         bullTP1 ? 4 :
+         bullBreak ? 2 :
+         bullishActive ? 3 :
+         validBull and nearTrigger ? 1 :
+         validBull and trendCode == 1 ? 1 : 0
+
+    [trendCode, setupCode, statusCode, entryLow, entryHigh, priceB, priceC, tp1, tp2, tp3, close]
+
+f_state(int trendCode, int setupCode, int statusCode, float el, float eh, float trigger, float invalidation, float tp1, float tp2, float tp3) =>
+    str.tostring(trendCode) + "|" + str.tostring(setupCode) + "|" + str.tostring(statusCode) + "|" +
+     f_num(el) + "|" + f_num(eh) + "|" + f_num(trigger) + "|" + f_num(invalidation) + "|" +
+     f_num(tp1) + "|" + f_num(tp2) + "|" + f_num(tp3)
+
+f_signalJson(string symbol, int trendCode, int setupCode, int statusCode, float el, float eh, float trigger, float invalidation, float tp1, float tp2, float tp3, float px) =>
+    "{" +
+     "\"ticker\":\"" + f_plainTicker(symbol) + "\"," +
+     "\"timeframe\":\"" + timeframe.period + "\"," +
+     "\"trend\":\"" + f_trend(trendCode) + "\"," +
+     "\"setup\":\"" + f_setup(setupCode) + "\"," +
+     "\"status\":\"" + f_status(statusCode) + "\"," +
+     "\"entry_low\":\"" + f_num(el) + "\"," +
+     "\"entry_high\":\"" + f_num(eh) + "\"," +
+     "\"trigger\":\"" + f_num(trigger) + "\"," +
+     "\"invalidation\":\"" + f_num(invalidation) + "\"," +
+     "\"target1\":\"" + f_num(tp1) + "\"," +
+     "\"target2\":\"" + f_num(tp2) + "\"," +
+     "\"target3\":\"" + f_num(tp3) + "\"," +
+     "\"price\":\"" + f_num(px) + "\"," +
+     "\"updated_at\":" + str.tostring(timenow) +
+     "}"
+
+//------------------------------------------------------------------------------
+// 20 SYMBOL ARRAY + DYNAMIC REQUEST LOOP
+// Pine v6 mendukung series symbol request di loop.
+//------------------------------------------------------------------------------
+array<string> symbols = array.from(
+     sym01, sym02, sym03, sym04, sym05,
+     sym06, sym07, sym08, sym09, sym10,
+     sym11, sym12, sym13, sym14, sym15,
+     sym16, sym17, sym18, sym19, sym20)
+
+var array<string> prevStates = array.new_string(20, "")
+array<string> currStates = array.new_string()
+array<int> outTrend = array.new_int()
+array<int> outStatus = array.new_int()
+array<float> outTrigger = array.new_float()
+
+varip bool initialSent = false
+bool firstRealtime = barstate.isrealtime and initialSync and not initialSent
+bool closeReady = barstate.isrealtime and barstate.isconfirmed
+
+string batchItems = ""
+int batchCount = 0
+
+for i = 0 to array.size(symbols) - 1
+    string sym = array.get(symbols, i)
+    [trCode, setupCode, statusCode, entryLow, entryHigh, trigger, invalidation, tp1, tp2, tp3, px] = request.security(sym, timeframe.period, f_engine())
+
+    string state = f_state(trCode, setupCode, statusCode, entryLow, entryHigh, trigger, invalidation, tp1, tp2, tp3)
+    array.push(currStates, state)
+    array.push(outTrend, trCode)
+    array.push(outStatus, statusCode)
+    array.push(outTrigger, trigger)
+
+    string prevState = array.get(prevStates, i)
+    bool changedAtClose = closeReady and prevState != "" and state != prevState
+    bool includeSignal = firstRealtime or changedAtClose
+
+    if hubEnabled and webAlert and includeSignal
+        string item = f_signalJson(sym, trCode, setupCode, statusCode, entryLow, entryHigh, trigger, invalidation, tp1, tp2, tp3, px)
+        batchItems += (batchCount > 0 ? "," : "") + item
+        batchCount += 1
+
+// SATU alert() untuk semua ticker yang perlu sinkron pada eksekusi ini.
+if hubEnabled and webAlert and batchCount > 0
+    string batchPayload = "{\"signals\":[" + batchItems + "]}"
+    alert(batchPayload, alert.freq_all)
+    if firstRealtime
+        initialSent := true
+
+// Simpan state hanya pada candle yang sudah confirmed.
+if barstate.isconfirmed and array.size(currStates) == 20
+    for i = 0 to 19
+        array.set(prevStates, i, array.get(currStates, i))
+
+//------------------------------------------------------------------------------
+// VALIDATION TABLE
+// Cocokkan RAJA dengan Master V1.2 sebelum Website Alert Hub diaktifkan.
+//------------------------------------------------------------------------------
+var table hubTable = table.new(position.top_right, 4, 21, border_width=1)
+if barstate.islast and showTable and array.size(outTrend) == 20
+    table.cell(hubTable, 0, 0, "TICKER")
+    table.cell(hubTable, 1, 0, "TREND")
+    table.cell(hubTable, 2, 0, "STATUS")
+    table.cell(hubTable, 3, 0, "TRIGGER")
+
+    for i = 0 to 19
+        table.cell(hubTable, 0, i + 1, f_plainTicker(array.get(symbols, i)))
+        table.cell(hubTable, 1, i + 1, f_trend(array.get(outTrend, i)))
+        table.cell(hubTable, 2, i + 1, f_status(array.get(outStatus, i)))
+        table.cell(hubTable, 3, i + 1, f_num(array.get(outTrigger, i)))
+
+if barstate.islast and not showTable
+    table.clear(hubTable, 0, 0, 3, 20)
+
+// Data Window marker supaya script tetap punya output visual ringan.
+plot(array.size(outStatus) > 0 ? array.get(outStatus, 0) : na, "RAJA status code", display=display.data_window)
