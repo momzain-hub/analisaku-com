@@ -30,9 +30,9 @@
       <section class="decision-panel" id="decisionPanel">
         <div class="decision-head">
           <div><div class="kicker">ANALISAKU DECISION PANEL</div><h3><span id="decisionTicker">RAJA</span> <small id="decisionTf">1D</small></h3><p>Output ringkas dari Master Signal: trend, area keputusan, trigger, invalidation, target, dan status.</p></div>
-          <div class="decision-status waiting" id="decisionStatus"><span></span><b>WAITING</b><small>Signal API belum aktif</small></div>
+          <div class="decision-status waiting" id="decisionStatus"><span></span><b>WAITING</b><small>Menunggu Master Signal</small></div>
         </div>
-        <div class="decision-source" id="decisionSource"><div><span>DATA SOURCE</span><b>Signal API siap dihubungkan</b></div><button type="button" id="tvDemo">Preview RAJA</button></div>
+        <div class="decision-source" id="decisionSource"><div><span>DATA SOURCE</span><b>Master Signal API</b></div></div>
         <div class="decision-grid">
           <div class="decision-card"><span>TREND / REGIME</span><strong id="dTrend">—</strong><small>Output Master Signal</small></div>
           <div class="decision-card"><span>SETUP</span><strong id="dSetup">—</strong><small>Metodologi disembunyikan</small></div>
@@ -44,14 +44,13 @@
           <div class="decision-card"><span>TARGET 3</span><strong id="dTp3">—</strong><small>Target ekstensi</small></div>
         </div>
         <div class="decision-action"><div><span>DECISION</span><strong id="dDecision">Belum ada keputusan otomatis.</strong></div><p id="dDecisionCopy">Master Signal akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT.</p></div>
-        <div class="decision-demo-note" id="decisionDemoNote" hidden>Preview memakai contoh RAJA sebelumnya, bukan signal API dan bukan data live.</div>
       </section>
     </div></div>`;
   hero.insertAdjacentElement('afterend',section);
 
   const $=id=>document.getElementById(id);
   const ticker=$('tvTicker'),interval=$('tvInterval'),apply=$('tvApply'),frame=$('tvChartFrame'),status=$('tvStatus');
-  const chips=[...section.querySelectorAll('.tv-chip')],demoBtn=$('tvDemo');
+  const chips=[...section.querySelectorAll('.tv-chip')];
   let currentSymbol='RAJA',renderToken=0,signalApi='',signalRequest=0;
 
   const cleanTicker=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20)||'RAJA';
@@ -82,10 +81,10 @@
       'WAIT':['Tunggu setup dan konfirmasi.','Tidak perlu memaksakan transaksi.']
     })[s]||['Tunggu setup dan konfirmasi.','Tidak perlu memaksakan transaksi.'];
   }
-  function resetDecision(message='Signal API belum aktif'){
+  function resetDecision(message='Menunggu Master Signal'){
     put('dTrend','—');put('dSetup','—');put('dEntry','—');put('dBreakout','—');put('dStop','—');put('dTp1','—');put('dTp2','—');put('dTp3','—');
     put('dDecision','Belum ada keputusan otomatis.');put('dDecisionCopy','Master Signal akan menampilkan WAIT, WATCH, BUY SETUP, HOLD, TAKE PROFIT, atau EXIT.');
-    setBadge('WAITING',message);$('decisionDemoNote').hidden=true;
+    setBadge('WAITING',message);
   }
   function applySignal(data){
     if(!data)return;
@@ -95,7 +94,6 @@
     put('dTp1',price(data.target1));put('dTp2',price(data.target2));put('dTp3',price(data.target3));
     const copy=decisionCopy(s);put('dDecision',copy[0]);put('dDecisionCopy',copy[1]);setBadge(s,'Master Signal');
     const ts=Number(data.received_at||data.updated_at);sourceText('Master Signal'+(Number.isFinite(ts)?' • '+new Date(ts).toLocaleString('id-ID') : ''));
-    $('decisionDemoNote').hidden=true;
   }
   function syncHeader(){put('decisionTicker',currentSymbol);put('decisionTf',tfLabel(interval.value||'D'))}
 
@@ -104,7 +102,7 @@
       const s=document.createElement('script');s.src=new URL('signal-config.js',moduleSrc).href;s.onload=resolve;s.onerror=resolve;document.head.appendChild(s);
     });
     signalApi=String(window.ANALISAKU_SIGNAL_API||'').trim();
-    if(!signalApi){sourceText('Signal API siap — endpoint belum diaktifkan');resetDecision('Endpoint belum diaktifkan')}
+    if(!signalApi){sourceText('Signal API belum dikonfigurasi');resetDecision('Endpoint belum aktif')}
   }
   async function fetchSignal(){
     if(!signalApi)return;
@@ -119,15 +117,9 @@
     }catch(e){if(req===signalRequest){resetDecision('API tidak tersedia');sourceText('Signal API belum dapat diakses')}}
   }
 
-  function showDemo(){
-    if(currentSymbol!=='RAJA'){alert('Preview contoh tersedia untuk RAJA.');return}
-    applySignal({trend:'BULLISH',setup:'ACTIVE',status:'WATCH',entry_low:'864',entry_high:'880',trigger:'936',invalidation:'852',target1:'955',target2:'1028',target3:'1090'});
-    sourceText('Preview manual RAJA');$('decisionDemoNote').hidden=false;
-  }
-
   function renderChart(){
     const token=++renderToken;currentSymbol=cleanTicker(ticker.value);ticker.value=currentSymbol;const tvTf=interval.value||'D';
-    status.textContent='IDX:'+currentSymbol+' • '+tfLabel(tvTf);chips.forEach(c=>c.classList.toggle('active',c.dataset.tvSymbol===currentSymbol));syncHeader();resetDecision(signalApi?'Mengambil signal…':'Endpoint belum diaktifkan');frame.innerHTML='';
+    status.textContent='IDX:'+currentSymbol+' • '+tfLabel(tvTf);chips.forEach(c=>c.classList.toggle('active',c.dataset.tvSymbol===currentSymbol));syncHeader();resetDecision(signalApi?'Mengambil signal…':'Endpoint belum aktif');frame.innerHTML='';
     const wrap=document.createElement('div');wrap.className='tradingview-widget-container';wrap.style.cssText='height:100%;width:100%';
     const widget=document.createElement('div');widget.className='tradingview-widget-container__widget';widget.style.cssText='height:100%;width:100%';wrap.appendChild(widget);
     const script=document.createElement('script');script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';script.async=true;
@@ -136,7 +128,7 @@
   }
 
   apply.addEventListener('click',renderChart);ticker.addEventListener('keydown',e=>{if(e.key==='Enter')renderChart()});interval.addEventListener('change',renderChart);
-  chips.forEach(c=>c.addEventListener('click',()=>{ticker.value=c.dataset.tvSymbol;renderChart()}));demoBtn.addEventListener('click',showDemo);
+  chips.forEach(c=>c.addEventListener('click',()=>{ticker.value=c.dataset.tvSymbol;renderChart()}));
   let lastTheme=theme();new MutationObserver(()=>{const next=theme();if(next!==lastTheme){lastTheme=next;renderChart()}}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
   loadSignalConfig().then(()=>{renderChart();setInterval(fetchSignal,60000)});
