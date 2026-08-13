@@ -1,97 +1,36 @@
 # Analisaku Signal API
 
-Arsitektur:
+Backend ini menjadi penghubung antara mesin sinyal privat dan website publik Analisaku.com.
 
-`Private Pine Script / Signal Hub (TradingView) -> TradingView Alert -> Cloudflare Worker -> KV -> Analisaku.com Decision Panel`
+Prinsip keamanan:
 
-Pine/engine proprietary **tidak disimpan di repository publik ini**. Backend hanya menyimpan output generik yang dibutuhkan Decision Panel.
+- Mesin, formula, parameter, bobot, threshold, periode indikator, dan source proprietary tidak disimpan atau dijelaskan di dokumentasi publik.
+- Worker boleh menerima dan menyimpan data internal di KV untuk kebutuhan mesin.
+- Endpoint `GET` publik hanya mengeluarkan output yang memang ditampilkan website.
+- `Score` termasuk output publik. Komponen pembentuk Score tetap privat.
+- Secret webhook wajib disimpan sebagai Cloudflare Worker secret dan tidak boleh ditulis di frontend atau repository.
 
-## Cloudflare Worker
+Output publik yang diperbolehkan mencakup antara lain:
 
-Gunakan `backend/cloudflare-worker.js` sebagai source Worker.
+- ticker dan timeframe
+- score
+- trend / radar / decision
+- entry area
+- trigger
+- invalidation
+- target
+- status Golden Cross secara umum
+- waktu pembaruan
 
-Bindings yang dibutuhkan:
+Tidak boleh diekspos melalui endpoint publik:
 
-- KV namespace dengan binding name: `SIGNALS`
-- Worker secret: `WEBHOOK_TOKEN`
+- nilai atau periode MA/EMA
+- umur cross
+- komponen score
+- bobot dan threshold
+- relative-volume / relative-strength internal
+- parameter volatilitas internal
+- rule atau formula engine
+- source Pine / source strategi privat
 
-Jangan commit nilai `WEBHOOK_TOKEN` ke GitHub.
-
-Setelah Worker di-deploy, tersedia endpoint:
-
-- `POST /webhook/<WEBHOOK_TOKEN>` — penerima alert TradingView
-- `GET /signal?ticker=RAJA&timeframe=1D` — dibaca Decision Panel
-- `GET /health` — health check
-
-## Format webhook
-
-Worker mendukung dua format secara bersamaan.
-
-### Legacy / single signal
-
-```json
-{
-  "ticker": "RAJA",
-  "timeframe": "1D",
-  "trend": "BULLISH",
-  "setup": "ACTIVE",
-  "status": "WATCH"
-}
-```
-
-### Signal Hub batch
-
-```json
-{
-  "signals": [
-    {"ticker":"RAJA","timeframe":"1D","trend":"BULLISH","setup":"ACTIVE","status":"WATCH"},
-    {"ticker":"BBCA","timeframe":"1D","trend":"NEUTRAL","setup":"INACTIVE","status":"WAIT"}
-  ]
-}
-```
-
-Satu batch dibatasi maksimal 40 signal. Data dengan key `ticker:timeframe` yang sama di dalam satu batch di-deduplicate sebelum KV ditulis.
-
-## Private Signal Hub V1.4 — 20 ticker
-
-Source Pine V1.4 disimpan/didistribusikan secara privat dan tidak di-commit ke repository publik.
-
-Default watchlist operasional:
-
-RAJA, BBCA, BMRI, BBRI, BBNI, TLKM, ASII, ANTM, AMMN, MDKA, TPIA, BUMI, BRMS, ADRO, PGAS, INCO, UNTR, ICBP, ITMG, GOTO.
-
-Seluruh ticker dapat diganti dari Inputs TradingView tanpa mengubah formula engine.
-
-Alur:
-
-1. Hub menghitung 20 ticker pada timeframe chart yang sama.
-2. Snapshot awal 20 ticker digabung menjadi satu payload `signals[]`.
-3. Perubahan berikutnya hanya memasukkan ticker yang state/level pentingnya berubah setelah candle close.
-4. Satu eksekusi menghasilkan maksimal satu `alert()` / satu webhook batch.
-5. Worker memecah batch menjadi key KV per `ticker:timeframe`.
-
-## Hubungkan website
-
-`assets/js/signal-config.js` berisi endpoint GET publik Worker. Jangan meletakkan secret/token pada frontend.
-
-## Hubungkan TradingView
-
-1. Pasang Private Signal Hub V1.4 pada chart.
-2. Validasi dulu output RAJA vs Master V1.2 dengan `Website Alert` masih OFF.
-3. Setelah cocok, aktifkan `Aktifkan Website Alert` dan `Kirim Snapshot Awal 20 Saham`.
-4. Buat satu alert pada Hub dan pilih `Any alert() function call`.
-5. Gunakan Webhook URL `https://nama-worker.workers.dev/webhook/<WEBHOOK_TOKEN>`.
-6. Message tidak perlu diisi JSON manual karena Pine mengirim payload dinamis melalui `alert()`.
-
-## Status publik
-
-Decision Panel mengenali:
-
-- WAIT
-- WATCH
-- BUY SETUP
-- HOLD
-- TAKE PROFIT
-- EXIT
-
-Output bersifat analisis/edukasi dan bukan rekomendasi transaksi.
+Source Worker pada folder ini harus selalu menggunakan whitelist output publik sebelum data dikirim ke browser.
