@@ -1,12 +1,12 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260813-1640';
+  const VERSION='20260813-1655';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
-    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"]').forEach(el=>el.remove());
+    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"]').forEach(el=>el.remove());
 
-    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css'].forEach(path=>{
+    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css'].forEach(path=>{
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href=new URL(path,base).href+'?v='+VERSION;
