@@ -1,16 +1,14 @@
 /* Analisaku Signal Monitor V2 cache-busting loader */
 (function(){
-  const VERSION='20260813-1445';
+  const VERSION='20260813-1458';
   const base=document.currentScript?.src||location.href;
 
   function loadV2(){
     const panel=document.getElementById('decisionPanel');
     if(!panel){setTimeout(loadV2,200);return;}
 
-    const old=document.getElementById('signalMonitor');
-    if(old)old.remove();
-    const oldGc=document.getElementById('goldenCrossRadar');
-    if(oldGc)oldGc.remove();
+    document.getElementById('signalMonitor')?.remove();
+    document.getElementById('goldenCrossRadar')?.remove();
 
     document.querySelectorAll('link[href*="signal-monitor.css"]').forEach(el=>el.remove());
     const css=document.createElement('link');
