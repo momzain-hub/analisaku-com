@@ -1,6 +1,6 @@
 /* Analisaku Signal Monitor V2 cache-busting loader */
 (function(){
-  const VERSION='20260813-1458';
+  const VERSION='20260813-1501';
   const base=document.currentScript?.src||location.href;
 
   function loadV2(){
