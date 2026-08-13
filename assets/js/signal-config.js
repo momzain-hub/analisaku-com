@@ -2,21 +2,23 @@
    Public endpoint only. Never put API secrets, tokens, or Pine logic here. */
 window.ANALISAKU_SIGNAL_API = "https://analisaku-signal.pitizain.workers.dev/signal";
 
-/* Technical page add-on: wait for Decision Panel, then load 20-stock monitor. */
+/* Technical page add-on: wait for Decision Panel, then force-load Signal Monitor V2. */
 (function(){
   if(!document.querySelector('.technical-hero'))return;
 
   let tries=0;
-  const maxTries=100; // ~10 seconds
+  const maxTries=150;
+  const VERSION='20260813-1204';
 
   function loadMonitor(){
-    if(document.querySelector('script[src*="signal-monitor.js"]'))return true;
+    if(document.querySelector('script[data-analisaku-monitor-loader-v2]'))return true;
     if(!document.getElementById('decisionPanel'))return false;
 
     const base=document.currentScript?.src||location.href;
     const s=document.createElement('script');
-    s.src=new URL('signal-monitor.js',base).href+'?v=2';
+    s.src=new URL('signal-monitor-v2-loader.js',base).href+'?v='+VERSION;
     s.async=true;
+    s.dataset.analisakuMonitorLoaderV2='true';
     document.head.appendChild(s);
     return true;
   }
