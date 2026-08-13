@@ -119,6 +119,7 @@
   }
 
   const clean=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20)||'RAJA';
+  const apiTf=v=>({D:'1D',W:'1W',M:'1M'})[v]||v;
   const price=v=>{if(v===undefined||v===null||v==='')return '—';const n=Number(v);return Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:2}):String(v)};
   const publicStatus=status=>({
     'WAIT':'WAIT',
@@ -151,7 +152,8 @@
     if(!api){resetQuick('Signal API belum tersedia.');return}
     $('hqSource').textContent='Mengambil technical snapshot…';
     try{
-      const url=new URL(api);url.searchParams.set('ticker',symbol);url.searchParams.set('timeframe',tf.value||'D');
+      const selectedTf=tf.value||'D';
+      const url=new URL(api);url.searchParams.set('ticker',symbol);url.searchParams.set('timeframe',apiTf(selectedTf));
       const r=await fetch(url,{cache:'no-store'});
       if(r.status===404){resetQuick('Belum ada snapshot tersimpan untuk ticker/timeframe ini.');return}
       if(!r.ok)throw new Error();
