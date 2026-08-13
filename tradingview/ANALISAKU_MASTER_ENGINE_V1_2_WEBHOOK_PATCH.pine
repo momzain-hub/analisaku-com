@@ -1,104 +1,63 @@
-// ANALISAKU MASTER ENGINE V1.2 — WEBSITE AUTO SYNC PATCH
-// Pine Script v6 patch for ANALISAKU_MASTER_ENGINE_V1.pine
-//
-// TUJUAN
-// - Kirim snapshot awal saat alert live mulai bekerja.
-// - Setelah itu kirim hanya jika status / trend / setup / level penting berubah.
-// - Kirim hanya setelah candle realtime confirmed/close.
-// - Payload cocok dengan backend/cloudflare-worker.js.
-// - Formula/metode internal tidak dikirim ke website.
-//
-// CARA PAKAI
-// 1) Pada source master, ganti input grup 08B lama dengan blok INPUT V1.2 di bawah.
-// 2) Ganti blok mulai "GENERIC JSON PAYLOAD UNTUK WEBSITE" sampai akhir ALERT STATE lama
-//    dengan blok PAYLOAD + CHANGE DETECTOR V1.2 di bawah.
-// 3) Di TradingView buat alert dari "Any alert() function call" dan isi Webhook URL Worker.
-//
-// Catatan: file ini adalah integration patch, bukan indicator standalone.
+// ANALISAKU WEBSITE ALERT V1.2 — COMPACT / TOKEN SAFE
+// Replacement untuk Section 15 pada ANALISAKU_MASTER_V1_1_WEBHOOK_TOKEN_SAFE.txt
+// Ganti mulai header "15) ANALISAKU WEBSITE ALERT V1.1" sampai akhir script dengan blok ini.
+// Payload publik hanya berisi output generik, tanpa nama metode internal.
 
-//============================================================================== 
-// INPUT V1.2 — menggantikan input grup 08B lama
-//============================================================================== 
-grpAKWeb = "08B. ANALISAKU MASTER — Website / Alert"
-akEnableWebAlert = input.bool(false, "Aktifkan Website Auto Sync", group=grpAKWeb,
-     tooltip="ON setelah alert TradingView + webhook Cloudflare sudah dibuat.")
-akWebInitialSync = input.bool(true, "Kirim Snapshot Awal", group=grpAKWeb,
+//=====================================================================
+// 15) ANALISAKU WEBSITE ALERT V1.2 — AUTO SYNC
+//=====================================================================
+akWebAlert = input.bool(false, "Aktifkan Website Alert", group=grpPanel)
+akWebInitialSync = input.bool(true, "Kirim Snapshot Awal", group=grpPanel,
      tooltip="ON = kirim kondisi terakhir pada candle realtime close pertama setelah alert aktif.")
 
-//============================================================================== 
-// GENERIC JSON PAYLOAD V1.2
-// Hanya output generik. Tidak mengirim nama metode/formula proprietary.
-//============================================================================== 
-string akPayload = "{" +
+f_akJ(float v) =>
+    na(v) ? "" : str.tostring(v, format.mintick)
+
+string akWebPayload = "{" +
      "\"ticker\":\"" + syminfo.ticker + "\"," +
      "\"timeframe\":\"" + timeframe.period + "\"," +
      "\"trend\":\"" + akTrend + "\"," +
      "\"setup\":\"" + akSetup + "\"," +
      "\"status\":\"" + akStatus + "\"," +
-     "\"entry_low\":\"" + f_akJsonPrice(akEntryLow) + "\"," +
-     "\"entry_high\":\"" + f_akJsonPrice(akEntryHigh) + "\"," +
-     "\"trigger\":\"" + f_akJsonPrice(akTrigger) + "\"," +
-     "\"invalidation\":\"" + f_akJsonPrice(akStop) + "\"," +
-     "\"target1\":\"" + f_akJsonPrice(akTarget1) + "\"," +
-     "\"target2\":\"" + f_akJsonPrice(akTarget2) + "\"," +
-     "\"target3\":\"" + f_akJsonPrice(akTarget3) + "\"," +
+     "\"entry_low\":\"" + f_akJ(akEntryLow) + "\"," +
+     "\"entry_high\":\"" + f_akJ(akEntryHigh) + "\"," +
+     "\"trigger\":\"" + f_akJ(priceB) + "\"," +
+     "\"invalidation\":\"" + f_akJ(priceC) + "\"," +
+     "\"target1\":\"" + f_akJ(fib1272) + "\"," +
+     "\"target2\":\"" + f_akJ(fib1618) + "\"," +
+     "\"target3\":\"" + f_akJ(fib2000) + "\"," +
      "\"price\":\"" + str.tostring(close, format.mintick) + "\"," +
      "\"updated_at\":" + str.tostring(timenow) +
      "}"
 
-//============================================================================== 
-// STATE FINGERPRINT
-// PRICE + updated_at sengaja tidak ikut fingerprint agar tidak spam tiap candle.
-//============================================================================== 
+// Fingerprint keputusan. Price + updated_at tidak dimasukkan agar tidak spam setiap candle.
 string akWebState =
      akTrend + "|" +
      akSetup + "|" +
      akStatus + "|" +
-     f_akJsonPrice(akEntryLow) + "|" +
-     f_akJsonPrice(akEntryHigh) + "|" +
-     f_akJsonPrice(akTrigger) + "|" +
-     f_akJsonPrice(akStop) + "|" +
-     f_akJsonPrice(akTarget1) + "|" +
-     f_akJsonPrice(akTarget2) + "|" +
-     f_akJsonPrice(akTarget3)
+     f_akJ(akEntryLow) + "|" +
+     f_akJ(akEntryHigh) + "|" +
+     f_akJ(priceB) + "|" +
+     f_akJ(priceC) + "|" +
+     f_akJ(fib1272) + "|" +
+     f_akJ(fib1618) + "|" +
+     f_akJ(fib2000)
 
 var string akPrevWebState = ""
-var bool akWebInitialSent = false
-var string akPrevAlertStatus = ""
+var bool akInitialSent = false
 
-bool akWebStateChanged = akPrevWebState != "" and akWebState != akPrevWebState
-bool akWebNeedInitial = akWebInitialSync and not akWebInitialSent
+bool akStateChanged = akPrevWebState != "" and akWebState != akPrevWebState
+bool akNeedInitialSync = akWebInitialSync and not akInitialSent
 bool akWebReady = barstate.isrealtime and barstate.isconfirmed
-bool akWebShouldSend = akWebReady and (akWebNeedInitial or akWebStateChanged)
+bool akShouldWebSend = akWebReady and (akNeedInitialSync or akStateChanged)
 
-//============================================================================== 
-// SEND → TradingView Alert → Cloudflare Worker → KV → Website
-//============================================================================== 
-if akEngineEnabled and akEnableWebAlert and akWebShouldSend
-    alert(akPayload, alert.freq_once_per_bar_close)
-    akWebInitialSent := true
+if akWebAlert and akShouldWebSend
+    alert(akWebPayload, alert.freq_once_per_bar_close)
+    akInitialSent := true
 
-//============================================================================== 
-// STATUS ALERT CONDITIONS — tetap tersedia untuk kebutuhan TradingView UI
-//============================================================================== 
-bool akStatusChanged = barstate.isconfirmed and akPrevAlertStatus != "" and akStatus != akPrevAlertStatus
-
-alertcondition(akEngineEnabled and akStatusChanged and akStatus == "BUY SETUP",
-     title="Analisaku BUY SETUP", message="Analisaku Master: BUY SETUP")
-alertcondition(akEngineEnabled and akStatusChanged and akStatus == "WATCH",
-     title="Analisaku WATCH", message="Analisaku Master: WATCH")
-alertcondition(akEngineEnabled and akStatusChanged and akStatus == "TAKE PROFIT",
-     title="Analisaku TAKE PROFIT", message="Analisaku Master: TAKE PROFIT")
-alertcondition(akEngineEnabled and akStatusChanged and akStatus == "EXIT",
-     title="Analisaku EXIT", message="Analisaku Master: EXIT")
-
-//============================================================================== 
-// SAVE LAST CONFIRMED STATE
-//============================================================================== 
 if barstate.isconfirmed
     akPrevWebState := akWebState
-    akPrevAlertStatus := akStatus
 
-//============================================================================== 
-// END — ANALISAKU MASTER ENGINE V1.2 WEBSITE AUTO SYNC PATCH
-//==============================================================================
+//=====================================================================
+// END — ANALISAKU WEBSITE ALERT V1.2
+//=====================================================================
