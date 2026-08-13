@@ -1,6 +1,6 @@
 /* Analisaku Signal Monitor V2 cache-busting loader */
 (function(){
-  const VERSION='20260813-1204';
+  const VERSION='20260813-1445';
   const base=document.currentScript?.src||location.href;
 
   function loadV2(){
@@ -9,6 +9,8 @@
 
     const old=document.getElementById('signalMonitor');
     if(old)old.remove();
+    const oldGc=document.getElementById('goldenCrossRadar');
+    if(oldGc)oldGc.remove();
 
     document.querySelectorAll('link[href*="signal-monitor.css"]').forEach(el=>el.remove());
     const css=document.createElement('link');
