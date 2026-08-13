@@ -23,6 +23,8 @@
     let rows=[];
     let filter='ALL';
     let bullishOnly=false;
+    let sortMode='SCORE_DESC';
+    let displayLimit=5;
     let gcPayload=null;
     let gcFilter='ALL_GC';
 
@@ -38,21 +40,51 @@
         </div>
         <button type="button" class="signal-refresh" id="signalMonitorRefresh">Refresh</button>
       </div>
+
       <div class="market-opportunities-wrap">
         <div class="market-opportunities-head">
           <div><span>TOP OPPORTUNITIES</span><small>Prioritas output terbaik yang tersedia saat ini.</small></div>
         </div>
         <div class="market-opportunities" id="marketOpportunities"></div>
       </div>
+
       <div class="signal-summary" id="signalSummary"></div>
-      <div class="signal-toolbar">
+
+      <div class="signal-toolbar market-toolbar">
         <div class="signal-filters" id="signalFilters"></div>
         <button type="button" class="signal-bullish-toggle" id="signalBullishToggle" aria-pressed="false">Bullish only</button>
       </div>
+
+      <div class="market-view-bar">
+        <div class="market-view-controls">
+          <label class="market-control">
+            <span>Urutkan</span>
+            <select id="marketSort" aria-label="Urutkan Market Radar">
+              <option value="SCORE_DESC" selected>Score tertinggi</option>
+              <option value="SCORE_ASC">Score terendah</option>
+              <option value="STATUS">Status prioritas</option>
+              <option value="TICKER">Ticker A–Z</option>
+            </select>
+          </label>
+          <label class="market-control">
+            <span>Tampilkan</span>
+            <select id="marketLimit" aria-label="Jumlah saham Market Radar">
+              <option value="5" selected>5 saham</option>
+              <option value="10">10 saham</option>
+              <option value="20">20 saham</option>
+              <option value="50">50 saham</option>
+              <option value="ALL">Semua</option>
+            </select>
+          </label>
+        </div>
+        <span class="market-view-count" id="marketViewCount">Menampilkan 0 saham</span>
+      </div>
+
       <div class="market-meta-row">
         <div class="signal-monitor-meta" id="signalMonitorMeta">Memuat radar…</div>
         <span class="data-freshness" id="dataFreshness">CHECKING</span>
       </div>
+
       <div class="signal-table-wrap">
         <table class="signal-table market-radar-table">
           <thead><tr><th>Ticker</th><th>Score</th><th>Trend</th><th>Radar</th><th>Status</th><th>Trigger</th><th>Entry</th><th>Invalidation</th><th>Target 1</th><th>Updated</th></tr></thead>
@@ -176,7 +208,8 @@
         return `<button type="button" data-filter="${s}" class="signal-summary-card ${statusClass(s)} ${filter===s?'active':''}"><span>${s}</span><strong>${count}</strong></button>`;
       }).join('');
       host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
-        filter=filter===b.dataset.filter?'ALL':b.dataset.filter;renderSummary();renderFilters();renderTable();
+        filter=filter===b.dataset.filter?'ALL':b.dataset.filter;
+        renderSummary();renderFilters();renderTable();
       }));
     }
 
@@ -184,29 +217,58 @@
       const host=$('signalFilters');
       const filters=['ALL','BUY SETUP','HOLD','WATCH','TAKE PROFIT','EXIT','WAIT'];
       host.innerHTML=filters.map(f=>`<button type="button" data-filter="${f}" class="${filter===f?'active':''}">${f}</button>`).join('');
-      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;renderSummary();renderFilters();renderTable();}));
+      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        filter=b.dataset.filter;
+        renderSummary();renderFilters();renderTable();
+      }));
       const toggle=$('signalBullishToggle');
       toggle?.classList.toggle('active',bullishOnly);
       toggle?.setAttribute('aria-pressed',String(bullishOnly));
     }
 
-    function renderTable(){
-      const body=$('signalMonitorBody');
-      let view=rows.slice().sort((a,b)=>{
-        const ar=a.data?decisionRank[String(a.data.status||'WAIT').toUpperCase()]||99:99;
-        const br=b.data?decisionRank[String(b.data.status||'WAIT').toUpperCase()]||99:99;
-        if(ar!==br)return ar-br;
+    function sortRows(list){
+      const view=list.slice();
+      if(sortMode==='SCORE_ASC'){
+        return view.sort((a,b)=>(Number(a.data?.score)||0)-(Number(b.data?.score)||0)||a.symbol.localeCompare(b.symbol));
+      }
+      if(sortMode==='STATUS'){
+        return view.sort((a,b)=>{
+          const ar=decisionRank[String(a.data?.status||'WAIT').toUpperCase()]||99;
+          const br=decisionRank[String(b.data?.status||'WAIT').toUpperCase()]||99;
+          if(ar!==br)return ar-br;
+          return (Number(b.data?.score)||0)-(Number(a.data?.score)||0)||a.symbol.localeCompare(b.symbol);
+        });
+      }
+      if(sortMode==='TICKER'){
+        return view.sort((a,b)=>a.symbol.localeCompare(b.symbol));
+      }
+      return view.sort((a,b)=>{
         const scoreDiff=(Number(b.data?.score)||0)-(Number(a.data?.score)||0);
         if(scoreDiff!==0)return scoreDiff;
-        const at=a.data?trendRank[String(a.data.trend||'NEUTRAL').toUpperCase()]||99:99;
-        const bt=b.data?trendRank[String(b.data.trend||'NEUTRAL').toUpperCase()]||99:99;
+        const at=trendRank[String(a.data?.trend||'NEUTRAL').toUpperCase()]||99;
+        const bt=trendRank[String(b.data?.trend||'NEUTRAL').toUpperCase()]||99;
         return at-bt||a.symbol.localeCompare(b.symbol);
       });
-      if(filter!=='ALL')view=view.filter(r=>r.data&&String(r.data.status||'').toUpperCase()===filter);
-      if(bullishOnly)view=view.filter(r=>r.data&&String(r.data.trend||'').toUpperCase()==='BULLISH');
+    }
 
-      body.innerHTML=view.map(r=>{
-        if(!r.data)return '';
+    function renderTable(){
+      const body=$('signalMonitorBody');
+      let view=rows.filter(r=>r.data);
+
+      if(filter!=='ALL')view=view.filter(r=>String(r.data.status||'').toUpperCase()===filter);
+      if(bullishOnly)view=view.filter(r=>String(r.data.trend||'').toUpperCase()==='BULLISH');
+
+      view=sortRows(view);
+      const filteredTotal=view.length;
+      const visible=displayLimit==='ALL'?view:view.slice(0,Number(displayLimit)||5);
+      const count=$('marketViewCount');
+      if(count){
+        count.textContent=filteredTotal===visible.length
+          ? `Menampilkan ${visible.length} saham`
+          : `Menampilkan ${visible.length} dari ${filteredTotal} saham`;
+      }
+
+      body.innerHTML=visible.map(r=>{
         const d=r.data;
         const s=String(d.status||'WAIT').toUpperCase();
         const trend=String(d.trend||'NEUTRAL').toUpperCase();
@@ -245,14 +307,19 @@
       const s=gcPayload?.summary||{};
       const cards=[['DOUBLE_NEW','DOUBLE BARU',Number(s.double_fresh)||0],['DOUBLE_GC','DOUBLE GC',Number(s.double_gc)||0],['EMA_GC','EMA GC',Number(s.ema_gc)||0],['SMA_GC','MA GC',Number(s.sma_gc)||0],['NEW_GC','GC BARU',Number(s.fresh_gc)||0]];
       host.innerHTML=cards.map(([key,label,count])=>`<button type="button" data-gc-filter="${key}" class="gc-summary-card ${gcFilter===key?'active':''}"><span>${label}</span><strong>${count}</strong></button>`).join('');
-      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{gcFilter=gcFilter===b.dataset.gcFilter?'ALL_GC':b.dataset.gcFilter;renderGcSummary();renderGcFilters();renderGcTable();}));
+      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        gcFilter=gcFilter===b.dataset.gcFilter?'ALL_GC':b.dataset.gcFilter;
+        renderGcSummary();renderGcFilters();renderGcTable();
+      }));
     }
 
     function renderGcFilters(){
       const host=$('gcFilters');if(!host)return;
       const filters=[['ALL_GC','ALL GC'],['DOUBLE_GC','DOUBLE GC'],['EMA_GC','EMA GC'],['SMA_GC','MA GC'],['NEW_GC','GC BARU'],['DOUBLE_NEW','DOUBLE BARU']];
       host.innerHTML=filters.map(([key,label])=>`<button type="button" data-gc-filter="${key}" class="${gcFilter===key?'active':''}">${label}</button>`).join('');
-      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{gcFilter=b.dataset.gcFilter;renderGcSummary();renderGcFilters();renderGcTable();}));
+      host.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        gcFilter=b.dataset.gcFilter;renderGcSummary();renderGcFilters();renderGcTable();
+      }));
     }
 
     function renderGcTable(){
@@ -348,7 +415,16 @@
 
     $('gcRefresh').addEventListener('click',loadGoldenCross);
     $('signalMonitorRefresh').addEventListener('click',load);
-    $('signalBullishToggle').addEventListener('click',()=>{bullishOnly=!bullishOnly;renderFilters();renderTable();});
+    $('signalBullishToggle').addEventListener('click',()=>{
+      bullishOnly=!bullishOnly;renderFilters();renderTable();
+    });
+    $('marketSort').addEventListener('change',e=>{
+      sortMode=e.target.value||'SCORE_DESC';renderTable();
+    });
+    $('marketLimit').addEventListener('change',e=>{
+      displayLimit=e.target.value==='ALL'?'ALL':Number(e.target.value)||5;renderTable();
+    });
+
     renderFilters();renderGcFilters();load();loadGoldenCross();
     setInterval(()=>{load();loadGoldenCross();},60000);
   }
