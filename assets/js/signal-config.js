@@ -1,12 +1,12 @@
 /* Analisaku Signal API configuration.
-   Public endpoint only. Never put API secrets, tokens, or proprietary Pine logic here. */
+   Public endpoint only. Never put API secrets, tokens, or proprietary engine logic here. */
 window.ANALISAKU_SIGNAL_API = "https://analisaku-signal.pitizain.workers.dev/signal";
 
 (function(){
   if(!document.querySelector('.technical-hero'))return;
   let tries=0;
   const maxTries=150;
-  const VERSION='20260813-1458';
+  const VERSION='20260813-1510';
 
   function loadMonitor(){
     if(document.querySelector('script[data-analisaku-monitor-loader-v2]'))return true;
