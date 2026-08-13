@@ -44,7 +44,7 @@
       <div class="signal-monitor-meta" id="gcMeta">Memuat Golden Cross Radar…</div>
       <div class="signal-table-wrap">
         <table class="signal-table gc-table">
-          <thead><tr><th>Ticker</th><th>Radar</th><th>EMA Golden Cross</th><th>MA Golden Cross</th><th>Confluence</th><th>Decision</th></tr></thead>
+          <thead><tr><th>Ticker</th><th>Score</th><th>Radar</th><th>EMA Golden Cross</th><th>MA Golden Cross</th><th>Confluence</th><th>Decision</th></tr></thead>
           <tbody id="gcBody"></tbody>
         </table>
       </div>`;
@@ -146,15 +146,18 @@
       body.querySelectorAll('.signal-row[data-symbol]').forEach(row=>row.addEventListener('click',()=>openSymbol(row.dataset.symbol)));
     }
 
+    function byScore(list){
+      return list.slice().sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)||String(a.ticker||'').localeCompare(String(b.ticker||'')));
+    }
     function gcAll(){
       if(!gcPayload)return [];
       const map=new Map();
       [...(gcPayload.ema_gc||[]),...(gcPayload.sma_gc||[])].forEach(d=>map.set(d.ticker,d));
-      return [...map.values()];
+      return byScore([...map.values()]);
     }
     function gcView(){
       if(!gcPayload)return [];
-      return ({ALL_GC:gcAll(),DOUBLE_NEW:gcPayload.double_fresh||[],DOUBLE_GC:gcPayload.double_gc||[],EMA_GC:gcPayload.ema_gc||[],SMA_GC:gcPayload.sma_gc||[],NEW_GC:gcPayload.fresh_gc||[]}[gcFilter]||gcAll()).slice();
+      return byScore(({ALL_GC:gcAll(),DOUBLE_NEW:gcPayload.double_fresh||[],DOUBLE_GC:gcPayload.double_gc||[],EMA_GC:gcPayload.ema_gc||[],SMA_GC:gcPayload.sma_gc||[],NEW_GC:gcPayload.fresh_gc||[]}[gcFilter]||gcAll()));
     }
     function renderGcSummary(){
       const host=$('gcSummary'); if(!host)return;
@@ -174,8 +177,8 @@
       const view=gcView();
       body.innerHTML=view.map(d=>{
         const ticker=String(d.ticker||''),radar=String(d.radar_status||'AVOID').toUpperCase(),decision=String(d.status||'WAIT').toUpperCase();
-        return `<tr class="signal-row gc-row" data-symbol="${ticker}"><td><b>${ticker}</b></td><td><span class="gc-radar-pill ${radarClass(radar)}">${radar}</span></td><td>${gcCell(d.ema_gc)}</td><td>${gcCell(d.sma_gc)}</td><td>${bool(d.double_gc)?'<span class="gc-double">DOUBLE</span>':'—'}</td><td><span class="signal-pill ${statusClass(decision)}">${decision}</span></td></tr>`;
-      }).join('')||'<tr><td colspan="6" class="signal-empty">Belum ada saham pada kategori ini.</td></tr>';
+        return `<tr class="signal-row gc-row" data-symbol="${ticker}"><td><b>${ticker}</b></td><td><b>${fmt(d.score)}</b></td><td><span class="gc-radar-pill ${radarClass(radar)}">${radar}</span></td><td>${gcCell(d.ema_gc)}</td><td>${gcCell(d.sma_gc)}</td><td>${bool(d.double_gc)?'<span class="gc-double">DOUBLE</span>':'—'}</td><td><span class="signal-pill ${statusClass(decision)}">${decision}</span></td></tr>`;
+      }).join('')||'<tr><td colspan="7" class="signal-empty">Belum ada saham pada kategori ini.</td></tr>';
       body.querySelectorAll('.gc-row').forEach(row=>row.addEventListener('click',()=>openSymbol(row.dataset.symbol)));
     }
 
