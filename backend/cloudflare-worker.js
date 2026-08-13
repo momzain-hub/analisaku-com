@@ -1,5 +1,5 @@
 // Analisaku Signal API — public-safe Cloudflare Worker
-// Stores the full private webhook payload in KV, but GET endpoints expose output-only fields.
+// Public GET endpoints expose approved output fields only.
 // Required bindings: SIGNALS (KV), WEBHOOK_SECRET (secret)
 
 export default {
@@ -42,7 +42,6 @@ export default {
       return ['FRESH','RECENT','ACTIVE'].includes(state) ? state : 'OFF';
     };
 
-    // Public Decision Panel payload. Score is intentionally public.
     const publicSignal = s => ({
       ticker: normalizeTicker(s?.ticker),
       timeframe: normalizeTimeframe(s?.timeframe),
@@ -63,8 +62,6 @@ export default {
       received_at: Number(s?.received_at || 0)
     });
 
-    // Public Technical Radar payload. No periods, MA/EMA values, ages, RVOL,
-    // score components, thresholds, weights, or other proprietary calculation fields.
     const publicGc = s => ({
       ticker: normalizeTicker(s?.ticker),
       timeframe: normalizeTimeframe(s?.timeframe),
@@ -221,8 +218,7 @@ export default {
           return json({ ok: false, error: 'payload tidak lengkap', index: i }, 400);
         }
 
-        // Full engine output remains private in KV and is never returned as-is by GET endpoints.
-        const internal = {
+        const stored = {
           ...item,
           ticker,
           timeframe,
@@ -231,7 +227,7 @@ export default {
 
         writes.push({
           key: `signal:${ticker}:${timeframe}`,
-          value: internal
+          value: stored
         });
       }
 
