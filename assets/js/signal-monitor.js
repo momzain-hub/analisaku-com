@@ -27,38 +27,15 @@
     let gcPayload=null;
     let gcFilter='ALL_GC';
 
-    const gc=document.createElement('section');
-    gc.className='signal-monitor golden-cross-radar';
-    gc.id='goldenCrossRadar';
-    gc.innerHTML=`
-      <div class="signal-monitor-head">
-        <div>
-          <div class="kicker">GOLDEN CROSS RADAR</div>
-          <h3>Golden Cross <small>1D</small></h3>
-          <p>Saham yang terdeteksi memiliki struktur Golden Cross berdasarkan mesin Technical Analisaku. Parameter perhitungan internal tidak ditampilkan.</p>
-        </div>
-        <button type="button" class="signal-refresh" id="gcRefresh">Refresh</button>
-      </div>
-      <div class="gc-summary" id="gcSummary"></div>
-      <div class="signal-toolbar"><div class="signal-filters" id="gcFilters"></div></div>
-      <div class="signal-monitor-meta" id="gcMeta">Memuat Golden Cross Radar…</div>
-      <div class="signal-table-wrap">
-        <table class="signal-table gc-table">
-          <thead><tr><th>Ticker</th><th>Score</th><th>Radar</th><th>EMA Golden Cross</th><th>MA Golden Cross</th><th>Confluence</th><th>Decision</th></tr></thead>
-          <tbody id="gcBody"></tbody>
-        </table>
-      </div>`;
-    anchor.insertAdjacentElement('afterend',gc);
-
     const section=document.createElement('section');
     section.className='signal-monitor';
     section.id='signalMonitor';
     section.innerHTML=`
       <div class="signal-monitor-head">
         <div>
-          <div class="kicker">20-STOCK SIGNAL MONITOR • V2</div>
-          <h3>Market Watch <small>1D</small></h3>
-          <p>Prioritas otomatis berdasarkan status. Klik saham untuk membuka Decision Panel dan chart.</p>
+          <div class="kicker">ANALISAKU MARKET RADAR</div>
+          <h3>Market Radar <small>1D</small></h3>
+          <p>Saham diprioritaskan berdasarkan output Analisaku. Klik saham untuk membuka Decision Panel dan chart.</p>
         </div>
         <button type="button" class="signal-refresh" id="signalMonitorRefresh">Refresh</button>
       </div>
@@ -74,7 +51,30 @@
           <tbody id="signalMonitorBody"></tbody>
         </table>
       </div>`;
-    gc.insertAdjacentElement('afterend',section);
+    anchor.insertAdjacentElement('afterend',section);
+
+    const gc=document.createElement('section');
+    gc.className='signal-monitor golden-cross-radar';
+    gc.id='goldenCrossRadar';
+    gc.innerHTML=`
+      <div class="signal-monitor-head">
+        <div>
+          <div class="kicker">ANALISAKU GOLDEN CROSS RADAR</div>
+          <h3>Golden Cross <small>1D</small></h3>
+          <p>Saham yang terdeteksi memiliki struktur Golden Cross. Parameter dan perhitungan internal tidak ditampilkan.</p>
+        </div>
+        <button type="button" class="signal-refresh" id="gcRefresh">Refresh</button>
+      </div>
+      <div class="gc-summary" id="gcSummary"></div>
+      <div class="signal-toolbar"><div class="signal-filters" id="gcFilters"></div></div>
+      <div class="signal-monitor-meta" id="gcMeta">Memuat Golden Cross Radar…</div>
+      <div class="signal-table-wrap">
+        <table class="signal-table gc-table">
+          <thead><tr><th>Ticker</th><th>Score</th><th>Radar</th><th>EMA Golden Cross</th><th>MA Golden Cross</th><th>Confluence</th><th>Decision</th></tr></thead>
+          <tbody id="gcBody"></tbody>
+        </table>
+      </div>`;
+    section.insertAdjacentElement('afterend',gc);
 
     const $=id=>document.getElementById(id);
     const fmt=v=>{
