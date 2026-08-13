@@ -1,6 +1,10 @@
-/* Analisaku Technical Radar UX enhancements: ticker search + mobile labels */
+/* Analisaku Technical Radar UX enhancements: ticker search + compact mobile labels */
 (function(){
   const clean=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9._-]/g,'').slice(0,20);
+  const isEmptyValue=v=>{
+    const text=String(v||'').replace(/\s+/g,' ').trim();
+    return !text||text==='—'||text==='-'||text==='–';
+  };
 
   function waitForRadar(){
     const market=document.getElementById('signalMonitor');
@@ -11,6 +15,7 @@
     }
     if(document.documentElement.dataset.radarUxReady==='true')return;
     document.documentElement.dataset.radarUxReady='true';
+
     enhanceRadar({
       root:market,
       bodyId:'signalMonitorBody',
@@ -18,8 +23,10 @@
       limitId:'marketLimit',
       searchId:'marketTickerSearch',
       placeholder:'Cari ticker, mis. RAJA',
+      tableClass:'market-compact',
       labels:['Ticker','Score','Trend','Radar','Status','Trigger','Entry','Invalidation','Target 1','Updated']
     });
+
     enhanceRadar({
       root:gc,
       bodyId:'gcBody',
@@ -27,6 +34,7 @@
       limitId:'gcLimit',
       searchId:'gcTickerSearch',
       placeholder:'Cari ticker, mis. BBRI',
+      tableClass:'gc-compact',
       labels:['Ticker','Score','Radar','EMA Golden Cross','MA Golden Cross','Confluence','Decision']
     });
   }
@@ -35,7 +43,9 @@
     const controls=cfg.root.querySelector('.market-view-controls');
     const limit=document.getElementById(cfg.limitId);
     const body=document.getElementById(cfg.bodyId);
-    if(!controls||!limit||!body)return;
+    const table=body?.closest('table');
+    if(!controls||!limit||!body||!table)return;
+    table.classList.add(cfg.tableClass);
 
     let search=document.getElementById(cfg.searchId);
     if(!search){
@@ -53,6 +63,7 @@
       body.querySelectorAll('tr.signal-row').forEach(row=>{
         [...row.children].forEach((cell,index)=>{
           if(cfg.labels[index])cell.dataset.label=cfg.labels[index];
+          cell.classList.toggle('is-empty',isEmptyValue(cell.textContent));
         });
       });
     }
