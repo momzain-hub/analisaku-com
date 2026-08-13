@@ -9,14 +9,14 @@
 
     document.getElementById('signalMonitor')?.remove();
     document.getElementById('goldenCrossRadar')?.remove();
-
+    document.querySelectorAll('script[data-analisaku-monitor-v2]').forEach(el=>el.remove());
     document.querySelectorAll('link[href*="signal-monitor.css"]').forEach(el=>el.remove());
+
     const css=document.createElement('link');
     css.rel='stylesheet';
     css.href=new URL('../css/signal-monitor.css',base).href+'?v='+VERSION;
     document.head.appendChild(css);
 
-    if(document.querySelector('script[data-analisaku-monitor-v2]'))return;
     const s=document.createElement('script');
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
     s.async=true;
