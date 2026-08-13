@@ -4,7 +4,7 @@ Arsitektur:
 
 `Private Pine Script / Signal Hub (TradingView) -> TradingView Alert -> Cloudflare Worker -> KV -> Analisaku.com Decision Panel`
 
-Pine/engine tidak ditampilkan oleh website. Backend hanya menyimpan output generik yang dibutuhkan Decision Panel.
+Pine/engine proprietary **tidak disimpan di repository publik ini**. Backend hanya menyimpan output generik yang dibutuhkan Decision Panel.
 
 ## Cloudflare Worker
 
@@ -52,17 +52,15 @@ Worker mendukung dua format secara bersamaan.
 
 Satu batch dibatasi maksimal 40 signal. Data dengan key `ticker:timeframe` yang sama di dalam satu batch di-deduplicate sebelum KV ditulis.
 
-## Signal Hub V1.4 — 20 ticker
+## Private Signal Hub V1.4 — 20 ticker
 
-Source:
+Source Pine V1.4 disimpan/didistribusikan secara privat dan tidak di-commit ke repository publik.
 
-`tradingview/ANALISAKU_SIGNAL_HUB_V1_4_20TICKER_BATCH.pine`
-
-Default watchlist:
+Default watchlist operasional:
 
 RAJA, BBCA, BMRI, BBRI, BBNI, TLKM, ASII, ANTM, AMMN, MDKA, TPIA, BUMI, BRMS, ADRO, PGAS, INCO, UNTR, ICBP, ITMG, GOTO.
 
-Seluruh ticker dapat diganti dari Inputs TradingView tanpa mengubah kode.
+Seluruh ticker dapat diganti dari Inputs TradingView tanpa mengubah formula engine.
 
 Alur:
 
@@ -78,7 +76,7 @@ Alur:
 
 ## Hubungkan TradingView
 
-1. Pasang `ANALISAKU_SIGNAL_HUB_V1_4_20TICKER_BATCH.pine` pada chart.
+1. Pasang Private Signal Hub V1.4 pada chart.
 2. Validasi dulu output RAJA vs Master V1.2 dengan `Website Alert` masih OFF.
 3. Setelah cocok, aktifkan `Aktifkan Website Alert` dan `Kirim Snapshot Awal 20 Saham`.
 4. Buat satu alert pada Hub dan pilih `Any alert() function call`.
