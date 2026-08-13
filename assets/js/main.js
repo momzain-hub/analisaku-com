@@ -274,10 +274,19 @@ techChecks.forEach(btn=>btn.addEventListener('click',()=>{
 }));
 updateTechReadiness();
 
-/* ---------- Technical page: TradingView Advanced Chart ---------- */
+/* ---------- Technical page: TradingView + Signal Monitor V2 ---------- */
 if(document.querySelector('.technical-hero')){
+  const VERSION='20260813-1212';
+
   const tvModule=document.createElement('script');
-  tvModule.src=assetUrl('tradingview.js','assets/js/tradingview.js');
+  tvModule.src=assetUrl('tradingview.js','assets/js/tradingview.js')+'?v='+VERSION;
   tvModule.async=true;
   document.body.appendChild(tvModule);
+
+  /* Load V2 directly. The loader waits for Decision Panel and replaces V1. */
+  const monitorLoader=document.createElement('script');
+  monitorLoader.src=assetUrl('signal-monitor-v2-loader.js','assets/js/signal-monitor-v2-loader.js')+'?v='+VERSION;
+  monitorLoader.async=true;
+  monitorLoader.dataset.analisakuMonitorDirect='true';
+  document.body.appendChild(monitorLoader);
 }
