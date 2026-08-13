@@ -62,6 +62,62 @@
     });
   }
 
+  function workerEndpoint(path){
+    if(!api)return '';
+    try{
+      const u=new URL(api);
+      u.pathname=path;
+      u.search='';
+      u.hash='';
+      return u.href;
+    }catch(e){return ''}
+  }
+
+  function pulseCard(label){
+    return [...document.querySelectorAll('.pulse-card')].find(card=>
+      String(card.querySelector('small')?.textContent||'').trim().toUpperCase()===label
+    );
+  }
+
+  function formatPercent(v){
+    const n=Number(v);
+    if(!Number.isFinite(n))return '';
+    return `${n>0?'+':''}${n.toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})}%`;
+  }
+
+  function renderRupiah(rupiah){
+    const card=pulseCard('RUPIAH');
+    if(!card||!rupiah)return;
+    const status=String(rupiah.status||'').toUpperCase()||'—';
+    const value=Number(rupiah.value);
+    const change5d=Number(rupiah.change_5d);
+    const date=String(rupiah.date||'');
+    const strong=card.querySelector('strong');
+    const detail=card.querySelector('span');
+    if(strong)strong.textContent=status;
+    if(detail){
+      const parts=[];
+      if(Number.isFinite(value))parts.push(`JISDOR ${value.toLocaleString('id-ID',{maximumFractionDigits:2})}`);
+      if(Number.isFinite(change5d))parts.push(`5D ${formatPercent(change5d)}`);
+      if(date)parts.push(date);
+      detail.textContent=parts.join(' • ')||'Sumber: BI / JISDOR';
+    }
+    card.classList.remove('pending');
+    card.dataset.pulseStatus=status;
+  }
+
+  async function fetchMarketPulse(){
+    const endpoint=workerEndpoint('/market-pulse');
+    if(!endpoint)return;
+    try{
+      const r=await fetch(endpoint,{cache:'no-store'});
+      if(!r.ok)return;
+      const d=await r.json();
+      const rupiah=d.rupiah||d.market_pulse?.rupiah;
+      if(rupiah)renderRupiah(rupiah);
+    }catch(e){/* keep data-ready placeholder */}
+  }
+
   const clean=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20)||'RAJA';
   const price=v=>{if(v===undefined||v===null||v==='')return '—';const n=Number(v);return Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:2}):String(v)};
   const publicStatus=status=>({
@@ -115,5 +171,8 @@
 
   if(check)check.addEventListener('click',fetchQuick);
   if(ticker)ticker.addEventListener('keydown',e=>{if(e.key==='Enter')fetchQuick()});
-  loadConfig().then(()=>resetQuick());
+  loadConfig().then(()=>{
+    resetQuick();
+    fetchMarketPulse();
+  });
 })();
