@@ -1,0 +1,296 @@
+//@version=6
+indicator("ANALISAKU SIGNAL HUB V1.3 — 5 TICKER", overlay=false, max_bars_back=5000)
+
+//==============================================================================
+// ANALISAKU.COM — SIGNAL HUB V1.3
+// 1 script + 1 TradingView alert untuk 5 saham pada timeframe chart yang sama.
+// Engine publik dibuat dari decision logic Master yang dipakai website:
+// trend + setup + status + entry + trigger + invalidation + target 1/2/3.
+//==============================================================================
+
+grpHub = "01. SIGNAL HUB"
+hubEnabled = input.bool(true, "Aktifkan Signal Hub", group=grpHub)
+sym1 = input.symbol("IDX:RAJA", "Ticker 1", inline="S1", group=grpHub)
+sym2 = input.symbol("IDX:BBCA", "Ticker 2", inline="S2", group=grpHub)
+sym3 = input.symbol("IDX:BMRI", "Ticker 3", inline="S3", group=grpHub)
+sym4 = input.symbol("IDX:TLKM", "Ticker 4", inline="S4", group=grpHub)
+sym5 = input.symbol("IDX:ANTM", "Ticker 5", inline="S5", group=grpHub)
+
+grpEngine = "02. MASTER DECISION"
+leftBars = input.int(5, "Pivot Left", minval=1, maxval=50, inline="PIV", group=grpEngine)
+rightBars = input.int(5, "Pivot Right", minval=1, maxval=50, inline="PIV", group=grpEngine)
+pivotSource = input.string("Wick", "Sumber Pivot", options=["Wick", "Close"], group=grpEngine)
+directionMode = input.string("Auto", "Arah Pola", options=["Auto", "Bullish saja", "Bearish saja"], group=grpEngine)
+strictPattern = input.bool(true, "Validasi struktur A-B-C ketat", group=grpEngine)
+breakoutMethod = input.string("Close", "Konfirmasi breakout", options=["Close", "Wick"], group=grpEngine)
+oneSignalPerPattern = input.bool(true, "Satu sinyal breakout per pola", group=grpEngine)
+watchPct = input.float(4.0, "WATCH jika jarak ke Trigger ≤ (%)", minval=0.1, maxval=20.0, step=0.1, group=grpEngine)
+
+grpWeb = "03. WEBSITE AUTO SYNC"
+webAlert = input.bool(false, "Aktifkan Website Alert", group=grpWeb)
+initialSync = input.bool(true, "Kirim Snapshot Awal", group=grpWeb,
+     tooltip="ON = kelima ticker dikirim satu kali pada update realtime pertama. Update berikutnya hanya saat state berubah dan candle close.")
+
+//------------------------------------------------------------------------------
+// HELPERS
+//------------------------------------------------------------------------------
+f_plainTicker(string symbol) =>
+    str.replace_all(symbol, "IDX:", "")
+
+f_num(float v) =>
+    na(v) ? "" : str.tostring(v, "#.########")
+
+f_trend(int code) =>
+    code == 1 ? "BULLISH" : code == -1 ? "BEARISH" : "NEUTRAL"
+
+f_setup(int code) =>
+    code == 1 ? "ACTIVE" : "INACTIVE"
+
+f_status(int code) =>
+    code == 1 ? "WATCH" :
+     code == 2 ? "BUY SETUP" :
+     code == 3 ? "HOLD" :
+     code == 4 ? "TAKE PROFIT" :
+     code == 5 ? "EXIT" : "WAIT"
+
+//------------------------------------------------------------------------------
+// COMPACT MASTER ENGINE
+// Setiap written call memiliki state sendiri. Saat dipanggil melalui request.security,
+// perhitungan berjalan di konteks simbol yang diminta.
+//------------------------------------------------------------------------------
+f_engine() =>
+    // Trend sama dengan Master: EMA 12 / 36 / 60 / 200.
+    float e12 = ta.ema(close, 12)
+    float e36 = ta.ema(close, 36)
+    float e60 = ta.ema(close, 60)
+    float e200 = ta.ema(close, 200)
+    bool bullStrong = close > e200 and e12 > e36 and e36 > e60
+    bool bearStrong = close < e200 and e12 < e36 and e36 < e60
+
+    // Swing A-B-C sama dengan source Master default.
+    float phSrc = pivotSource == "Wick" ? high : close
+    float plSrc = pivotSource == "Wick" ? low : close
+    float ph = ta.pivothigh(phSrc, leftBars, rightBars)
+    float pl = ta.pivotlow(plSrc, leftBars, rightBars)
+
+    var array<int> pTypes = array.new<int>()
+    var array<float> pPrices = array.new<float>()
+    var array<int> pBars = array.new<int>()
+
+    bool hasHigh = not na(ph)
+    bool hasLow = not na(pl)
+    if hasHigh or hasLow
+        int pBar = bar_index - rightBars
+        int pType = 0
+        float pPrice = na
+
+        if hasHigh and hasLow
+            int lastStoredType = array.size(pTypes) > 0 ? array.get(pTypes, array.size(pTypes) - 1) : 0
+            if lastStoredType == 1
+                pType := -1
+                pPrice := pl
+            else
+                pType := 1
+                pPrice := ph
+        else if hasHigh
+            pType := 1
+            pPrice := ph
+        else
+            pType := -1
+            pPrice := pl
+
+        int sz = array.size(pTypes)
+        if sz == 0
+            array.push(pTypes, pType)
+            array.push(pPrices, pPrice)
+            array.push(pBars, pBar)
+        else
+            int lastType = array.get(pTypes, sz - 1)
+            float lastPrice = array.get(pPrices, sz - 1)
+            if pType == lastType
+                bool moreExtreme = (pType == 1 and pPrice > lastPrice) or (pType == -1 and pPrice < lastPrice)
+                if moreExtreme
+                    array.set(pPrices, sz - 1, pPrice)
+                    array.set(pBars, sz - 1, pBar)
+            else
+                array.push(pTypes, pType)
+                array.push(pPrices, pPrice)
+                array.push(pBars, pBar)
+
+        while array.size(pTypes) > 38
+            array.shift(pTypes)
+            array.shift(pPrices)
+            array.shift(pBars)
+
+    int n = array.size(pTypes)
+    int typeA = 0
+    int typeB = 0
+    int typeC = 0
+    float priceA = na
+    float priceB = na
+    float priceC = na
+    int barC = na
+
+    if n >= 3
+        typeA := array.get(pTypes, n - 3)
+        typeB := array.get(pTypes, n - 2)
+        typeC := array.get(pTypes, n - 1)
+        priceA := array.get(pPrices, n - 3)
+        priceB := array.get(pPrices, n - 2)
+        priceC := array.get(pPrices, n - 1)
+        barC := array.get(pBars, n - 1)
+
+    bool bullSeq = typeA == -1 and typeB == 1 and typeC == -1
+    bool bearSeq = typeA == 1 and typeB == -1 and typeC == 1
+    bool bullStruct = not strictPattern or (priceA < priceB and priceC > priceA and priceC < priceB)
+    bool bearStruct = not strictPattern or (priceA > priceB and priceC < priceA and priceC > priceB)
+    bool bullAllowed = directionMode == "Auto" or directionMode == "Bullish saja"
+    bool bearAllowed = directionMode == "Auto" or directionMode == "Bearish saja"
+    bool validBull = n >= 3 and bullAllowed and bullSeq and bullStruct
+    bool validBear = n >= 3 and bearAllowed and bearSeq and bearStruct
+    bool valid = validBull or validBear
+
+    float impulse = validBull ? priceB - priceA : validBear ? priceA - priceB : na
+    float entryA = valid ? (validBull ? priceC + impulse * 0.500 : priceC - impulse * 0.500) : na
+    float entryB = valid ? (validBull ? priceC + impulse * 0.618 : priceC - impulse * 0.618) : na
+    float entryLow = valid ? math.min(entryA, entryB) : na
+    float entryHigh = valid ? math.max(entryA, entryB) : na
+    float tp1 = valid ? (validBull ? priceC + impulse * 1.272 : priceC - impulse * 1.272) : na
+    float tp2 = valid ? (validBull ? priceC + impulse * 1.618 : priceC - impulse * 1.618) : na
+    float tp3 = valid ? (validBull ? priceC + impulse * 2.000 : priceC - impulse * 2.000) : na
+
+    float bullBreakSrc = breakoutMethod == "Close" ? close : high
+    float bearBreakSrc = breakoutMethod == "Close" ? close : low
+    int patternId = valid ? barC : na
+    bool newPattern = valid and (na(patternId[1]) or patternId != patternId[1])
+    bool rawBullBreak = validBull and not newPattern and ta.crossover(bullBreakSrc, priceB)
+    bool rawBearBreak = validBear and not newPattern and ta.crossunder(bearBreakSrc, priceB)
+
+    var int lastBullPattern = na
+    var int lastBearPattern = na
+    bool bullBreak = rawBullBreak and (not oneSignalPerPattern or na(lastBullPattern) or lastBullPattern != patternId)
+    bool bearBreak = rawBearBreak and (not oneSignalPerPattern or na(lastBearPattern) or lastBearPattern != patternId)
+    if bullBreak
+        lastBullPattern := patternId
+    if bearBreak
+        lastBearPattern := patternId
+
+    bool bullTP1 = validBull and not newPattern and ta.crossover(high, tp1)
+    bool bullTP2 = validBull and not newPattern and ta.crossover(high, tp2)
+    bool bullishActive = validBull and close > priceB
+    bool bearishActive = validBear and close < priceB
+
+    bool invalid = validBull ? close < priceC : validBear ? close > priceC : false
+    float distTrigger = valid and not na(priceB) and priceB != 0.0 ? math.abs(close - priceB) / math.abs(priceB) * 100.0 : na
+    bool nearTrigger = valid and not na(distTrigger) and distTrigger <= watchPct
+
+    int trendCode = bullStrong ? 1 : bearStrong ? -1 : 0
+    int setupCode = valid and not invalid ? 1 : 0
+    int statusCode =
+         not valid ? 0 :
+         invalid ? 5 :
+         validBear and (bearBreak or bearishActive) ? 5 :
+         bullTP2 ? 4 :
+         bullTP1 ? 4 :
+         bullBreak ? 2 :
+         bullishActive ? 3 :
+         validBull and nearTrigger ? 1 :
+         validBull and trendCode == 1 ? 1 : 0
+
+    [trendCode, setupCode, statusCode, entryLow, entryHigh, priceB, priceC, tp1, tp2, tp3, close]
+
+//------------------------------------------------------------------------------
+// REQUEST 5 SYMBOLS — timeframe selalu sama dengan chart.
+//------------------------------------------------------------------------------
+[t1, se1, st1, el1, eh1, tr1, iv1, a1, b1, c1, px1] = request.security(sym1, timeframe.period, f_engine())
+[t2, se2, st2, el2, eh2, tr2, iv2, a2, b2, c2, px2] = request.security(sym2, timeframe.period, f_engine())
+[t3, se3, st3, el3, eh3, tr3, iv3, a3, b3, c3, px3] = request.security(sym3, timeframe.period, f_engine())
+[t4, se4, st4, el4, eh4, tr4, iv4, a4, b4, c4, px4] = request.security(sym4, timeframe.period, f_engine())
+[t5, se5, st5, el5, eh5, tr5, iv5, a5, b5, c5, px5] = request.security(sym5, timeframe.period, f_engine())
+
+f_state(int trendCode, int setupCode, int statusCode, float el, float eh, float trigger, float invalidation, float tp1, float tp2, float tp3) =>
+    str.tostring(trendCode) + "|" + str.tostring(setupCode) + "|" + str.tostring(statusCode) + "|" +
+     f_num(el) + "|" + f_num(eh) + "|" + f_num(trigger) + "|" + f_num(invalidation) + "|" +
+     f_num(tp1) + "|" + f_num(tp2) + "|" + f_num(tp3)
+
+f_payload(string symbol, int trendCode, int setupCode, int statusCode, float el, float eh, float trigger, float invalidation, float tp1, float tp2, float tp3, float px) =>
+    "{" +
+     "\"ticker\":\"" + f_plainTicker(symbol) + "\"," +
+     "\"timeframe\":\"" + timeframe.period + "\"," +
+     "\"trend\":\"" + f_trend(trendCode) + "\"," +
+     "\"setup\":\"" + f_setup(setupCode) + "\"," +
+     "\"status\":\"" + f_status(statusCode) + "\"," +
+     "\"entry_low\":\"" + f_num(el) + "\"," +
+     "\"entry_high\":\"" + f_num(eh) + "\"," +
+     "\"trigger\":\"" + f_num(trigger) + "\"," +
+     "\"invalidation\":\"" + f_num(invalidation) + "\"," +
+     "\"target1\":\"" + f_num(tp1) + "\"," +
+     "\"target2\":\"" + f_num(tp2) + "\"," +
+     "\"target3\":\"" + f_num(tp3) + "\"," +
+     "\"price\":\"" + f_num(px) + "\"," +
+     "\"updated_at\":" + str.tostring(timenow) +
+     "}"
+
+string state1 = f_state(t1,se1,st1,el1,eh1,tr1,iv1,a1,b1,c1)
+string state2 = f_state(t2,se2,st2,el2,eh2,tr2,iv2,a2,b2,c2)
+string state3 = f_state(t3,se3,st3,el3,eh3,tr3,iv3,a3,b3,c3)
+string state4 = f_state(t4,se4,st4,el4,eh4,tr4,iv4,a4,b4,c4)
+string state5 = f_state(t5,se5,st5,el5,eh5,tr5,iv5,a5,b5,c5)
+
+var string prev1 = ""
+var string prev2 = ""
+var string prev3 = ""
+var string prev4 = ""
+var string prev5 = ""
+varip bool initialSent = false
+
+bool firstRealtime = barstate.isrealtime and initialSync and not initialSent
+bool closeReady = barstate.isrealtime and barstate.isconfirmed
+
+// Snapshot awal: 5 webhook events maksimum, aman untuk tahap awal hub.
+if hubEnabled and webAlert and firstRealtime
+    alert(f_payload(sym1,t1,se1,st1,el1,eh1,tr1,iv1,a1,b1,c1,px1), alert.freq_all)
+    alert(f_payload(sym2,t2,se2,st2,el2,eh2,tr2,iv2,a2,b2,c2,px2), alert.freq_all)
+    alert(f_payload(sym3,t3,se3,st3,el3,eh3,tr3,iv3,a3,b3,c3,px3), alert.freq_all)
+    alert(f_payload(sym4,t4,se4,st4,el4,eh4,tr4,iv4,a4,b4,c4,px4), alert.freq_all)
+    alert(f_payload(sym5,t5,se5,st5,el5,eh5,tr5,iv5,a5,b5,c5,px5), alert.freq_all)
+    initialSent := true
+
+// Perubahan berikutnya: hanya state yang berubah, setelah candle chart close.
+if hubEnabled and webAlert and closeReady and not firstRealtime
+    if prev1 != "" and state1 != prev1
+        alert(f_payload(sym1,t1,se1,st1,el1,eh1,tr1,iv1,a1,b1,c1,px1), alert.freq_all)
+    if prev2 != "" and state2 != prev2
+        alert(f_payload(sym2,t2,se2,st2,el2,eh2,tr2,iv2,a2,b2,c2,px2), alert.freq_all)
+    if prev3 != "" and state3 != prev3
+        alert(f_payload(sym3,t3,se3,st3,el3,eh3,tr3,iv3,a3,b3,c3,px3), alert.freq_all)
+    if prev4 != "" and state4 != prev4
+        alert(f_payload(sym4,t4,se4,st4,el4,eh4,tr4,iv4,a4,b4,c4,px4), alert.freq_all)
+    if prev5 != "" and state5 != prev5
+        alert(f_payload(sym5,t5,se5,st5,el5,eh5,tr5,iv5,a5,b5,c5,px5), alert.freq_all)
+
+if barstate.isconfirmed
+    prev1 := state1
+    prev2 := state2
+    prev3 := state3
+    prev4 := state4
+    prev5 := state5
+
+//------------------------------------------------------------------------------
+// VALIDATION TABLE — untuk membandingkan RAJA Hub vs Master chart sebelum dipakai live.
+//------------------------------------------------------------------------------
+var table hubTable = table.new(position.top_right, 4, 6, border_width=1)
+if barstate.islast
+    table.cell(hubTable,0,0,"TICKER")
+    table.cell(hubTable,1,0,"TREND")
+    table.cell(hubTable,2,0,"STATUS")
+    table.cell(hubTable,3,0,"TRIGGER")
+
+    table.cell(hubTable,0,1,f_plainTicker(sym1)); table.cell(hubTable,1,1,f_trend(t1)); table.cell(hubTable,2,1,f_status(st1)); table.cell(hubTable,3,1,f_num(tr1))
+    table.cell(hubTable,0,2,f_plainTicker(sym2)); table.cell(hubTable,1,2,f_trend(t2)); table.cell(hubTable,2,2,f_status(st2)); table.cell(hubTable,3,2,f_num(tr2))
+    table.cell(hubTable,0,3,f_plainTicker(sym3)); table.cell(hubTable,1,3,f_trend(t3)); table.cell(hubTable,2,3,f_status(st3)); table.cell(hubTable,3,3,f_num(tr3))
+    table.cell(hubTable,0,4,f_plainTicker(sym4)); table.cell(hubTable,1,4,f_trend(t4)); table.cell(hubTable,2,4,f_status(st4)); table.cell(hubTable,3,4,f_num(tr4))
+    table.cell(hubTable,0,5,f_plainTicker(sym5)); table.cell(hubTable,1,5,f_trend(t5)); table.cell(hubTable,2,5,f_status(st5)); table.cell(hubTable,3,5,f_num(tr5))
+
+// Data window marker.
+plot(st1, "RAJA status code", display=display.data_window)
