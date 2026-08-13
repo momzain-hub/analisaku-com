@@ -1,4 +1,4 @@
-/* Analisaku 20-Stock Signal Monitor V2 */
+/* Analisaku 20-Stock Signal Monitor V2 + Golden Cross Radar */
 (function(){
   function bootMonitor(){
     const anchor=document.getElementById('decisionPanel');
@@ -26,6 +26,34 @@
     let rows=[];
     let filter='ALL';
     let bullishOnly=false;
+    let gcPayload=null;
+    let gcFilter='ALL_GC';
+
+    const gcSection=document.createElement('section');
+    gcSection.className='signal-monitor golden-cross-radar';
+    gcSection.id='goldenCrossRadar';
+    gcSection.innerHTML=`
+      <div class="signal-monitor-head">
+        <div>
+          <div class="kicker">GOLDEN CROSS RADAR • V2</div>
+          <h3>Golden Cross <small>1D</small></h3>
+          <p>Daftar saham EMA 12/36 dan MA 12/36 yang masih golden cross. Fresh = cross baru ≤3 bar; Recent = 4–10 bar; Active = >10 bar.</p>
+        </div>
+        <button type="button" class="signal-refresh" id="gcRefresh">Refresh</button>
+      </div>
+      <div class="gc-summary" id="gcSummary"></div>
+      <div class="signal-toolbar gc-toolbar">
+        <div class="signal-filters" id="gcFilters"></div>
+        <div class="gc-legend"><span class="gc-dot fresh"></span>Fresh <span class="gc-dot recent"></span>Recent <span class="gc-dot active"></span>Active</div>
+      </div>
+      <div class="signal-monitor-meta" id="gcMeta">Memuat Golden Cross Radar…</div>
+      <div class="signal-table-wrap">
+        <table class="signal-table gc-table">
+          <thead><tr><th>Ticker</th><th>Score</th><th>Radar</th><th>EMA 12/36</th><th>MA 12/36</th><th>Double GC</th><th>RVOL</th><th>Decision</th></tr></thead>
+          <tbody id="gcBody"></tbody>
+        </table>
+      </div>`;
+    anchor.insertAdjacentElement('afterend',gcSection);
 
     const section=document.createElement('section');
     section.className='signal-monitor';
@@ -51,7 +79,7 @@
           <tbody id="signalMonitorBody"></tbody>
         </table>
       </div>`;
-    anchor.insertAdjacentElement('afterend',section);
+    gcSection.insertAdjacentElement('afterend',section);
 
     const $=id=>document.getElementById(id);
     const fmt=v=>{
@@ -72,6 +100,24 @@
         ? date.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})
         : date.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})+' '+date.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
     };
+    const bool=v=>v===true||String(v).toLowerCase()==='true'||String(v)==='1';
+    const gcState=v=>String(v||'OFF').toUpperCase();
+    const gcStateClass=v=>'gc-'+gcState(v).toLowerCase();
+    const gcCell=(state,age)=>{
+      const s=gcState(state);
+      if(s==='OFF')return '<span class="gc-state gc-off">OFF</span>';
+      const n=Number(age);
+      const ageText=Number.isFinite(n)&&n<9999?`<small>${n} bar</small>`:'';
+      return `<span class="gc-state ${gcStateClass(s)}"><b>${s}</b>${ageText}</span>`;
+    };
+    const scoreCell=d=>{
+      const score=Number(d?.score)||0;
+      const delta=Number(d?.score_delta)||0;
+      const sign=delta>0?'+':'';
+      const cls=delta>0?'up':delta<0?'down':'flat';
+      return `<div class="gc-score"><b>${score}</b><small class="${cls}">${sign}${delta}</small></div>`;
+    };
+    const radarClass=s=>'r-'+String(s||'AVOID').toLowerCase();
 
     function loadMemory(){
       try{return JSON.parse(localStorage.getItem(MEMORY_KEY)||'{}')||{}}
@@ -91,15 +137,12 @@
         const receivedAt=signalTs(row.data);
         const old=memory[row.symbol];
         let changedAt=Number(old?.changedAt)||0;
-
         if(old&&old.status&&old.status!==status&&receivedAt>=(Number(old.receivedAt)||0)){
           changedAt=now;
           row.previousStatus=old.status;
         }
-
         if(changedAt&&now-changedAt<CHANGE_TTL)row.changed=true;
         else if(changedAt)changedAt=0;
-
         memory[row.symbol]={status,receivedAt,changedAt};
       });
       saveMemory(memory);
@@ -144,10 +187,8 @@
         if(Boolean(a.changed)!==Boolean(b.changed))return a.changed?-1:1;
         return signalTs(b.data)-signalTs(a.data)||a.symbol.localeCompare(b.symbol);
       });
-
       if(filter!=='ALL')view=view.filter(r=>r.data&&String(r.data.status||'').toUpperCase()===filter);
       if(bullishOnly)view=view.filter(r=>r.data&&String(r.data.trend||'').toUpperCase()==='BULLISH');
-
       body.innerHTML=view.map(r=>{
         if(!r.data)return `<tr class="signal-row unavailable" data-symbol="${r.symbol}"><td><b>${r.symbol}</b></td><td>—</td><td><span class="signal-pill">NO DATA</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
         const d=r.data;
@@ -158,15 +199,77 @@
           <td><div class="signal-ticker-cell"><b>${r.symbol}</b>${changeBadge}</div></td>
           <td><span class="signal-trend ${trend.toLowerCase()}">${trend}</span></td>
           <td><span class="signal-pill ${statusClass(s)}">${s}</span></td>
-          <td>${fmt(d.trigger)}</td>
-          <td>${entry(d)}</td>
-          <td>${fmt(d.invalidation)}</td>
-          <td>${fmt(d.target1)}</td>
-          <td>${updated(d)}</td>
+          <td>${fmt(d.trigger)}</td><td>${entry(d)}</td><td>${fmt(d.invalidation)}</td><td>${fmt(d.target1)}</td><td>${updated(d)}</td>
         </tr>`;
       }).join('')||'<tr><td colspan="8" class="signal-empty">Tidak ada saham untuk filter ini.</td></tr>';
-
       [...body.querySelectorAll('.signal-row:not(.unavailable)')].forEach(row=>row.addEventListener('click',()=>openSymbol(row.dataset.symbol)));
+    }
+
+    function gcAll(){
+      if(!gcPayload)return [];
+      const map=new Map();
+      [...(gcPayload.ema_gc||[]),...(gcPayload.sma_gc||[])].forEach(d=>map.set(d.ticker,d));
+      return [...map.values()].sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)||(Number(a.rank)||999)-(Number(b.rank)||999));
+    }
+    function gcView(){
+      if(!gcPayload)return [];
+      const source={
+        ALL_GC:gcAll(),
+        DOUBLE_FRESH:gcPayload.double_fresh||[],
+        DOUBLE_GC:gcPayload.double_gc||[],
+        EMA_GC:gcPayload.ema_gc||[],
+        SMA_GC:gcPayload.sma_gc||[],
+        FRESH_GC:gcPayload.fresh_gc||[]
+      }[gcFilter]||gcAll();
+      return source.slice().sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)||(Number(a.rank)||999)-(Number(b.rank)||999));
+    }
+    function renderGcSummary(){
+      const host=$('gcSummary');
+      if(!host)return;
+      const s=gcPayload?.summary||{};
+      const cards=[
+        ['DOUBLE_FRESH','DOUBLE FRESH',Number(s.double_fresh)||0],
+        ['DOUBLE_GC','DOUBLE GC',Number(s.double_gc)||0],
+        ['EMA_GC','EMA GC',Number(s.ema_gc)||0],
+        ['SMA_GC','MA GC',Number(s.sma_gc)||0],
+        ['FRESH_GC','FRESH GC',Number(s.fresh_gc)||0]
+      ];
+      host.innerHTML=cards.map(([key,label,count])=>`<button type="button" data-gc-filter="${key}" class="gc-summary-card ${gcFilter===key?'active':''}"><span>${label}</span><strong>${count}</strong></button>`).join('');
+      [...host.querySelectorAll('button')].forEach(b=>b.addEventListener('click',()=>{
+        gcFilter=gcFilter===b.dataset.gcFilter?'ALL_GC':b.dataset.gcFilter;
+        renderGcSummary();renderGcFilters();renderGcTable();
+      }));
+    }
+    function renderGcFilters(){
+      const host=$('gcFilters');
+      if(!host)return;
+      const filters=[['ALL_GC','ALL GC'],['DOUBLE_GC','DOUBLE GC'],['EMA_GC','EMA GC'],['SMA_GC','MA GC'],['FRESH_GC','FRESH GC'],['DOUBLE_FRESH','DOUBLE FRESH']];
+      host.innerHTML=filters.map(([key,label])=>`<button type="button" data-gc-filter="${key}" class="${gcFilter===key?'active':''}">${label}</button>`).join('');
+      [...host.querySelectorAll('button')].forEach(b=>b.addEventListener('click',()=>{
+        gcFilter=b.dataset.gcFilter;renderGcSummary();renderGcFilters();renderGcTable();
+      }));
+    }
+    function renderGcTable(){
+      const body=$('gcBody');
+      if(!body)return;
+      const view=gcView();
+      body.innerHTML=view.map(d=>{
+        const ticker=String(d.ticker||'');
+        const radar=String(d.radar_status||'AVOID').toUpperCase();
+        const decision=String(d.status||'WAIT').toUpperCase();
+        const rvol=Number(d.rvol);
+        return `<tr class="signal-row gc-row" data-symbol="${ticker}">
+          <td><b>${ticker}</b></td>
+          <td>${scoreCell(d)}</td>
+          <td><span class="gc-radar-pill ${radarClass(radar)}">${radar}</span></td>
+          <td>${gcCell(d.ema_gc,d.ema_gc_age)}</td>
+          <td>${gcCell(d.sma_gc,d.sma_gc_age)}</td>
+          <td>${bool(d.double_gc)?'<span class="gc-double">DOUBLE</span>':'—'}</td>
+          <td>${Number.isFinite(rvol)?rvol.toFixed(2)+'×':'—'}</td>
+          <td><span class="signal-pill ${statusClass(decision)}">${decision}</span></td>
+        </tr>`;
+      }).join('')||'<tr><td colspan="8" class="signal-empty">Belum ada saham pada kategori Golden Cross ini.</td></tr>';
+      [...body.querySelectorAll('.gc-row')].forEach(row=>row.addEventListener('click',()=>openSymbol(row.dataset.symbol)));
     }
 
     function openSymbol(symbol){
@@ -188,6 +291,30 @@
       });
       api=String(window.ANALISAKU_SIGNAL_API||'');
     }
+    function technicalEndpoint(){
+      const url=new URL(api);
+      url.pathname=url.pathname.replace(/\/signal\/?$/,'/technical');
+      url.search='';
+      url.searchParams.set('timeframe',tf);
+      return url;
+    }
+
+    async function loadGoldenCross(){
+      await ensureApi();
+      if(!api){$('gcMeta').textContent='Signal API belum tersedia.';return}
+      $('gcMeta').textContent='Mengambil daftar Golden Cross…';
+      try{
+        const res=await fetch(technicalEndpoint(),{cache:'no-store'});
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        gcPayload=await res.json();
+        const s=gcPayload.summary||{};
+        const ts=Number(gcPayload.updated_at)||0;
+        $('gcMeta').textContent=`${Number(s.total)||0} saham dipantau • Double GC ${Number(s.double_gc)||0} • EMA GC ${Number(s.ema_gc)||0} • MA GC ${Number(s.sma_gc)||0}`+(ts?` • update ${new Date(ts).toLocaleString('id-ID')}`:'');
+        renderGcSummary();renderGcFilters();renderGcTable();
+      }catch(e){
+        $('gcMeta').textContent='Golden Cross Radar belum dapat dimuat. Coba Refresh.';
+      }
+    }
 
     async function load(){
       await ensureApi();
@@ -202,25 +329,23 @@
           return {symbol,data:body.data||body};
         }catch(e){return {symbol,data:null}}
       }));
-
       detectStatusChanges(results);
       rows=results;
       const available=rows.filter(r=>r.data).length;
       const changed=rows.filter(r=>r.changed).length;
       const latest=Math.max(0,...rows.map(r=>signalTs(r.data)));
-      $('signalMonitorMeta').textContent=`${available}/20 snapshot tersedia`+
-        (changed?` • ${changed} perubahan status baru`:'')+
-        (latest?` • update terakhir ${new Date(latest).toLocaleString('id-ID')}`:'');
+      $('signalMonitorMeta').textContent=`${available}/20 snapshot tersedia`+(changed?` • ${changed} perubahan status baru`:'')+(latest?` • update terakhir ${new Date(latest).toLocaleString('id-ID')}`:'');
       renderSummary();renderFilters();renderTable();
     }
 
     $('signalMonitorRefresh').addEventListener('click',load);
+    $('gcRefresh').addEventListener('click',loadGoldenCross);
     $('signalBullishToggle').addEventListener('click',()=>{
       bullishOnly=!bullishOnly;renderFilters();renderTable();
     });
-    renderFilters();
-    load();
-    setInterval(load,60000);
+    renderFilters();renderGcFilters();
+    loadGoldenCross();load();
+    setInterval(()=>{loadGoldenCross();load();},60000);
   }
 
   bootMonitor();
