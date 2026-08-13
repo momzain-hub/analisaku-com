@@ -55,6 +55,7 @@
 
   const cleanTicker=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20)||'RAJA';
   const tfLabel=v=>({15:'15M',60:'1H',240:'4H',D:'1D',W:'1W',M:'1M'})[v]||v;
+  const apiTf=v=>({D:'1D',W:'1W',M:'1M'})[v]||v;
   const theme=()=>document.documentElement.dataset.theme==='light'?'light':'dark';
   const put=(id,v)=>{const el=$(id);if(el)el.textContent=v};
   const price=v=>{if(v===null||v===undefined||v==='')return '—';const n=Number(v);return Number.isFinite(n)?n.toLocaleString('id-ID',{maximumFractionDigits:2}):String(v)};
@@ -109,9 +110,10 @@
     const req=++signalRequest;
     sourceText('Mengambil Master Signal…');
     try{
-      const url=new URL(signalApi);url.searchParams.set('ticker',currentSymbol);url.searchParams.set('timeframe',interval.value||'D');
+      const selectedTf=interval.value||'D';
+      const url=new URL(signalApi);url.searchParams.set('ticker',currentSymbol);url.searchParams.set('timeframe',apiTf(selectedTf));
       const res=await fetch(url,{cache:'no-store'});if(req!==signalRequest)return;
-      if(res.status===404){resetDecision('Belum ada signal');sourceText('Belum ada signal untuk '+currentSymbol+' • '+tfLabel(interval.value||'D'));return}
+      if(res.status===404){resetDecision('Belum ada signal');sourceText('Belum ada signal untuk '+currentSymbol+' • '+tfLabel(selectedTf));return}
       if(!res.ok)throw new Error('HTTP '+res.status);
       const body=await res.json();applySignal(body.data||body);
     }catch(e){if(req===signalRequest){resetDecision('API tidak tersedia');sourceText('Signal API belum dapat diakses')}}
