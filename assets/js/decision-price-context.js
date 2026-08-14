@@ -8,7 +8,11 @@
   let timer=0;
 
   const $=id=>document.getElementById(id);
-  const numeric=v=>{const n=Number(v);return Number.isFinite(n)?n:null};
+  const numeric=v=>{
+    if(v===null||v===undefined||String(v).trim()==='')return null;
+    const n=Number(v);
+    return Number.isFinite(n)?n:null;
+  };
   const fmt=v=>{
     const n=numeric(v);
     return n===null?'—':n.toLocaleString('id-ID',{maximumFractionDigits:2});
