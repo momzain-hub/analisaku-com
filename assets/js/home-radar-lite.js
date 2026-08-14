@@ -11,15 +11,23 @@
     .then(r=>r.json())
     .then(data=>{
       const all=Array.isArray(data.signals)?data.signals:[];
-      const items=all.slice().sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)).slice(0,5);
+      const preferred=all.filter(d=>String(d.radar_status||'').toUpperCase()!=='AVOID'&&String(d.status||'').toUpperCase()!=='EXIT');
+      const items=(preferred.length?preferred:all).slice().sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)).slice(0,5);
       rows.forEach((row,i)=>{
         const d=items[i];
         if(!d){row.hidden=true;return;}
+        row.hidden=false;
+        const ticker=String(d.ticker||'').toUpperCase();
+        const radar=String(d.radar_status||'—').toUpperCase();
+        const decision=String(d.status||'—').toUpperCase();
         const cells=row.children;
-        cells[1].textContent=String(d.ticker||'').toUpperCase();
+        cells[1].textContent=ticker;
         cells[2].textContent=String(Math.round(Number(d.score)||0));
-        cells[3].textContent=String(d.radar_status||'—').toUpperCase();
-        cells[4].textContent=String(d.status||'—').toUpperCase();
+        cells[3].textContent=radar;
+        cells[3].className='home-radar-pill home-r-'+radar.toLowerCase();
+        cells[4].textContent=decision;
+        cells[4].className='home-status-pill home-s-'+decision.toLowerCase().replace(/\s+/g,'-');
+        row.href='technical.html?symbol='+encodeURIComponent(ticker);
       });
       if(meta)meta.textContent=all.length+' saham dipantau';
     })
