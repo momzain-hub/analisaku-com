@@ -15,6 +15,8 @@
 
     let rows=[];
     let filter='ALL';
+    let entryFilter='ALL';
+    let stageFilter='ALL';
     let bullishOnly=false;
     let sortMode='SCORE_DESC';
     let displayLimit=5;
@@ -41,6 +43,22 @@
       </div>
 
       <div class="signal-summary" id="signalSummary"></div>
+
+      <div class="market-strategy-panel" id="marketStrategyPanel" hidden>
+        <div class="market-strategy-head">
+          <div><span>ENTRY STYLE</span><small>Cara membaca peluang, bukan rekomendasi transaksi otomatis.</small></div>
+          <label class="market-stage-control"><span>Setup Stage</span>
+            <select id="marketStageFilter" aria-label="Filter Setup Stage">
+              <option value="ALL">Semua tahap</option>
+              <option value="EARLY WATCH">Early Watch</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="ACTIVE">Active</option>
+            </select>
+          </label>
+        </div>
+        <div class="market-entry-filters" id="marketEntryFilters"></div>
+      </div>
+
       <div class="signal-toolbar market-toolbar">
         <div class="signal-filters" id="signalFilters"></div>
         <button type="button" class="signal-bullish-toggle" id="signalBullishToggle" aria-pressed="false">Bullish only</button>
@@ -75,7 +93,7 @@
       </div>
       <div class="signal-table-wrap">
         <table class="signal-table market-radar-table">
-          <thead><tr><th>Ticker</th><th>Score</th><th>Trend</th><th>Radar</th><th>Status</th><th>Trigger</th><th>Entry</th><th>Invalidation</th><th>Target 1</th><th>Updated</th></tr></thead>
+          <thead><tr><th>Ticker</th><th>Score</th><th>Trend</th><th>Radar</th><th>Status / Setup</th><th>Trigger</th><th>Entry</th><th>Invalidation</th><th>Target 1</th><th>Updated</th></tr></thead>
           <tbody id="signalMonitorBody"></tbody>
         </table>
       </div>`;
@@ -128,6 +146,8 @@
     };
     const statusClass=s=>'s-'+String(s||'WAIT').toLowerCase().replace(/\s+/g,'-');
     const radarClass=s=>'r-'+String(s||'AVOID').toLowerCase();
+    const stageClass=s=>'stage-'+String(s||'').toLowerCase().replace(/\s+/g,'-');
+    const entryClass=s=>'entry-'+String(s||'').toLowerCase().replace(/\s+/g,'-');
     const stampOf=d=>Number(d?.received_at||d?.updated_at)||0;
     const entry=d=>(d.entry_low||d.entry_high)?`${fmt(d.entry_low)} – ${fmt(d.entry_high)}`:'—';
     const updated=d=>{
@@ -169,6 +189,13 @@
       return {label:'DATA PERLU DIPERBARUI',className:'stale'};
     }
 
+    function strategyMeta(d){
+      const stage=String(d?.setup_stage||'').toUpperCase();
+      const style=String(d?.entry_style||'').toUpperCase();
+      if(!stage&&!style)return '';
+      return `<div class="market-setup-meta">${stage?`<span class="market-stage ${stageClass(stage)}">${stage}</span>`:''}${style?`<span class="market-entry-style ${entryClass(style)}">${style}</span>`:''}</div>`;
+    }
+
     function renderOpportunities(){
       const host=$('marketOpportunities');if(!host)return;
       const candidates=byScore(rows.map(r=>r.data).filter(Boolean).filter(d=>{
@@ -186,6 +213,7 @@
           <span class="opportunity-rank">#${index+1}</span>
           <div class="opportunity-main"><b>${ticker}</b><strong>${fmt(d.score)}</strong></div>
           <div class="opportunity-tags"><span class="gc-radar-pill ${radarClass(radar)}">${radar}</span><span class="signal-pill ${statusClass(status)}">${status}</span></div>
+          ${strategyMeta(d)}
           <small>${trend}</small>
         </button>`;
       }).join('');
@@ -203,6 +231,30 @@
         filter=filter===b.dataset.filter?'ALL':b.dataset.filter;
         renderSummary();renderFilters();renderTable();
       }));
+    }
+
+    function renderStrategyFilters(){
+      const panel=$('marketStrategyPanel');
+      const host=$('marketEntryFilters');
+      if(!panel||!host)return;
+      const strategyReady=rows.some(r=>r.data&&(String(r.data.setup_stage||'').trim()||String(r.data.entry_style||'').trim()));
+      panel.hidden=!strategyReady;
+      if(!strategyReady){entryFilter='ALL';stageFilter='ALL';return;}
+      const styles=['ALL','BREAKOUT','PULLBACK','WEAKNESS'];
+      host.innerHTML=styles.map(style=>{
+        const count=style==='ALL'
+          ? rows.filter(r=>r.data&&String(r.data.entry_style||'').trim()).length
+          : rows.filter(r=>r.data&&String(r.data.entry_style||'').toUpperCase()===style).length;
+        const label=style==='ALL'?'ALL STYLE':style;
+        return `<button type="button" data-entry-filter="${style}" class="${entryFilter===style?'active':''}"><span>${label}</span><strong>${count}</strong></button>`;
+      }).join('');
+      host.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
+        entryFilter=btn.dataset.entryFilter||'ALL';
+        renderStrategyFilters();
+        renderTable();
+      }));
+      const stage=$('marketStageFilter');
+      if(stage&&stage.value!==stageFilter)stage.value=stageFilter;
     }
 
     function renderFilters(){
@@ -238,6 +290,8 @@
       const body=$('signalMonitorBody');
       let view=rows.filter(r=>r.data);
       if(filter!=='ALL')view=view.filter(r=>String(r.data.status||'').toUpperCase()===filter);
+      if(entryFilter!=='ALL')view=view.filter(r=>String(r.data.entry_style||'').toUpperCase()===entryFilter);
+      if(stageFilter!=='ALL')view=view.filter(r=>String(r.data.setup_stage||'').toUpperCase()===stageFilter);
       if(bullishOnly)view=view.filter(r=>String(r.data.trend||'').toUpperCase()==='BULLISH');
       view=sortRows(view);
       const total=view.length;
@@ -252,7 +306,7 @@
           <td><b>${r.symbol}</b></td><td><b>${fmt(d.score)}</b></td>
           <td><span class="signal-trend ${trend.toLowerCase()}">${trend}</span></td>
           <td><span class="gc-radar-pill ${radarClass(radar)}">${radar}</span></td>
-          <td><span class="signal-pill ${statusClass(status)}">${status}</span></td>
+          <td><span class="signal-pill ${statusClass(status)}">${status}</span>${strategyMeta(d)}</td>
           <td>${fmt(d.trigger)}</td><td>${entry(d)}</td><td>${fmt(d.invalidation)}</td><td>${fmt(d.target1)}</td><td>${updated(d)}</td>
         </tr>`;
       }).join('')||'<tr><td colspan="10" class="signal-empty">Tidak ada saham untuk filter ini.</td></tr>';
@@ -351,12 +405,12 @@
         const fresh=freshness(latest);
         const badge=$('dataFreshness');badge.textContent=fresh.label;badge.className='data-freshness '+fresh.className;
         $('signalMonitorMeta').textContent=`${rows.length} saham dipantau`+(latest?` • update terakhir ${new Date(latest).toLocaleString('id-ID')}`:'');
-        renderOpportunities();renderSummary();renderFilters();renderTable();
+        renderOpportunities();renderSummary();renderStrategyFilters();renderFilters();renderTable();
       }catch(e){
         rows=[];
         $('signalMonitorMeta').textContent='Market Radar belum dapat dimuat. Coba Refresh.';
         const badge=$('dataFreshness');badge.textContent='API ERROR';badge.className='data-freshness stale';
-        renderOpportunities();renderSummary();renderFilters();renderTable();
+        renderOpportunities();renderSummary();renderStrategyFilters();renderFilters();renderTable();
       }
     }
 
@@ -365,9 +419,10 @@
     $('signalBullishToggle').addEventListener('click',()=>{bullishOnly=!bullishOnly;renderFilters();renderTable();});
     $('marketSort').addEventListener('change',e=>{sortMode=e.target.value||'SCORE_DESC';renderTable();});
     $('marketLimit').addEventListener('change',e=>{displayLimit=e.target.value==='ALL'?'ALL':Number(e.target.value)||5;renderTable();});
+    $('marketStageFilter').addEventListener('change',e=>{stageFilter=String(e.target.value||'ALL').toUpperCase();renderTable();});
     $('gcLimit').addEventListener('change',e=>{gcDisplayLimit=e.target.value==='ALL'?'ALL':Number(e.target.value)||5;renderGcTable();});
 
-    renderFilters();renderGcFilters();load();loadGoldenCross();
+    renderFilters();renderStrategyFilters();renderGcFilters();load();loadGoldenCross();
     setInterval(()=>{load();loadGoldenCross();},60000);
   }
 
