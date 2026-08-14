@@ -1,0 +1,190 @@
+ANALISAKU SIGNAL HUB V2.1 — SETUP STAGE + ENTRY STYLE PATCH
+==============================================================
+
+TUJUAN
+- Menambah output publik setup_stage: EARLY WATCH / CONFIRMED / ACTIVE.
+- Menambah output publik entry_style: BREAKOUT / PULLBACK / WEAKNESS.
+- Tidak mengirim rumus, periode, threshold, atau komponen internal ke website.
+- Jika sebuah saham belum memenuhi salah satu gaya entry, entry_style = NONE dan Worker publik akan menampilkannya sebagai kosong.
+
+SUMBER
+Gunakan script aktif:
+ANALISAKU SIGNAL HUB V2 — SCORE + DOUBLE GC — 20 TICKER
+
+PENTING
+Jangan delete alert V2 yang sedang aktif sebelum V2.1 berhasil compile dan test. Paling aman buat script baru bernama:
+ANALISAKU SIGNAL HUB V2.1 — ENTRY STYLE
+
+======================================================================
+1) TAMBAHKAN HELPER SETELAH f_gc() / f_bool()
+======================================================================
+
+f_stage(int code) =>
+    code == 1 ? "EARLY WATCH" :
+     code == 2 ? "CONFIRMED" :
+     code == 3 ? "ACTIVE" : "NONE"
+
+f_entryStyle(int code) =>
+    code == 1 ? "BREAKOUT" :
+     code == 2 ? "PULLBACK" :
+     code == 3 ? "WEAKNESS" : "NONE"
+
+======================================================================
+2) DI DALAM f_engine(), SETELAH baris:
+   bool nearTrigger = valid and not na(distTrigger) and distTrigger <= watchPct
+   DAN SETELAH trendCode / statusCode SUDAH TERBENTUK,
+   TAMBAHKAN BLOK BERIKUT
+======================================================================
+
+    // SETUP STAGE + ENTRY STYLE — PRIVATE CLASSIFICATION
+    // Website hanya menerima label akhirnya.
+    int bullBreakAgeRaw = ta.barssince(rawBullBreak)
+    int bullBreakAge = na(bullBreakAgeRaw) ? 9999 : bullBreakAgeRaw
+
+    bool confirmedNow = validBull and not invalid and (bullBreak or rawBullBreak)
+    bool postBreakout = validBull and not invalid and bullBreakAge <= 20
+
+    bool inDecisionZone = validBull and not invalid and
+         not na(entryLow) and not na(entryHigh) and
+         close >= entryLow and close <= entryHigh
+
+    // Pullback: breakout sudah pernah terjadi, struktur belum invalid,
+    // lalu harga kembali mendekati area referensi tanpa merusak skenario.
+    float pullbackRef = math.max(priceB, e12)
+    bool pullbackSetup = postBreakout and close > priceC and
+         close < close[1] and
+         close <= pullbackRef + atr14 * 0.75
+
+    // Weakness: struktur bullish masih valid sebelum breakout,
+    // harga masuk area keputusan dan trend utama masih mendukung.
+    bool weaknessSetup = validBull and not invalid and not postBreakout and
+         trendCode == 1 and inDecisionZone
+
+    // Breakout: kandidat mendekati trigger atau baru mengonfirmasi breakout.
+    bool breakoutSetup = validBull and not invalid and
+         (confirmedNow or (not postBreakout and nearTrigger))
+
+    int stageCode =
+         not validBull or invalid ? 0 :
+         confirmedNow ? 2 :
+         postBreakout or bullishActive ? 3 :
+         1
+
+    int entryStyleCode =
+         pullbackSetup ? 2 :
+         weaknessSetup ? 3 :
+         breakoutSetup ? 1 :
+         0
+
+======================================================================
+3) UBAH RETURN f_engine()
+======================================================================
+
+RETURN LAMA BERAKHIR:
+..., boDistance, eligible, overextended]
+
+GANTI MENJADI:
+..., boDistance, eligible, overextended, stageCode, entryStyleCode]
+
+======================================================================
+4) TAMBAHKAN OUTPUT ARRAY
+======================================================================
+
+Setelah array output lain, tambahkan:
+
+array<int> outStage = array.new_int()
+array<int> outEntryStyle = array.new_int()
+
+======================================================================
+5) PASS 1 — REQUEST SECURITY
+======================================================================
+
+Pada destructuring request.security(), tambahkan dua output terakhir:
+
+..., boDistance, eligible, overextended, stageCode, entryStyleCode] =
+    request.security(sym, timeframe.period, f_engine())
+
+Setelah push output lain, tambahkan:
+
+array.push(outStage, stageCode)
+array.push(outEntryStyle, entryStyleCode)
+
+======================================================================
+6) UPDATE f_state() AGAR PERUBAHAN STAGE/STYLE MEMICU WEBHOOK
+======================================================================
+
+Tambahkan parameter:
+int stageCode, int entryStyleCode
+
+Lalu pada string state tambahkan di bagian akhir:
+
++ "|" + str.tostring(stageCode) + "|" + str.tostring(entryStyleCode)
+
+Saat f_state() dipanggil di PASS 2, tambahkan:
+
+array.get(outStage, i), array.get(outEntryStyle, i)
+
+======================================================================
+7) UPDATE f_signalJson()
+======================================================================
+
+Tambahkan dua parameter pada function:
+int stageCode, int entryStyleCode
+
+Di JSON, setelah field "setup", tambahkan:
+
+     "\"setup_stage\":\"" + f_stage(stageCode) + "\"," +
+     "\"entry_style\":\"" + f_entryStyle(entryStyleCode) + "\"," +
+
+Saat f_signalJson() dipanggil di PASS 2, tambahkan dua argument:
+
+array.get(outStage, i), array.get(outEntryStyle, i)
+
+Letakkan sesuai posisi parameter function yang Anda pilih; harus konsisten antara deklarasi function dan pemanggilannya.
+
+======================================================================
+OUTPUT YANG DIHARAPKAN
+======================================================================
+
+Contoh 1 — menunggu breakout:
+"setup_stage":"EARLY WATCH"
+"entry_style":"BREAKOUT"
+
+Contoh 2 — breakout baru:
+"setup_stage":"CONFIRMED"
+"entry_style":"BREAKOUT"
+
+Contoh 3 — trend aktif sedang pullback:
+"setup_stage":"ACTIVE"
+"entry_style":"PULLBACK"
+
+Contoh 4 — struktur bullish masuk area weakness sebelum breakout:
+"setup_stage":"EARLY WATCH"
+"entry_style":"WEAKNESS"
+
+Contoh 5 — tidak ada gaya entry yang valid:
+"setup_stage":"ACTIVE"
+"entry_style":"NONE"
+
+======================================================================
+CUTOVER YANG AMAN
+======================================================================
+
+1. Buat script TradingView baru dari V2 aktif.
+2. Terapkan patch ini.
+3. Save sebagai ANALISAKU SIGNAL HUB V2.1 — ENTRY STYLE.
+4. Website Alert = OFF dahulu.
+5. Compile dan Add to chart.
+6. Pastikan 20 ticker sama.
+7. Jika compile berhasil, pause alert V2 lama (jangan delete).
+8. Aktifkan Website Alert + Initial Sync pada V2.1.
+9. Buat satu alert baru: Any alert() function call, webhook URL tetap Worker yang sama.
+10. Tunggu snapshot awal 20 ticker masuk.
+11. Cek /signals?timeframe=1D: setup_stage dan entry_style harus mulai terisi setelah Worker 2.4 live.
+12. Setelah valid, V2 lama boleh tetap paused sebagai rollback sementara.
+
+CATATAN DESAIN
+- Setup Stage dan Entry Style adalah klasifikasi engine, bukan rekomendasi transaksi.
+- BREAKOUT tidak berarti otomatis BUY; Decision status tetap menjadi lapisan keputusan.
+- PULLBACK dan WEAKNESS wajib tetap berada di atas invalidation/struktur valid.
+- Formula klasifikasi tetap berada di Pine dan tidak ditampilkan frontend.
