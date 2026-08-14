@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/home-market.css">
+  <link rel="stylesheet" href="assets/css/home-radar.css?v=20260814-0720">
 </head>
 <body class="home-market">
   <header class="site-header">
@@ -90,25 +91,47 @@
     <section class="section" id="watchlist">
       <div class="container">
         <div class="mc-section-head">
-          <div><div class="kicker">04 / ANALISAKU WATCHLIST</div><h2>Saham yang sedang masuk radar Analisaku.</h2></div>
-          <p>Maksimal lima saham dari Analisaku Engine. Home hanya menampilkan ticker, trend, dan kondisi teknikal ringkas; metode internal tetap tidak ditampilkan.</p>
+          <div><div class="kicker">04 / TOP RADAR</div><h2>Peluang teknikal terbaik dari radar Analisaku.</h2></div>
+          <p>Lima saham teratas dari output publik terbaru. Score ditampilkan; metode perhitungan internal tetap tidak diekspos.</p>
         </div>
-        <div class="watchlist-shell">
-          <div class="watchlist-head"><span>TICKER</span><span>TREND</span><span>STATUS</span></div>
-          <div class="watchlist-row placeholder"><b>—</b><span>—</span><em>Menunggu scanner</em></div>
-          <div class="watchlist-row placeholder"><b>—</b><span>—</span><em>Menunggu scanner</em></div>
-          <div class="watchlist-row placeholder"><b>—</b><span>—</span><em>Menunggu scanner</em></div>
-          <div class="watchlist-row placeholder"><b>—</b><span>—</span><em>Menunggu scanner</em></div>
-          <div class="watchlist-row placeholder"><b>—</b><span>—</span><em>Menunggu scanner</em></div>
-          <div class="data-note">Public status akan diringkas sebagai WAIT • WATCH • SETUP ACTIVE • ACTIVE • TARGET REACHED • INVALID.</div>
+        <div class="watchlist-shell" id="homeTopRadar">
+          <div class="home-radar-head"><span>#</span><span>TICKER</span><span>SCORE</span><span>RADAR</span><span>DECISION</span></div>
+          <div class="home-radar-list">
+            <a class="home-radar-row" data-home-rank="0" href="technical.html"><b>#1</b><strong>—</strong><span>—</span><em class="home-radar-pill">—</em><em class="home-status-pill">—</em></a>
+            <a class="home-radar-row" data-home-rank="1" href="technical.html"><b>#2</b><strong>—</strong><span>—</span><em class="home-radar-pill">—</em><em class="home-status-pill">—</em></a>
+            <a class="home-radar-row" data-home-rank="2" href="technical.html"><b>#3</b><strong>—</strong><span>—</span><em class="home-radar-pill">—</em><em class="home-status-pill">—</em></a>
+            <a class="home-radar-row" data-home-rank="3" href="technical.html"><b>#4</b><strong>—</strong><span>—</span><em class="home-radar-pill">—</em><em class="home-status-pill">—</em></a>
+            <a class="home-radar-row" data-home-rank="4" href="technical.html"><b>#5</b><strong>—</strong><span>—</span><em class="home-radar-pill">—</em><em class="home-status-pill">—</em></a>
+          </div>
+          <div class="home-radar-foot"><span id="homeRadarMeta">Memuat Top Radar…</span><a href="technical.html">Lihat Radar Lengkap →</a></div>
         </div>
       </div>
     </section>
 
-    <section class="section alt" id="technical-quick">
+    <section class="section alt" id="recentChanges">
+      <div class="container">
+        <div class="mc-section-head">
+          <div><div class="kicker">05 / RECENT CHANGES</div><h2>Perubahan sinyal yang perlu diperhatikan.</h2></div>
+          <p>Perubahan Decision dari snapshot publik terbaru. Formula internal tidak ditampilkan.</p>
+        </div>
+        <div class="home-recent-shell">
+          <div id="homeRecentList">
+            <a class="home-change-row" data-home-change="0" href="technical.html" hidden><div><strong>—</strong><span>Score —</span></div><div class="home-change-flow"><em class="home-status-pill">—</em><b>→</b><em class="home-status-pill">—</em></div><time>—</time></a>
+            <a class="home-change-row" data-home-change="1" href="technical.html" hidden><div><strong>—</strong><span>Score —</span></div><div class="home-change-flow"><em class="home-status-pill">—</em><b>→</b><em class="home-status-pill">—</em></div><time>—</time></a>
+            <a class="home-change-row" data-home-change="2" href="technical.html" hidden><div><strong>—</strong><span>Score —</span></div><div class="home-change-flow"><em class="home-status-pill">—</em><b>→</b><em class="home-status-pill">—</em></div><time>—</time></a>
+            <a class="home-change-row" data-home-change="3" href="technical.html" hidden><div><strong>—</strong><span>Score —</span></div><div class="home-change-flow"><em class="home-status-pill">—</em><b>→</b><em class="home-status-pill">—</em></div><time>—</time></a>
+            <a class="home-change-row" data-home-change="4" href="technical.html" hidden><div><strong>—</strong><span>Score —</span></div><div class="home-change-flow"><em class="home-status-pill">—</em><b>→</b><em class="home-status-pill">—</em></div><time>—</time></a>
+            <div class="home-radar-empty" id="homeRecentEmpty"><strong>Belum ada perubahan baru.</strong><span>Akan terisi otomatis ketika Decision berubah.</span></div>
+          </div>
+          <div class="home-radar-foot"><span id="homeRecentMeta">Monitoring perubahan aktif.</span><a href="technical.html">Buka Technical Radar →</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="technical-quick">
       <div class="container technical-layout">
         <div class="technical-copy">
-          <div class="kicker">05 / ANALISAKU TECHNICAL</div>
+          <div class="kicker">06 / ANALISAKU TECHNICAL</div>
           <h2>Dari saham pilihan ke level teknikal.</h2>
           <p>Cek technical snapshot satu saham. Chart TradingView dan Decision Panel lengkap tetap tersedia di halaman Technical.</p>
           <a class="btn primary" href="technical.html">Buka Analisis Lengkap →</a>
@@ -156,5 +179,6 @@
   </footer>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/home-market.js"></script>
+  <script src="assets/js/home-radar-lite.js?v=20260814-0720"></script>
 </body>
 </html>
