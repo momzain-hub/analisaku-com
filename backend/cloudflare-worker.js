@@ -37,6 +37,16 @@ export default {
       return Number.isFinite(n) ? n : 0;
     };
 
+    const publicStage = value => {
+      const stage = String(value || '').toUpperCase().trim();
+      return ['EARLY WATCH','CONFIRMED','ACTIVE'].includes(stage) ? stage : '';
+    };
+
+    const publicEntryStyle = value => {
+      const style = String(value || '').toUpperCase().trim();
+      return ['BREAKOUT','PULLBACK','WEAKNESS'].includes(style) ? style : '';
+    };
+
     const gcState = value => {
       const state = String(value || '').toUpperCase();
       return ['FRESH','RECENT','ACTIVE'].includes(state) ? state : 'OFF';
@@ -54,6 +64,8 @@ export default {
       score: toScore(s?.score),
       trend: String(s?.trend || ''),
       setup: String(s?.setup || ''),
+      setup_stage: publicStage(s?.setup_stage),
+      entry_style: publicEntryStyle(s?.entry_style),
       status: String(s?.status || ''),
       entry_low: String(s?.entry_low || ''),
       entry_high: String(s?.entry_high || ''),
@@ -108,7 +120,7 @@ export default {
       return json({
         ok: true,
         service: 'analisaku-signal',
-        version: '2.3-gc-candles',
+        version: '2.4-entry-style',
         status: 'ready'
       });
     }
@@ -245,7 +257,7 @@ export default {
 
       return json({
         ok: true,
-        version: '2.3-gc-candles',
+        version: '2.4-entry-style',
         mode: isBatch ? 'batch' : 'single',
         count: writes.length
       });
