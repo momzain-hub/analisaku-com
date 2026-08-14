@@ -1,17 +1,26 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260813-1655';
+  const VERSION='20260814-0712';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
-    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"]').forEach(el=>el.remove());
+    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"]').forEach(el=>el.remove());
 
-    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css'].forEach(path=>{
+    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css'].forEach(path=>{
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href=new URL(path,base).href+'?v='+VERSION;
       document.head.appendChild(link);
     });
+  }
+
+  function loadGcCandleUi(){
+    document.querySelectorAll('script[data-analisaku-gc-candles]').forEach(el=>el.remove());
+    const gc=document.createElement('script');
+    gc.src=new URL('gc-candle-ui.js',base).href+'?v='+VERSION;
+    gc.async=true;
+    gc.dataset.analisakuGcCandles='true';
+    document.head.appendChild(gc);
   }
 
   function loadEnhancer(){
@@ -21,6 +30,8 @@
     enhance.src=new URL('signal-monitor-enhance.js',base).href+'?v='+VERSION;
     enhance.async=true;
     enhance.dataset.analisakuRadarEnhance='true';
+    enhance.onload=loadGcCandleUi;
+    enhance.onerror=loadGcCandleUi;
     document.head.appendChild(enhance);
   }
 
