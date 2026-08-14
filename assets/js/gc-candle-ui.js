@@ -5,6 +5,7 @@
   let payload=null;
   let sortMode='SCORE_DESC';
   let observer=null;
+  let detailObserver=null;
   let renderTimer=0;
 
   const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null};
@@ -43,6 +44,7 @@
 
     addControls(root,controls);
     bind(root,body);
+    bindQuickDetail();
     load();
     setInterval(load,60000);
   }
@@ -77,6 +79,15 @@
       });
     }
 
+    if(!document.getElementById('gcCandleAvailability')){
+      const note=document.createElement('div');
+      note.id='gcCandleAvailability';
+      note.className='gc-candle-availability';
+      note.hidden=true;
+      note.textContent='Data candle Golden Cross belum tersedia dari server.';
+      document.getElementById('gcNewFormed')?.insertAdjacentElement('afterend',note);
+    }
+
     renameNewLabels(root);
   }
 
@@ -102,13 +113,24 @@
     observer.observe(body,{childList:true,subtree:false});
   }
 
+  function bindQuickDetail(){
+    if(detailObserver)return;
+    detailObserver=new MutationObserver(()=>{
+      const modal=document.querySelector('.radar-detail-modal');
+      if(modal&&!modal.closest('.radar-detail-overlay')?.hidden)setTimeout(decorateQuickDetail,0);
+    });
+    detailObserver.observe(document.body,{childList:true,subtree:true});
+  }
+
   async function load(){
     try{
       const r=await fetch(endpoint(),{cache:'no-store'});
       if(!r.ok)throw new Error();
       payload=await r.json();
       updateNewCount();
+      updateAvailability();
       render();
+      decorateQuickDetail();
     }catch(e){/* original radar keeps its own error state */}
   }
 
@@ -125,6 +147,23 @@
       const stamp=Number(payload.updated_at)||0;
       meta.textContent=`${Number(s.total)||0} saham dipantau • ${n} baru membentuk Golden Cross • Double GC ${Number(s.double_gc)||0} • EMA GC ${Number(s.ema_gc)||0} • MA GC ${Number(s.sma_gc)||0}`+(stamp?` • update ${new Date(stamp).toLocaleString('id-ID')}`:'');
     }
+  }
+
+  function allPayloadRows(){
+    const map=new Map();
+    ['double_fresh','double_gc','ema_gc','sma_gc','fresh_gc'].forEach(group=>{
+      (payload?.[group]||[]).forEach(d=>map.set(String(d.ticker||'').toUpperCase(),d));
+    });
+    return [...map.values()];
+  }
+
+  function hasCandleData(){
+    return allPayloadRows().some(d=>num(d?.ema_gc_candles)!==null||num(d?.sma_gc_candles)!==null);
+  }
+
+  function updateAvailability(){
+    const note=document.getElementById('gcCandleAvailability');
+    if(note)note.hidden=hasCandleData();
   }
 
   function activeFilter(){
@@ -197,6 +236,32 @@
     observer?.observe(body,{childList:true,subtree:false});
 
     body.querySelectorAll('.gc-row').forEach(row=>row.addEventListener('click',()=>openSymbol(row.dataset.symbol)));
+  }
+
+  function payloadForTicker(ticker){
+    const symbol=String(ticker||'').toUpperCase();
+    return allPayloadRows().find(d=>String(d.ticker||'').toUpperCase()===symbol)||null;
+  }
+
+  function decorateQuickDetail(){
+    if(!payload)return;
+    const modal=document.querySelector('.radar-detail-modal');
+    const overlay=modal?.closest('.radar-detail-overlay');
+    if(!modal||overlay?.hidden)return;
+    const title=modal.querySelector('#radarDetailTitle');
+    const ticker=String(title?.childNodes?.[0]?.textContent||title?.textContent||'').trim().split(/\s+/)[0].toUpperCase();
+    const d=payloadForTicker(ticker);if(!d)return;
+    const gc=modal.querySelector('.radar-detail-gc');if(!gc)return;
+    [...gc.children].forEach(box=>{
+      const label=String(box.querySelector('small')?.textContent||'').toUpperCase();
+      let age=null;
+      if(label.includes('EMA GOLDEN CROSS'))age=num(d.ema_gc_candles);
+      else if(label.includes('MA GOLDEN CROSS'))age=num(d.sma_gc_candles);
+      else return;
+      let ageEl=box.querySelector('.gc-detail-age');
+      if(!ageEl){ageEl=document.createElement('span');ageEl.className='gc-detail-age';box.appendChild(ageEl)}
+      ageEl.textContent=age!==null&&age>=0?`${Math.floor(age)} candle`:'Data candle belum tersedia';
+    });
   }
 
   function openSymbol(symbol){
