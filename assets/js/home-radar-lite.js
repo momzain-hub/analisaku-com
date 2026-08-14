@@ -3,6 +3,10 @@
   const meta=document.getElementById('homeRadarMeta');
   if(!rows.length)return;
 
+  const recentScript=document.createElement('script');
+  recentScript.src='assets/js/home-recent-lite.js?v=20260814-0725';
+  document.body.appendChild(recentScript);
+
   fetch('https://analisaku-signal.pitizain.workers.dev/signals?timeframe=1D',{cache:'no-store'})
     .then(r=>r.json())
     .then(data=>{
