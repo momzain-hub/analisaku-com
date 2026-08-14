@@ -70,6 +70,7 @@
     if(!document.getElementById('gcNewFormed')){
       const info=document.createElement('button');
       info.type='button';info.id='gcNewFormed';info.className='gc-new-formed';
+      info.style.display='none';
       info.innerHTML='<span>BARU TERBENTUK</span><strong>0 saham</strong><small>Golden Cross baru pada snapshot ini</small>';
       const summary=document.getElementById('gcSummary');
       summary?.insertAdjacentElement('afterend',info);
@@ -140,6 +141,7 @@
     if(info){
       const strong=info.querySelector('strong');
       if(strong)strong.textContent=`${n} saham`;
+      info.style.display=n>0?'':'none';
     }
     const meta=document.getElementById('gcMeta');
     if(meta&&payload?.summary){
