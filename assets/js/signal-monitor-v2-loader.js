@@ -1,12 +1,12 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260814-1258';
+  const VERSION='20260814-1305';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
-    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"]').forEach(el=>el.remove());
+    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"],link[href*="market-strategy.css"]').forEach(el=>el.remove());
 
-    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css'].forEach(path=>{
+    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css','../css/market-strategy.css'].forEach(path=>{
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href=new URL(path,base).href+'?v='+VERSION;
