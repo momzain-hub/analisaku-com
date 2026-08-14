@@ -42,6 +42,12 @@ export default {
       return ['FRESH','RECENT','ACTIVE'].includes(state) ? state : 'OFF';
     };
 
+    const gcCandleAge = (value, state) => {
+      if (gcState(state) === 'OFF') return null;
+      const n = Number(value);
+      return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+    };
+
     const publicSignal = s => ({
       ticker: normalizeTicker(s?.ticker),
       timeframe: normalizeTimeframe(s?.timeframe),
@@ -69,7 +75,9 @@ export default {
       radar_status: String(s?.radar_status || ''),
       status: String(s?.status || ''),
       ema_gc: gcState(s?.ema_gc),
+      ema_gc_candles: gcCandleAge(s?.ema_gc_age, s?.ema_gc),
       sma_gc: gcState(s?.sma_gc),
+      sma_gc_candles: gcCandleAge(s?.sma_gc_age, s?.sma_gc),
       double_gc: toBool(s?.double_gc),
       updated_at: Number(s?.updated_at || 0),
       received_at: Number(s?.received_at || 0)
@@ -100,7 +108,7 @@ export default {
       return json({
         ok: true,
         service: 'analisaku-signal',
-        version: '2.2-public-safe',
+        version: '2.3-gc-candles',
         status: 'ready'
       });
     }
@@ -237,7 +245,7 @@ export default {
 
       return json({
         ok: true,
-        version: '2.2-public-safe',
+        version: '2.3-gc-candles',
         mode: isBatch ? 'batch' : 'single',
         count: writes.length
       });
