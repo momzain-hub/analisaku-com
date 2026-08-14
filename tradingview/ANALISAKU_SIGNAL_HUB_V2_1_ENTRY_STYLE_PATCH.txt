@@ -42,14 +42,16 @@ f_entryStyle(int code) =>
     int bullBreakAge = na(bullBreakAgeRaw) ? 9999 : bullBreakAgeRaw
 
     bool confirmedNow = validBull and not invalid and (bullBreak or rawBullBreak)
-    bool postBreakout = validBull and not invalid and bullBreakAge <= 20
+    bool postBreakout = validBull and not invalid and
+         not na(lastBullPattern) and lastBullPattern == patternId and
+         bullBreakAge <= 20
 
     bool inDecisionZone = validBull and not invalid and
          not na(entryLow) and not na(entryHigh) and
          close >= entryLow and close <= entryHigh
 
-    // Pullback: breakout sudah pernah terjadi, struktur belum invalid,
-    // lalu harga kembali mendekati area referensi tanpa merusak skenario.
+    // Pullback: breakout memang berasal dari setup/pola aktif,
+    // struktur belum invalid, lalu harga kembali mendekati area referensi.
     float pullbackRef = math.max(priceB, e12)
     bool pullbackSetup = postBreakout and close > priceC and
          close < close[1] and
