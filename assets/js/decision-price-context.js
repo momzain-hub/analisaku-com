@@ -11,7 +11,7 @@
   const numeric=v=>{
     if(v===null||v===undefined||String(v).trim()==='')return null;
     const n=Number(v);
-    return Number.isFinite(n)?n:null;
+    return Number.isFinite(n)&&n>0?n:null;
   };
   const fmt=v=>{
     const n=numeric(v);
@@ -19,6 +19,36 @@
   };
   const clean=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20);
   const apiTf=v=>({D:'1D',W:'1W',M:'1M'})[String(v||'D').toUpperCase()]||String(v||'D');
+
+  function modeOf(data){
+    const stage=String(data?.setup_stage||'').toUpperCase();
+    const style=String(data?.entry_style||'').toUpperCase();
+    if(style==='BREAKOUT')return stage==='CONFIRMED'?'BREAKOUT CONFIRMED':'BREAKOUT WATCH';
+    if(style==='PULLBACK')return 'PULLBACK';
+    if(style==='WEAKNESS')return 'BUY ON WEAKNESS';
+    return '';
+  }
+
+  function areaOf(data){
+    const mode=modeOf(data);
+    const styleLow=numeric(data?.style_entry_low),styleHigh=numeric(data?.style_entry_high);
+    if(mode){
+      return {mode,low:styleLow,high:styleHigh,ready:styleLow!==null||styleHigh!==null,reference:false};
+    }
+    const low=numeric(data?.entry_low),high=numeric(data?.entry_high);
+    return {mode:'',low,high,ready:low!==null||high!==null,reference:true};
+  }
+
+  function areaLabel(mode,ctxKey='UNKNOWN'){
+    if(mode==='BREAKOUT WATCH')return ['AREA KONFIRMASI','Zona yang perlu diuji sebelum breakout dianggap siap'];
+    if(mode==='BREAKOUT CONFIRMED')return ['BREAKOUT ENTRY','Area eksekusi setelah breakout terkonfirmasi'];
+    if(mode==='PULLBACK')return ['PULLBACK ENTRY','Area retest pada struktur breakout yang masih valid'];
+    if(mode==='BUY ON WEAKNESS')return ['WEAKNESS ENTRY','Area weakness pada struktur bullish yang masih valid'];
+    if(ctxKey==='BELOW')return ['AREA KONFIRMASI','Area referensi yang perlu direclaim / dikonfirmasi'];
+    if(ctxKey==='IN')return ['ENTRY / DECISION AREA','Harga sedang berada di area keputusan'];
+    if(ctxKey==='ABOVE')return ['AREA REFERENSI ENTRY','Harga sudah berada di atas area referensi'];
+    return ['ENTRY / DECISION AREA','Area keputusan dari Master Signal'];
+  }
 
   function wait(){
     if(!$('decisionPanel')||!$('dEntry')||!$('tvTicker')||!$('tvInterval')){
@@ -45,7 +75,7 @@
     if(!positionCard){
       positionCard=document.createElement('div');
       positionCard.className='decision-card decision-position-card';
-      positionCard.innerHTML='<span>PRICE POSITION</span><strong id="dPricePosition">—</strong><small id="dPricePositionNote">Posisi harga terhadap area keputusan</small>';
+      positionCard.innerHTML='<span>PRICE POSITION</span><strong id="dPricePosition">—</strong><small id="dPricePositionNote">Posisi harga terhadap area skenario</small>';
       grid.insertBefore(positionCard,priceCard.nextSibling);
     }
 
@@ -83,20 +113,47 @@
   }
 
   function contextOf(data){
-    const p=numeric(data?.price),a=numeric(data?.entry_low),b=numeric(data?.entry_high);
-    if(p===null||a===null||b===null)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Konteks harga belum tersedia'};
-    const lo=Math.min(a,b),hi=Math.max(a,b);
-    if(p<lo)return {key:'BELOW',label:'DI BAWAH AREA KONFIRMASI',note:'Harga belum masuk area keputusan'};
-    if(p<=hi)return {key:'IN',label:'DI AREA KEPUTUSAN',note:'Harga sedang berada di area keputusan'};
-    return {key:'ABOVE',label:'DI ATAS AREA REFERENSI',note:'Harga sudah berada di atas area entry referensi'};
+    const p=numeric(data?.price),area=areaOf(data);
+    if(p===null)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Harga snapshot belum tersedia',area};
+    if(area.mode&&!area.ready)return {key:'UNKNOWN',label:'MENUNGGU AREA SKENARIO',note:'Klasifikasi sudah ada, tetapi area khusus skenario belum diterima',area};
+    if(!area.ready)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Area harga belum tersedia',area};
+    const values=[area.low,area.high].filter(v=>v!==null);
+    const lo=Math.min(...values),hi=Math.max(...values);
+    if(p<lo)return {key:'BELOW',label:'DI BAWAH AREA SKENARIO',note:'Harga masih di bawah area yang sedang dipantau',area};
+    if(p<=hi)return {key:'IN',label:'DI AREA SKENARIO',note:'Harga sedang berada di area skenario aktif',area};
+    return {key:'ABOVE',label:'DI ATAS AREA SKENARIO',note:'Harga sudah berada di atas area skenario aktif',area};
   }
 
   function decisionText(status,ctx,data){
     const s=String(status||'WAIT').toUpperCase();
+    if(['EXIT','TAKE PROFIT'].includes(s))return null;
+    const mode=ctx.area?.mode||'';
     const trigger=fmt(data?.trigger);
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='BELOW')return ['Tunggu harga kembali ke area konfirmasi.',`Harga masih di bawah area keputusan. Pantau penguatan/reclaim dan konfirmasi berikutnya${trigger!=='—'?` di sekitar ${trigger}`:''}.`];
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='IN')return ['Harga sudah di area keputusan.',`Tunggu konfirmasi Master Signal${trigger!=='—'?` dan trigger sekitar ${trigger}`:''}; jangan terburu-buru entry.`];
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='ABOVE')return ['Harga sudah di atas area referensi.','Ikuti status Master Signal dan hindari mengejar harga. Tunggu setup yang memberi risk/reward lebih jelas.'];
+
+    if(mode==='BREAKOUT WATCH'){
+      if(ctx.key==='BELOW')return ['Menunggu area konfirmasi.','Harga belum masuk zona konfirmasi breakout. Pantau penguatan tanpa mengejar harga.'];
+      if(ctx.key==='IN')return ['Breakout sedang diuji.','Harga sudah berada di area konfirmasi. Tunggu status dan konfirmasi penutupan sebelum eksekusi.'];
+      if(ctx.key==='ABOVE')return ['Harga di atas area konfirmasi.','Cek apakah breakout sudah berstatus CONFIRMED. Jika belum, hindari chase dan tunggu validasi berikutnya.'];
+    }
+    if(mode==='BREAKOUT CONFIRMED'){
+      if(ctx.key==='IN')return ['Breakout terkonfirmasi di area entry.','Gunakan area breakout yang aktif bersama invalidation dan target; tetap sesuaikan position size.'];
+      if(ctx.key==='ABOVE')return ['Harga di atas breakout entry.','Breakout valid tidak berarti harus dikejar. Tunggu risk/reward yang tetap masuk akal.'];
+      if(ctx.key==='BELOW')return ['Harga kembali di bawah breakout entry.','Pantau apakah struktur masih valid atau berubah menjadi skenario retest/pullback.'];
+    }
+    if(mode==='PULLBACK'){
+      if(ctx.key==='IN')return ['Harga masuk area pullback.','Skenario retest sedang aktif. Konfirmasi bahwa struktur tetap valid sebelum eksekusi.'];
+      if(ctx.key==='ABOVE')return ['Pullback belum kembali ke area.','Tunggu retest yang lebih favorable; jangan memaksakan entry di atas zona.'];
+      if(ctx.key==='BELOW')return ['Harga menembus bawah area pullback.','Periksa invalidation dan kualitas struktur sebelum mempertimbangkan skenario ini.'];
+    }
+    if(mode==='BUY ON WEAKNESS'){
+      if(ctx.key==='IN')return ['Harga masuk area weakness.','Area weakness aktif pada struktur bullish; tetap tunggu respons harga dan disiplin invalidation.'];
+      if(ctx.key==='ABOVE')return ['Harga belum berada di area weakness.','Tunggu harga kembali ke zona yang lebih favorable daripada mengejar pergerakan.'];
+      if(ctx.key==='BELOW')return ['Harga di bawah area weakness.','Periksa apakah struktur bullish masih valid sebelum mempertahankan skenario.'];
+    }
+
+    if((s==='WAIT'||s==='WATCH')&&ctx.key==='BELOW')return ['Tunggu harga kembali ke area keputusan.',`Harga masih di bawah area referensi${trigger!=='—'?`; pantau trigger sekitar ${trigger}`:''}.`];
+    if((s==='WAIT'||s==='WATCH')&&ctx.key==='IN')return ['Harga sudah di area keputusan.','Tunggu konfirmasi Master Signal; jangan terburu-buru entry.'];
+    if((s==='WAIT'||s==='WATCH')&&ctx.key==='ABOVE')return ['Harga sudah di atas area referensi.','Hindari mengejar harga. Tunggu setup yang memberi risk/reward lebih jelas.'];
     return null;
   }
 
@@ -109,10 +166,9 @@
 
     const entryLabel=$('dEntryLabel'),entryNote=$('dEntryNote');
     if(entryLabel&&entryNote){
-      if(ctx.key==='BELOW'){entryLabel.textContent='AREA KONFIRMASI';entryNote.textContent='Area yang perlu direclaim / dikonfirmasi';}
-      else if(ctx.key==='IN'){entryLabel.textContent='ENTRY / DECISION AREA';entryNote.textContent='Harga sedang berada di area keputusan';}
-      else if(ctx.key==='ABOVE'){entryLabel.textContent='AREA REFERENSI ENTRY';entryNote.textContent='Harga sudah berada di atas area ini';}
-      else{entryLabel.textContent='ENTRY / DECISION AREA';entryNote.textContent='Area keputusan dari Master Signal';}
+      const copy=areaLabel(ctx.area?.mode||'',ctx.key);
+      entryLabel.textContent=copy[0];
+      entryNote.textContent=ctx.area?.mode&&!ctx.area?.ready?'Menunggu area khusus dari Signal Hub':copy[1];
     }
 
     const custom=decisionText(data?.status,ctx,data);
