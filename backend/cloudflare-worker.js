@@ -61,8 +61,7 @@ export default {
       return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
     };
 
-    const gcState = value =>
-      publicEnum(value, ['FRESH','RECENT','ACTIVE'], 'OFF');
+    const gcState = value => publicEnum(value, ['FRESH','RECENT','ACTIVE'], 'OFF');
 
     const gcCandleAge = (value, state) => {
       if (gcState(state) === 'OFF') return null;
@@ -80,6 +79,7 @@ export default {
       entry_style: publicEntryStyle(s?.entry_style),
       style_entry_low: publicPrice(s?.style_entry_low),
       style_entry_high: publicPrice(s?.style_entry_high),
+      style_stop: publicPrice(s?.style_stop),
       status: publicDecision(s?.status),
       entry_low: publicPrice(s?.entry_low),
       entry_high: publicPrice(s?.entry_high),
@@ -119,6 +119,7 @@ export default {
       entry_style: publicEntryStyle(item?.entry_style),
       style_entry_low: publicPrice(item?.style_entry_low),
       style_entry_high: publicPrice(item?.style_entry_high),
+      style_stop: publicPrice(item?.style_stop),
       status: publicDecision(item?.status),
       entry_low: publicPrice(item?.entry_low),
       entry_high: publicPrice(item?.entry_high),
@@ -144,90 +145,46 @@ export default {
 
     async function readAll(tf) {
       const list = await env.SIGNALS.list({ prefix: 'signal:', limit: 100 });
-      const keys = list.keys
-        .map(k => k.name)
-        .filter(k => k.endsWith(`:${tf}`));
-
-      const values = await Promise.all(
-        keys.map(k => env.SIGNALS.get(k, { type: 'json' }))
-      );
-
+      const keys = list.keys.map(k => k.name).filter(k => k.endsWith(`:${tf}`));
+      const values = await Promise.all(keys.map(k => env.SIGNALS.get(k, { type: 'json' })));
       return values.filter(Boolean);
     }
 
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers });
-    }
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
 
     if (request.method === 'GET' && url.pathname === '/') {
-      return json({
-        ok: true,
-        service: 'analisaku-signal',
-        version: '2.5-style-entry',
-        status: 'ready'
-      });
+      return json({ ok: true, service: 'analisaku-signal', version: '2.5-execution-plan', status: 'ready' });
     }
 
     if (request.method === 'GET' && url.pathname === '/signal') {
       const ticker = normalizeTicker(url.searchParams.get('ticker'));
       const timeframe = normalizeTimeframe(url.searchParams.get('timeframe'));
-
-      if (!ticker || !timeframe) {
-        return json({ ok: false, error: 'ticker dan timeframe wajib diisi' }, 400);
-      }
-
+      if (!ticker || !timeframe) return json({ ok: false, error: 'ticker dan timeframe wajib diisi' }, 400);
       const data = await env.SIGNALS.get(`signal:${ticker}:${timeframe}`, { type: 'json' });
-
-      if (!data) {
-        return json({
-          ok: false,
-          error: 'signal belum tersedia',
-          ticker,
-          timeframe
-        }, 404);
-      }
-
+      if (!data) return json({ ok: false, error: 'signal belum tersedia', ticker, timeframe }, 404);
       return json({ ok: true, ...publicSignal(data) });
     }
 
     if (request.method === 'GET' && url.pathname === '/signals') {
       const timeframe = normalizeTimeframe(url.searchParams.get('timeframe') || '1D');
       if (!timeframe) return json({ ok: false, error: 'timeframe tidak valid' }, 400);
-
       const all = await readAll(timeframe);
       const signals = all.map(publicSignal).sort(byScore);
-
-      return json({
-        ok: true,
-        timeframe,
-        count: signals.length,
-        signals
-      });
+      return json({ ok: true, timeframe, count: signals.length, signals });
     }
 
     if (request.method === 'GET' && url.pathname === '/technical') {
       const timeframe = normalizeTimeframe(url.searchParams.get('timeframe') || '1D');
       if (!timeframe) return json({ ok: false, error: 'timeframe tidak valid' }, 400);
-
       const internal = await readAll(timeframe);
-
       const ema = internal.filter(s => gcState(s.ema_gc) !== 'OFF');
       const sma = internal.filter(s => gcState(s.sma_gc) !== 'OFF');
       const double = internal.filter(s => toBool(s.double_gc));
-      const fresh = internal.filter(s =>
-        gcState(s.ema_gc) === 'FRESH' || gcState(s.sma_gc) === 'FRESH'
-      );
+      const fresh = internal.filter(s => gcState(s.ema_gc) === 'FRESH' || gcState(s.sma_gc) === 'FRESH');
       const doubleFresh = internal.filter(s =>
-        toBool(s.double_gc) &&
-        gcState(s.ema_gc) === 'FRESH' &&
-        gcState(s.sma_gc) === 'FRESH'
+        toBool(s.double_gc) && gcState(s.ema_gc) === 'FRESH' && gcState(s.sma_gc) === 'FRESH'
       );
-
-      const newest = internal.reduce(
-        (max, s) => Math.max(max, publicTimestamp(s.updated_at)),
-        0
-      );
-
+      const newest = internal.reduce((max, s) => Math.max(max, publicTimestamp(s.updated_at)), 0);
       return json({
         ok: true,
         timeframe,
@@ -250,58 +207,35 @@ export default {
 
     if (request.method === 'POST' && url.pathname.startsWith('/webhook/')) {
       const supplied = decodeURIComponent(url.pathname.slice('/webhook/'.length));
-
-      if (!env.WEBHOOK_SECRET || supplied !== env.WEBHOOK_SECRET) {
-        return json({ ok: false, error: 'unauthorized' }, 401);
-      }
+      if (!env.WEBHOOK_SECRET || supplied !== env.WEBHOOK_SECRET) return json({ ok: false, error: 'unauthorized' }, 401);
 
       let payload;
-      try {
-        payload = await request.json();
-      } catch {
-        return json({ ok: false, error: 'body harus JSON' }, 400);
-      }
+      try { payload = await request.json(); }
+      catch { return json({ ok: false, error: 'body harus JSON' }, 400); }
 
       const isBatch = Array.isArray(payload?.signals);
       const raw = isBatch ? payload.signals : [payload];
-
-      if (!raw.length) {
-        return json({ ok: false, error: 'signals kosong' }, 400);
-      }
-
-      if (raw.length > 40) {
-        return json({ ok: false, error: 'terlalu banyak signal', max: 40 }, 400);
-      }
+      if (!raw.length) return json({ ok: false, error: 'signals kosong' }, 400);
+      if (raw.length > 40) return json({ ok: false, error: 'terlalu banyak signal', max: 40 }, 400);
 
       const receivedAt = Date.now();
       const writes = [];
-
       for (let i = 0; i < raw.length; i++) {
         const item = raw[i] || {};
         const ticker = normalizeTicker(item.ticker);
         const timeframe = normalizeTimeframe(item.timeframe);
         const rawStatus = String(item.status || '').toUpperCase().trim();
-
         if (!ticker || !timeframe || !DECISIONS.includes(rawStatus)) {
           return json({ ok: false, error: 'payload tidak lengkap / status tidak valid', index: i }, 400);
         }
-
         writes.push({
           key: `signal:${ticker}:${timeframe}`,
           value: sanitizeForStorage(item, ticker, timeframe, receivedAt)
         });
       }
 
-      await Promise.all(
-        writes.map(w => env.SIGNALS.put(w.key, JSON.stringify(w.value)))
-      );
-
-      return json({
-        ok: true,
-        version: '2.5-style-entry',
-        mode: isBatch ? 'batch' : 'single',
-        count: writes.length
-      });
+      await Promise.all(writes.map(w => env.SIGNALS.put(w.key, JSON.stringify(w.value))));
+      return json({ ok: true, version: '2.5-execution-plan', mode: isBatch ? 'batch' : 'single', count: writes.length });
     }
 
     return json({ ok: false, error: 'not found' }, 404);
