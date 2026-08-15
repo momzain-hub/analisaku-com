@@ -46,7 +46,7 @@
 
       <div class="market-strategy-panel" id="marketStrategyPanel" hidden>
         <div class="market-strategy-head">
-          <div><span>ENTRY STYLE</span><small>Cara membaca peluang, bukan rekomendasi transaksi otomatis.</small></div>
+          <div><span>ENTRY STYLE</span><small>Breakout Watch, Breakout Confirmed, Pullback, atau Buy on Weakness.</small></div>
           <label class="market-stage-control"><span>Setup Stage</span>
             <select id="marketStageFilter" aria-label="Filter Setup Stage">
               <option value="ALL">Semua tahap</option>
@@ -168,6 +168,15 @@
     };
     const gcCell=v=>`<span class="gc-state ${gcStateClass(v)}"><b>${publicGcState(v)}</b></span>`;
 
+    function publicEntryMode(d){
+      const stage=String(d?.setup_stage||'').toUpperCase();
+      const style=String(d?.entry_style||'').toUpperCase();
+      if(style==='BREAKOUT')return stage==='CONFIRMED'?'BREAKOUT CONFIRMED':'BREAKOUT WATCH';
+      if(style==='PULLBACK')return 'PULLBACK';
+      if(style==='WEAKNESS')return 'BUY ON WEAKNESS';
+      return '';
+    }
+
     function byScore(list){
       return list.slice().sort((a,b)=>(Number(b?.score)||0)-(Number(a?.score)||0)||String(a?.ticker||'').localeCompare(String(b?.ticker||'')));
     }
@@ -191,7 +200,7 @@
 
     function strategyMeta(d){
       const stage=String(d?.setup_stage||'').toUpperCase();
-      const style=String(d?.entry_style||'').toUpperCase();
+      const style=publicEntryMode(d);
       if(!stage&&!style)return '';
       return `<div class="market-setup-meta">${stage?`<span class="market-stage ${stageClass(stage)}">${stage}</span>`:''}${style?`<span class="market-entry-style ${entryClass(style)}">${style}</span>`:''}</div>`;
     }
@@ -240,11 +249,11 @@
       const strategyReady=rows.some(r=>r.data&&(String(r.data.setup_stage||'').trim()||String(r.data.entry_style||'').trim()));
       panel.hidden=!strategyReady;
       if(!strategyReady){entryFilter='ALL';stageFilter='ALL';return;}
-      const styles=['ALL','BREAKOUT','PULLBACK','WEAKNESS'];
+      const styles=['ALL','BREAKOUT WATCH','BREAKOUT CONFIRMED','PULLBACK','BUY ON WEAKNESS'];
       host.innerHTML=styles.map(style=>{
         const count=style==='ALL'
-          ? rows.filter(r=>r.data&&String(r.data.entry_style||'').trim()).length
-          : rows.filter(r=>r.data&&String(r.data.entry_style||'').toUpperCase()===style).length;
+          ? rows.filter(r=>r.data&&publicEntryMode(r.data)).length
+          : rows.filter(r=>r.data&&publicEntryMode(r.data)===style).length;
         const label=style==='ALL'?'ALL STYLE':style;
         return `<button type="button" data-entry-filter="${style}" class="${entryFilter===style?'active':''}"><span>${label}</span><strong>${count}</strong></button>`;
       }).join('');
@@ -290,7 +299,7 @@
       const body=$('signalMonitorBody');
       let view=rows.filter(r=>r.data);
       if(filter!=='ALL')view=view.filter(r=>String(r.data.status||'').toUpperCase()===filter);
-      if(entryFilter!=='ALL')view=view.filter(r=>String(r.data.entry_style||'').toUpperCase()===entryFilter);
+      if(entryFilter!=='ALL')view=view.filter(r=>publicEntryMode(r.data)===entryFilter);
       if(stageFilter!=='ALL')view=view.filter(r=>String(r.data.setup_stage||'').toUpperCase()===stageFilter);
       if(bullishOnly)view=view.filter(r=>String(r.data.trend||'').toUpperCase()==='BULLISH');
       view=sortRows(view);
