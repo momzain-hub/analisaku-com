@@ -1,22 +1,15 @@
-/* Analisaku Decision Panel price context. Public outputs only. */
+/* Analisaku Decision Panel execution-plan context. Public outputs only. */
 (function(){
   if(document.documentElement.dataset.decisionPriceContextModule==='true')return;
   document.documentElement.dataset.decisionPriceContextModule='true';
 
   const API=String(window.ANALISAKU_SIGNAL_API||'https://analisaku-signal.pitizain.workers.dev/signal');
-  let requestId=0;
-  let timer=0;
-
+  let requestId=0,timer=0;
   const $=id=>document.getElementById(id);
-  const numeric=v=>{
-    if(v===null||v===undefined||String(v).trim()==='')return null;
-    const n=Number(v);
-    return Number.isFinite(n)&&n>0?n:null;
-  };
-  const fmt=v=>{
-    const n=numeric(v);
-    return n===null?'—':n.toLocaleString('id-ID',{maximumFractionDigits:2});
-  };
+  const numeric=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(v);return Number.isFinite(n)&&n>0?n:null};
+  const fmt=v=>{const n=numeric(v);return n===null?'—':n.toLocaleString('id-ID',{maximumFractionDigits:2})};
+  const pct=v=>Number.isFinite(v)?`${v.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})}%`:'—';
+  const rr=v=>Number.isFinite(v)&&v>0?`1 : ${v.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:2})}`:'—';
   const clean=v=>String(v||'').toUpperCase().replace(/^IDX:/,'').replace(/[^A-Z0-9._-]/g,'').slice(0,20);
   const apiTf=v=>({D:'1D',W:'1W',M:'1M'})[String(v||'D').toUpperCase()]||String(v||'D');
 
@@ -29,184 +22,155 @@
     return '';
   }
 
-  function areaOf(data){
-    const mode=modeOf(data);
-    const styleLow=numeric(data?.style_entry_low),styleHigh=numeric(data?.style_entry_high);
-    if(mode){
-      return {mode,low:styleLow,high:styleHigh,ready:styleLow!==null||styleHigh!==null,reference:false};
-    }
-    const low=numeric(data?.entry_low),high=numeric(data?.entry_high);
-    return {mode:'',low,high,ready:low!==null||high!==null,reference:true};
-  }
-
-  function rangeOf(area){
-    if(!area?.ready)return '—';
-    const values=[area.low,area.high].filter(v=>v!==null);
-    return values.map(fmt).join(' – ')||'—';
-  }
-
-  function areaLabel(mode,ctxKey='UNKNOWN'){
+  function areaLabel(mode){
     if(mode==='BREAKOUT WATCH')return ['AREA KONFIRMASI','Zona yang perlu diuji sebelum breakout dianggap siap'];
     if(mode==='BREAKOUT CONFIRMED')return ['BREAKOUT ENTRY','Area eksekusi setelah breakout terkonfirmasi'];
     if(mode==='PULLBACK')return ['PULLBACK ENTRY','Area retest pada struktur breakout yang masih valid'];
     if(mode==='BUY ON WEAKNESS')return ['WEAKNESS ENTRY','Area weakness pada struktur bullish yang masih valid'];
-    if(ctxKey==='BELOW')return ['AREA KONFIRMASI','Area referensi yang perlu direclaim / dikonfirmasi'];
-    if(ctxKey==='IN')return ['ENTRY / DECISION AREA','Harga sedang berada di area keputusan'];
-    if(ctxKey==='ABOVE')return ['AREA REFERENSI ENTRY','Harga sudah berada di atas area referensi'];
     return ['ENTRY / DECISION AREA','Area keputusan dari Master Signal'];
   }
 
-  function wait(){
-    if(!$('decisionPanel')||!$('dEntry')||!$('tvTicker')||!$('tvInterval')){
-      setTimeout(wait,180);return;
+  function riskLabel(mode){
+    if(mode==='BREAKOUT WATCH')return ['BATAS RISIKO RENCANA','Belum menjadi stop aktif sebelum entry'];
+    if(mode==='BREAKOUT CONFIRMED')return ['STOP BREAKOUT','Batas risiko skenario breakout'];
+    if(mode==='PULLBACK')return ['STOP PULLBACK','Batas risiko skenario pullback'];
+    if(mode==='BUY ON WEAKNESS')return ['STOP WEAKNESS','Batas risiko skenario weakness'];
+    return ['INVALIDATION / STOP','Batas struktur utama dianggap gagal'];
+  }
+
+  function areaOf(data){
+    const mode=modeOf(data),a=numeric(data?.style_entry_low),b=numeric(data?.style_entry_high);
+    if(mode)return {mode,low:a,high:b,ready:a!==null||b!==null};
+    const lo=numeric(data?.entry_low),hi=numeric(data?.entry_high);
+    return {mode:'',low:lo,high:hi,ready:lo!==null||hi!==null};
+  }
+  function rangeOf(area){if(!area.ready)return '—';return [area.low,area.high].filter(v=>v!==null).map(fmt).join(' – ')||'—'}
+
+  function nextTargetOf(data){
+    const p=numeric(data?.price),trend=String(data?.trend||'').toUpperCase();
+    const t=[numeric(data?.target1),numeric(data?.target2),numeric(data?.target3)].filter(v=>v!==null);
+    if(!t.length)return {value:null,index:0};
+    if(p===null)return {value:t[0],index:1};
+    const i=trend==='BEARISH'?t.findIndex(v=>v<p):t.findIndex(v=>v>p);
+    return i>=0?{value:t[i],index:i+1}:{value:null,index:0};
+  }
+
+  function planOf(data){
+    const area=areaOf(data),mode=area.mode;
+    const styleStop=numeric(data?.style_stop),structural=numeric(data?.invalidation);
+    const risk={value:mode?styleStop:structural,ready:(mode?styleStop:structural)!==null};
+    const target=nextTargetOf(data);
+    let riskPct=null,ratio=null;
+    if(mode&&area.ready&&risk.ready&&target.value!==null){
+      const vals=[area.low,area.high].filter(v=>v!==null);
+      const entry=vals.length?Math.max(...vals):null;
+      if(entry!==null&&risk.value<entry){
+        const r=entry-risk.value,reward=target.value-entry;
+        riskPct=r/entry*100;
+        ratio=reward>0?reward/r:null;
+      }
     }
-    ensureCards();
-    bind();
-    refresh();
+    return {area,risk,target,riskPct,ratio};
+  }
+
+  function contextOf(data,plan){
+    const p=numeric(data?.price),s=String(data?.status||'').toUpperCase();
+    if(s==='EXIT')return {key:'INVALID',label:'INVALID / EXIT',note:'Skenario tidak aktif'};
+    if(p===null)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Harga snapshot belum tersedia'};
+    if(plan.area.mode&&plan.risk.ready&&p<=plan.risk.value)return {key:'INVALID',label:'DI BAWAH BATAS RISIKO',note:'Harga telah melewati batas risiko skenario'};
+    if(plan.area.mode&&!plan.area.ready)return {key:'UNKNOWN',label:'MENUNGGU AREA SKENARIO',note:'Klasifikasi tersedia, area khusus belum diterima'};
+    if(!plan.area.ready)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Area harga belum tersedia'};
+    const vals=[plan.area.low,plan.area.high].filter(v=>v!==null),lo=Math.min(...vals),hi=Math.max(...vals);
+    if(p<lo)return {key:'BELOW',label:'BELOW ZONE',note:'Harga masih di bawah area skenario'};
+    if(p<=hi)return {key:'IN',label:'IN ZONE',note:'Harga sedang berada di area skenario'};
+    return {key:'ABOVE',label:'ABOVE ZONE',note:'Harga sudah di atas area; hindari chase'};
   }
 
   function ensureCards(){
-    const grid=$('decisionPanel')?.querySelector('.decision-grid');
-    if(!grid)return;
-
-    let priceCard=$('dCurrentPrice')?.closest('.decision-card');
-    if(!priceCard){
-      priceCard=document.createElement('div');
-      priceCard.className='decision-card decision-price-card';
-      priceCard.innerHTML='<span>CURRENT PRICE</span><strong id="dCurrentPrice">—</strong><small>Harga snapshot terakhir</small>';
-      grid.insertBefore(priceCard,grid.firstChild);
-    }
-
-    let positionCard=$('dPricePosition')?.closest('.decision-card');
-    if(!positionCard){
-      positionCard=document.createElement('div');
-      positionCard.className='decision-card decision-position-card';
-      positionCard.innerHTML='<span>PRICE POSITION</span><strong id="dPricePosition">—</strong><small id="dPricePositionNote">Posisi harga terhadap area skenario</small>';
-      grid.insertBefore(positionCard,priceCard.nextSibling);
-    }
-
-    if(!$('dEntryStyle')){
-      const card=document.createElement('div');
-      card.className='decision-card decision-entry-style-card';
-      card.innerHTML='<span>ENTRY STYLE</span><strong id="dEntryStyle">—</strong><small>Klasifikasi skenario aktif</small>';
-      const setupCard=$('dSetup')?.closest('.decision-card');
-      if(setupCard)setupCard.insertAdjacentElement('afterend',card);else grid.appendChild(card);
-    }
+    const grid=$('decisionPanel')?.querySelector('.decision-grid');if(!grid)return;
+    const add=(id,label,note,after)=>{
+      if($(id))return;
+      const card=document.createElement('div');card.className='decision-card';card.innerHTML=`<span>${label}</span><strong id="${id}">—</strong><small>${note}</small>`;
+      const anchor=after?$(after)?.closest('.decision-card'):null;
+      if(anchor)anchor.insertAdjacentElement('afterend',card);else grid.appendChild(card);
+    };
+    add('dCurrentPrice','CURRENT PRICE','Harga snapshot terakhir');
+    add('dPricePosition','PRICE POSITION','Posisi harga terhadap area skenario','dCurrentPrice');
+    add('dEntryStyle','ENTRY STYLE','Klasifikasi skenario aktif','dSetup');
+    add('dRiskPct','RISK','Risiko konservatif dari batas atas entry','dEntryStyle');
+    add('dRiskReward','RISK : REWARD','Menggunakan next target aktif','dRiskPct');
+    const priceCard=$('dCurrentPrice')?.closest('.decision-card');if(priceCard&&grid.firstElementChild!==priceCard)grid.insertBefore(priceCard,grid.firstChild);
+    const posCard=$('dPricePosition')?.closest('.decision-card');if(posCard&&priceCard?.nextSibling!==posCard)grid.insertBefore(posCard,priceCard.nextSibling);
 
     const entry=$('dEntry')?.closest('.decision-card');
-    if(entry){
-      const label=entry.querySelector('span');
-      const note=entry.querySelector('small');
-      if(label)label.id='dEntryLabel';
-      if(note)note.id='dEntryNote';
-    }
+    if(entry){entry.querySelector('span').id='dEntryLabel';entry.querySelector('small').id='dEntryNote';}
+    const stop=$('dStop')?.closest('.decision-card');
+    if(stop){stop.querySelector('span').id='dStopLabel';stop.querySelector('small').id='dStopNote';}
+    const t1=$('dTp1')?.closest('.decision-card');
+    if(t1){t1.querySelector('span').id='dTarget1Label';t1.querySelector('small').id='dTarget1Note';}
   }
 
-  function bind(){
-    if(document.documentElement.dataset.decisionPriceContextBound==='true')return;
-    document.documentElement.dataset.decisionPriceContextBound='true';
-
-    $('tvApply')?.addEventListener('click',schedule);
-    $('tvInterval')?.addEventListener('change',schedule);
-    $('tvTicker')?.addEventListener('keydown',e=>{if(e.key==='Enter')schedule()});
-    document.querySelectorAll('.tv-chip').forEach(btn=>btn.addEventListener('click',schedule));
-
-    const source=$('decisionSource');
-    if(source)new MutationObserver(schedule).observe(source,{childList:true,subtree:true,characterData:true});
-    setInterval(refresh,60000);
-  }
-
-  function schedule(){clearTimeout(timer);timer=setTimeout(refresh,450);}
-
-  function endpoint(ticker,timeframe){
-    const u=new URL(API);
-    u.pathname='/signal';u.search='';u.hash='';
-    u.searchParams.set('ticker',ticker);
-    u.searchParams.set('timeframe',timeframe);
-    return u;
-  }
-
-  function contextOf(data){
-    const p=numeric(data?.price),area=areaOf(data);
-    if(p===null)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Harga snapshot belum tersedia',area};
-    if(area.mode&&!area.ready)return {key:'UNKNOWN',label:'MENUNGGU AREA SKENARIO',note:'Klasifikasi sudah ada, tetapi area khusus skenario belum diterima',area};
-    if(!area.ready)return {key:'UNKNOWN',label:'BELUM TERSEDIA',note:'Area harga belum tersedia',area};
-    const values=[area.low,area.high].filter(v=>v!==null);
-    const lo=Math.min(...values),hi=Math.max(...values);
-    if(p<lo)return {key:'BELOW',label:'DI BAWAH AREA SKENARIO',note:'Harga masih di bawah area yang sedang dipantau',area};
-    if(p<=hi)return {key:'IN',label:'DI AREA SKENARIO',note:'Harga sedang berada di area skenario aktif',area};
-    return {key:'ABOVE',label:'DI ATAS AREA SKENARIO',note:'Harga sudah berada di atas area skenario aktif',area};
-  }
-
-  function decisionText(status,ctx,data){
-    const s=String(status||'WAIT').toUpperCase();
-    if(['EXIT','TAKE PROFIT'].includes(s))return null;
-    const mode=ctx.area?.mode||'';
-    const trigger=fmt(data?.trigger);
-
+  function decisionText(data,plan,ctx){
+    const mode=plan.area.mode,s=String(data?.status||'WAIT').toUpperCase();
+    if(s==='EXIT')return ['Skenario tidak aktif.','Tunggu struktur baru sebelum mempertimbangkan transaksi.'];
+    if(ctx.key==='INVALID')return ['Batas risiko terlewati.','Jangan mempertahankan skenario entry yang batas risikonya sudah gagal.'];
     if(mode==='BREAKOUT WATCH'){
-      if(ctx.key==='BELOW')return ['Menunggu area konfirmasi.','Harga belum masuk zona konfirmasi breakout. Pantau penguatan tanpa mengejar harga.'];
-      if(ctx.key==='IN')return ['Breakout sedang diuji.','Harga sudah berada di area konfirmasi. Tunggu status dan konfirmasi penutupan sebelum eksekusi.'];
-      if(ctx.key==='ABOVE')return ['Harga di atas area konfirmasi.','Cek apakah breakout sudah berstatus CONFIRMED. Jika belum, hindari chase dan tunggu validasi berikutnya.'];
+      if(ctx.key==='IN')return ['Breakout sedang diuji.','Ini masih fase watch, bukan entry otomatis. Tunggu konfirmasi breakout.'];
+      if(ctx.key==='ABOVE')return ['Harga melewati area konfirmasi.','Pastikan status sudah berubah menjadi CONFIRMED; jika belum, jangan chase.'];
+      return ['Menunggu area konfirmasi.','Pantau harga mendekati trigger dan tunggu konfirmasi.'];
     }
     if(mode==='BREAKOUT CONFIRMED'){
-      if(ctx.key==='IN')return ['Breakout terkonfirmasi di area entry.','Gunakan area breakout yang aktif bersama invalidation dan target; tetap sesuaikan position size.'];
-      if(ctx.key==='ABOVE')return ['Harga di atas breakout entry.','Breakout valid tidak berarti harus dikejar. Tunggu risk/reward yang tetap masuk akal.'];
-      if(ctx.key==='BELOW')return ['Harga kembali di bawah breakout entry.','Pantau apakah struktur masih valid atau berubah menjadi skenario retest/pullback.'];
+      if(ctx.key==='IN')return ['Breakout terkonfirmasi.','Area entry aktif; gunakan stop skenario dan next target sebagai trading plan.'];
+      if(ctx.key==='ABOVE')return ['Breakout valid, tetapi harga sudah di atas entry.','Jangan chase jika risk/reward sudah memburuk.'];
+      return ['Harga kembali di bawah breakout entry.','Pantau apakah berubah menjadi retest/pullback atau setup melemah.'];
     }
     if(mode==='PULLBACK'){
-      if(ctx.key==='IN')return ['Harga masuk area pullback.','Skenario retest sedang aktif. Konfirmasi bahwa struktur tetap valid sebelum eksekusi.'];
-      if(ctx.key==='ABOVE')return ['Pullback belum kembali ke area.','Tunggu retest yang lebih favorable; jangan memaksakan entry di atas zona.'];
-      if(ctx.key==='BELOW')return ['Harga menembus bawah area pullback.','Periksa invalidation dan kualitas struktur sebelum mempertimbangkan skenario ini.'];
+      if(ctx.key==='IN')return ['Pullback berada di area entry.','Retest masih valid; gunakan stop pullback dan next target.'];
+      if(ctx.key==='ABOVE')return ['Harga belum kembali ke area pullback.','Tunggu retest yang lebih favorable daripada mengejar harga.'];
+      return ['Harga di bawah area pullback.','Periksa batas risiko sebelum mempertahankan skenario.'];
     }
     if(mode==='BUY ON WEAKNESS'){
-      if(ctx.key==='IN')return ['Harga masuk area weakness.','Area weakness aktif pada struktur bullish; tetap tunggu respons harga dan disiplin invalidation.'];
-      if(ctx.key==='ABOVE')return ['Harga belum berada di area weakness.','Tunggu harga kembali ke zona yang lebih favorable daripada mengejar pergerakan.'];
-      if(ctx.key==='BELOW')return ['Harga di bawah area weakness.','Periksa apakah struktur bullish masih valid sebelum mempertahankan skenario.'];
+      if(ctx.key==='IN')return ['Harga berada di area weakness.','Struktur masih valid, tetapi tetap tunggu respons harga dan disiplin risk boundary.'];
+      if(ctx.key==='ABOVE')return ['Harga di atas area weakness.','Tunggu area yang lebih favorable; jangan mengejar harga.'];
+      return ['Harga di bawah area weakness.','Periksa apakah struktur bullish masih valid.'];
     }
-
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='BELOW')return ['Tunggu harga kembali ke area keputusan.',`Harga masih di bawah area referensi${trigger!=='—'?`; pantau trigger sekitar ${trigger}`:''}.`];
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='IN')return ['Harga sudah di area keputusan.','Tunggu konfirmasi Master Signal; jangan terburu-buru entry.'];
-    if((s==='WAIT'||s==='WATCH')&&ctx.key==='ABOVE')return ['Harga sudah di atas area referensi.','Hindari mengejar harga. Tunggu setup yang memberi risk/reward lebih jelas.'];
     return null;
   }
 
   function render(data){
     ensureCards();
-    const ctx=contextOf(data),p=numeric(data?.price),mode=ctx.area?.mode||'';
-    if($('dCurrentPrice'))$('dCurrentPrice').textContent=p===null?'—':fmt(p);
+    const plan=planOf(data),ctx=contextOf(data,plan),mode=plan.area.mode;
+    if($('dCurrentPrice'))$('dCurrentPrice').textContent=fmt(data?.price);
     if($('dPricePosition')){$('dPricePosition').textContent=ctx.label;$('dPricePosition').dataset.position=ctx.key;}
-    if($('dPricePositionNote'))$('dPricePositionNote').textContent=ctx.note;
+    const posNote=$('dPricePosition')?.closest('.decision-card')?.querySelector('small');if(posNote)posNote.textContent=ctx.note;
     if($('dEntryStyle'))$('dEntryStyle').textContent=mode||'—';
     if($('dSetup'))$('dSetup').textContent=String(data?.setup_stage||data?.setup||'INACTIVE').toUpperCase();
-    if($('dEntry'))$('dEntry').textContent=rangeOf(ctx.area);
+    if($('dEntry'))$('dEntry').textContent=rangeOf(plan.area);
+    if($('dRiskPct'))$('dRiskPct').textContent=mode?pct(plan.riskPct):'—';
+    if($('dRiskReward'))$('dRiskReward').textContent=mode?rr(plan.ratio):'—';
 
-    const entryLabel=$('dEntryLabel'),entryNote=$('dEntryNote');
-    if(entryLabel&&entryNote){
-      const copy=areaLabel(mode,ctx.key);
-      entryLabel.textContent=copy[0];
-      entryNote.textContent=mode&&!ctx.area?.ready?'Menunggu area khusus dari Signal Hub':copy[1];
-    }
+    const aCopy=areaLabel(mode);if($('dEntryLabel'))$('dEntryLabel').textContent=aCopy[0];if($('dEntryNote'))$('dEntryNote').textContent=mode&&!plan.area.ready?'Menunggu area khusus dari Signal Hub':aCopy[1];
+    const rCopy=riskLabel(mode);if($('dStopLabel'))$('dStopLabel').textContent=rCopy[0];if($('dStopNote'))$('dStopNote').textContent=mode&&!plan.risk.ready?'Menunggu risk boundary dari Signal Hub':rCopy[1];if($('dStop'))$('dStop').textContent=plan.risk.ready?fmt(plan.risk.value):'—';
+    if($('dTarget1Label'))$('dTarget1Label').textContent='NEXT TARGET';if($('dTarget1Note'))$('dTarget1Note').textContent=plan.target.value!==null?`Target aktif berikutnya${plan.target.index?` (T${plan.target.index})`:''}`:'Belum ada target berikutnya';if($('dTp1'))$('dTp1').textContent=plan.target.value!==null?fmt(plan.target.value):'—';
 
-    const custom=decisionText(data?.status,ctx,data);
-    if(custom){
-      if($('dDecision'))$('dDecision').textContent=custom[0];
-      if($('dDecisionCopy'))$('dDecisionCopy').textContent=custom[1];
-    }
+    const custom=decisionText(data,plan,ctx);
+    if(custom){if($('dDecision'))$('dDecision').textContent=custom[0];if($('dDecisionCopy'))$('dDecisionCopy').textContent=custom[1];}
   }
 
+  function endpoint(ticker,timeframe){const u=new URL(API);u.pathname='/signal';u.search='';u.hash='';u.searchParams.set('ticker',ticker);u.searchParams.set('timeframe',timeframe);return u;}
+  function schedule(){clearTimeout(timer);timer=setTimeout(refresh,450);}
+  function bind(){
+    if(document.documentElement.dataset.decisionPriceContextBound==='true')return;
+    document.documentElement.dataset.decisionPriceContextBound='true';
+    $('tvApply')?.addEventListener('click',schedule);$('tvInterval')?.addEventListener('change',schedule);$('tvTicker')?.addEventListener('keydown',e=>{if(e.key==='Enter')schedule()});
+    document.querySelectorAll('.tv-chip').forEach(btn=>btn.addEventListener('click',schedule));
+    const source=$('decisionSource');if(source)new MutationObserver(schedule).observe(source,{childList:true,subtree:true,characterData:true});
+    setInterval(refresh,60000);
+  }
   async function refresh(){
-    const ticker=clean($('tvTicker')?.value||$('decisionTicker')?.textContent),tf=apiTf($('tvInterval')?.value||'D');
-    if(!ticker)return;
-    const id=++requestId;
-    try{
-      const r=await fetch(endpoint(ticker,tf),{cache:'no-store'});
-      if(!r.ok)return;
-      const body=await r.json();
-      if(id!==requestId)return;
-      render(body.data||body);
-    }catch(e){}
+    const ticker=clean($('tvTicker')?.value||$('decisionTicker')?.textContent),tf=apiTf($('tvInterval')?.value||'D');if(!ticker)return;
+    const id=++requestId;try{const r=await fetch(endpoint(ticker,tf),{cache:'no-store'});if(!r.ok)return;const body=await r.json();if(id!==requestId)return;render(body.data||body);}catch(e){}
   }
-
+  function wait(){if(!$('decisionPanel')||!$('dEntry')||!$('tvTicker')||!$('tvInterval')){setTimeout(wait,180);return;}ensureCards();bind();refresh();}
   wait();
 })();
