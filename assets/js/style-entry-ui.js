@@ -136,9 +136,67 @@
     });
   }
 
+  function decorateDetail(){
+    const modal=document.querySelector('.radar-detail-modal');
+    const title=modal?.querySelector('#radarDetailTitle');
+    if(!modal||!title||modal.closest('.radar-detail-overlay')?.hidden)return;
+    const ticker=String(title.firstChild?.nodeValue||'').trim().toUpperCase();
+    const d=map.get(ticker);
+    if(!d)return;
+
+    const area=areaOf(d);
+    const tags=modal.querySelector('.radar-detail-tags');
+    if(tags){
+      tags.querySelectorAll('[data-style-chip]').forEach(el=>el.remove());
+      const stage=String(d.setup_stage||'').toUpperCase();
+      if(stage){
+        const chip=document.createElement('span');
+        chip.className='radar-detail-chip';
+        chip.dataset.styleChip='stage';
+        chip.textContent=stage;
+        tags.appendChild(chip);
+      }
+      if(area.mode){
+        const chip=document.createElement('span');
+        chip.className='radar-detail-chip strong';
+        chip.dataset.styleChip='mode';
+        chip.textContent=area.mode;
+        tags.appendChild(chip);
+      }
+    }
+
+    const grid=modal.querySelector('.radar-detail-grid');
+    if(grid){
+      const fields=[...grid.querySelectorAll('.radar-detail-field')];
+      let entryField=fields.find(field=>String(field.querySelector('small')?.textContent||'').trim().toUpperCase()==='ENTRY');
+      if(!entryField)entryField=fields.find(field=>field.dataset.styleEntryField==='true');
+      if(entryField){
+        entryField.dataset.styleEntryField='true';
+        const small=entryField.querySelector('small'),strong=entryField.querySelector('strong');
+        if(small)small.textContent=area.label;
+        if(strong)strong.textContent=range(area);
+        entryField.classList.toggle('is-empty',!area.ready);
+      }
+
+      let priceField=grid.querySelector('[data-style-price-field]');
+      if(!priceField&&numeric(d.price)!==null){
+        priceField=document.createElement('div');
+        priceField.className='radar-detail-field';
+        priceField.dataset.stylePriceField='true';
+        priceField.innerHTML='<small>Current Price</small><strong></strong>';
+        grid.prepend(priceField);
+      }
+      if(priceField){
+        const strong=priceField.querySelector('strong');
+        if(strong)strong.textContent=fmt(d.price);
+      }
+    }
+  }
+
   function decorate(){
     decorateTable();
     decorateOpportunities();
+    decorateDetail();
   }
 
   async function load(){
@@ -153,6 +211,13 @@
   }
 
   const observer=new MutationObserver(()=>decorate());
+  function bindDetailObserver(){
+    const modal=document.querySelector('.radar-detail-overlay');
+    if(!modal){setTimeout(bindDetailObserver,300);return;}
+    observer.observe(modal,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+    decorateDetail();
+  }
+
   function bind(){
     const body=document.getElementById('signalMonitorBody');
     const opportunities=document.getElementById('marketOpportunities');
@@ -161,6 +226,7 @@
     observer.observe(opportunities,{childList:true,subtree:true});
     decorate();
     load();
+    bindDetailObserver();
     setInterval(load,60000);
   }
 
