@@ -276,7 +276,7 @@ updateTechReadiness();
 
 /* ---------- Technical page: TradingView + Signal Monitor V2 ---------- */
 if(document.querySelector('.technical-hero')){
-  const VERSION='20260814-0845';
+  const VERSION='20260816-0025';
 
   const tvModule=document.createElement('script');
   tvModule.src=assetUrl('tradingview.js','assets/js/tradingview.js')+'?v='+VERSION;
