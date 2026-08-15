@@ -46,12 +46,19 @@
   }
   function rangeOf(area){if(!area.ready)return '—';return [area.low,area.high].filter(v=>v!==null).map(fmt).join(' – ')||'—'}
 
-  function nextTargetOf(data){
+  function nextTargetOf(data,area){
     const p=numeric(data?.price),trend=String(data?.trend||'').toUpperCase();
     const t=[numeric(data?.target1),numeric(data?.target2),numeric(data?.target3)].filter(v=>v!==null);
     if(!t.length)return {value:null,index:0};
-    if(p===null)return {value:t[0],index:1};
-    const i=trend==='BEARISH'?t.findIndex(v=>v<p):t.findIndex(v=>v>p);
+    if(trend==='BEARISH'&&!area?.mode){
+      if(p===null)return {value:t[0],index:1};
+      const i=t.findIndex(v=>v<p);
+      return i>=0?{value:t[i],index:i+1}:{value:null,index:0};
+    }
+    const zoneTop=area?.mode&&area?.ready?Math.max(...[area.low,area.high].filter(v=>v!==null)):null;
+    const threshold=p===null?zoneTop:(zoneTop===null?p:Math.max(p,zoneTop));
+    if(threshold===null)return {value:t[0],index:1};
+    const i=t.findIndex(v=>v>threshold);
     return i>=0?{value:t[i],index:i+1}:{value:null,index:0};
   }
 
@@ -59,7 +66,7 @@
     const area=areaOf(data),mode=area.mode;
     const styleStop=numeric(data?.style_stop),structural=numeric(data?.invalidation);
     const risk={value:mode?styleStop:structural,ready:(mode?styleStop:structural)!==null};
-    const target=nextTargetOf(data);
+    const target=nextTargetOf(data,area);
     let riskPct=null,ratio=null;
     if(mode&&area.ready&&risk.ready&&target.value!==null){
       const vals=[area.low,area.high].filter(v=>v!==null);
@@ -99,6 +106,8 @@
     add('dEntryStyle','ENTRY STYLE','Klasifikasi skenario aktif','dSetup');
     add('dRiskPct','RISK','Risiko konservatif dari batas atas entry','dEntryStyle');
     add('dRiskReward','RISK : REWARD','Menggunakan next target aktif','dRiskPct');
+    const riskCard=$('dRiskPct')?.closest('.decision-card');if(riskCard?.querySelector('span'))riskCard.querySelector('span').id='dRiskPctLabel';
+    const rrCard=$('dRiskReward')?.closest('.decision-card');if(rrCard?.querySelector('span'))rrCard.querySelector('span').id='dRiskRewardLabel';
     const priceCard=$('dCurrentPrice')?.closest('.decision-card');if(priceCard&&grid.firstElementChild!==priceCard)grid.insertBefore(priceCard,grid.firstChild);
     const posCard=$('dPricePosition')?.closest('.decision-card');if(posCard&&priceCard?.nextSibling!==posCard)grid.insertBefore(posCard,priceCard.nextSibling);
 
@@ -148,6 +157,8 @@
     if($('dEntry'))$('dEntry').textContent=rangeOf(plan.area);
     if($('dRiskPct'))$('dRiskPct').textContent=mode?pct(plan.riskPct):'—';
     if($('dRiskReward'))$('dRiskReward').textContent=mode?rr(plan.ratio):'—';
+    if($('dRiskPctLabel'))$('dRiskPctLabel').textContent=mode==='BREAKOUT WATCH'?'PLANNED RISK':'RISK';
+    if($('dRiskRewardLabel'))$('dRiskRewardLabel').textContent=mode==='BREAKOUT WATCH'?'PLANNED R:R':'RISK : REWARD';
 
     const aCopy=areaLabel(mode);if($('dEntryLabel'))$('dEntryLabel').textContent=aCopy[0];if($('dEntryNote'))$('dEntryNote').textContent=mode&&!plan.area.ready?'Menunggu area khusus dari Signal Hub':aCopy[1];
     const rCopy=riskLabel(mode);if($('dStopLabel'))$('dStopLabel').textContent=rCopy[0];if($('dStopNote'))$('dStopNote').textContent=mode&&!plan.risk.ready?'Menunggu risk boundary dari Signal Hub':rCopy[1];if($('dStop'))$('dStop').textContent=plan.risk.ready?fmt(plan.risk.value):'—';
