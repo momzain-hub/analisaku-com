@@ -47,6 +47,12 @@ export default {
       return ['BREAKOUT','PULLBACK','WEAKNESS'].includes(style) ? style : '';
     };
 
+    const publicPrice = value => {
+      if (value === undefined || value === null || value === '') return '';
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? String(value) : '';
+    };
+
     const gcState = value => {
       const state = String(value || '').toUpperCase();
       return ['FRESH','RECENT','ACTIVE'].includes(state) ? state : 'OFF';
@@ -66,15 +72,17 @@ export default {
       setup: String(s?.setup || ''),
       setup_stage: publicStage(s?.setup_stage),
       entry_style: publicEntryStyle(s?.entry_style),
+      style_entry_low: publicPrice(s?.style_entry_low),
+      style_entry_high: publicPrice(s?.style_entry_high),
       status: String(s?.status || ''),
-      entry_low: String(s?.entry_low || ''),
-      entry_high: String(s?.entry_high || ''),
-      trigger: String(s?.trigger || ''),
-      invalidation: String(s?.invalidation || ''),
-      target1: String(s?.target1 || ''),
-      target2: String(s?.target2 || ''),
-      target3: String(s?.target3 || ''),
-      price: String(s?.price || ''),
+      entry_low: publicPrice(s?.entry_low),
+      entry_high: publicPrice(s?.entry_high),
+      trigger: publicPrice(s?.trigger),
+      invalidation: publicPrice(s?.invalidation),
+      target1: publicPrice(s?.target1),
+      target2: publicPrice(s?.target2),
+      target3: publicPrice(s?.target3),
+      price: publicPrice(s?.price),
       radar_status: String(s?.radar_status || ''),
       updated_at: Number(s?.updated_at || 0),
       received_at: Number(s?.received_at || 0)
@@ -120,7 +128,7 @@ export default {
       return json({
         ok: true,
         service: 'analisaku-signal',
-        version: '2.4-entry-style',
+        version: '2.5-style-entry',
         status: 'ready'
       });
     }
@@ -257,7 +265,7 @@ export default {
 
       return json({
         ok: true,
-        version: '2.4-entry-style',
+        version: '2.5-style-entry',
         mode: isBatch ? 'batch' : 'single',
         count: writes.length
       });
