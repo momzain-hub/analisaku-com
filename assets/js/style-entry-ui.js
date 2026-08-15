@@ -65,17 +65,20 @@
     return {label:'STRUCTURAL INVALIDATION',value:structural,ready:structural!==null,style:false};
   }
 
-  function nextTargetOf(d){
+  function nextTargetOf(d,area){
     const price=numeric(d?.price);
     const trend=String(d?.trend||'').toUpperCase();
     const targets=[numeric(d?.target1),numeric(d?.target2),numeric(d?.target3)].filter(v=>v!==null);
     if(!targets.length)return {value:null,index:0,passed:false};
-    if(price===null)return {value:targets[0],index:1,passed:false};
-    if(trend==='BEARISH'){
+    if(trend==='BEARISH'&&!area?.mode){
+      if(price===null)return {value:targets[0],index:1,passed:false};
       const i=targets.findIndex(v=>v<price);
       return i>=0?{value:targets[i],index:i+1,passed:i>0}:{value:null,index:0,passed:true};
     }
-    const i=targets.findIndex(v=>v>price);
+    const zoneTop=area?.mode&&area?.ready?Math.max(...[area.low,area.high].filter(v=>v!==null)):null;
+    const threshold=price===null?zoneTop:(zoneTop===null?price:Math.max(price,zoneTop));
+    if(threshold===null)return {value:targets[0],index:1,passed:false};
+    const i=targets.findIndex(v=>v>threshold);
     return i>=0?{value:targets[i],index:i+1,passed:i>0}:{value:null,index:0,passed:true};
   }
 
@@ -115,7 +118,7 @@
   function planOf(d){
     const area=areaOf(d);
     const risk=riskOf(d,area);
-    const target=nextTargetOf(d);
+    const target=nextTargetOf(d,area);
     const metrics=metricsOf(d,area,risk,target);
     const position=positionOf(d,area,risk);
     return {area,risk,target,metrics,position};
@@ -212,8 +215,8 @@
 
     grid.querySelectorAll('[data-execution-metric]').forEach(el=>el.remove());
     if(plan.area.mode){
-      const risk=document.createElement('div');risk.className='radar-detail-field';risk.dataset.executionMetric='risk';risk.innerHTML=`<small>Risk</small><strong>${pct(plan.metrics.riskPct)}</strong>`;
-      const ratio=document.createElement('div');ratio.className='radar-detail-field';ratio.dataset.executionMetric='rr';ratio.innerHTML=`<small>Risk : Reward</small><strong>${rr(plan.metrics.rr)}</strong>`;
+      const risk=document.createElement('div');risk.className='radar-detail-field';risk.dataset.executionMetric='risk';risk.innerHTML=`<small>${plan.area.mode==='BREAKOUT WATCH'?'Planned Risk':'Risk'}</small><strong>${pct(plan.metrics.riskPct)}</strong>`;
+      const ratio=document.createElement('div');ratio.className='radar-detail-field';ratio.dataset.executionMetric='rr';ratio.innerHTML=`<small>${plan.area.mode==='BREAKOUT WATCH'?'Planned R:R':'Risk : Reward'}</small><strong>${rr(plan.metrics.rr)}</strong>`;
       grid.append(risk,ratio);
     }
   }
