@@ -25,8 +25,8 @@ export default {
         .slice(0, 20);
 
     const normalizeTimeframe = value => {
-      const v = String(value || '').toUpperCase();
-      return ({ D:'1D', '1D':'1D', W:'1W', '1W':'1W', M:'1M', '1M':'1M' })[v] || v;
+      const v = String(value || '').toUpperCase().trim();
+      return ({ D:'1D', '1D':'1D', W:'1W', '1W':'1W', M:'1M', '1M':'1M' })[v] || '';
     };
 
     const toBool = value =>
@@ -37,26 +37,31 @@ export default {
       return Number.isFinite(n) ? n : 0;
     };
 
-    const publicStage = value => {
-      const stage = String(value || '').toUpperCase().trim();
-      return ['EARLY WATCH','CONFIRMED','ACTIVE'].includes(stage) ? stage : '';
+    const publicEnum = (value, allowed, fallback = '') => {
+      const v = String(value || '').toUpperCase().trim();
+      return allowed.includes(v) ? v : fallback;
     };
 
-    const publicEntryStyle = value => {
-      const style = String(value || '').toUpperCase().trim();
-      return ['BREAKOUT','PULLBACK','WEAKNESS'].includes(style) ? style : '';
-    };
+    const publicTrend = value => publicEnum(value, ['BULLISH','NEUTRAL','BEARISH'], 'NEUTRAL');
+    const publicSetup = value => publicEnum(value, ['ACTIVE','INACTIVE'], 'INACTIVE');
+    const publicStage = value => publicEnum(value, ['EARLY WATCH','CONFIRMED','ACTIVE']);
+    const publicEntryStyle = value => publicEnum(value, ['BREAKOUT','PULLBACK','WEAKNESS']);
+    const publicDecision = value => publicEnum(value, ['WAIT','WATCH','BUY SETUP','HOLD','TAKE PROFIT','EXIT'], 'WAIT');
+    const publicRadar = value => publicEnum(value, ['AVOID','WATCH','READY','HOT','EXTENDED'], 'AVOID');
 
     const publicPrice = value => {
       if (value === undefined || value === null || value === '') return '';
       const n = Number(value);
-      return Number.isFinite(n) && n > 0 ? String(value) : '';
+      return Number.isFinite(n) && n > 0 ? String(n) : '';
     };
 
-    const gcState = value => {
-      const state = String(value || '').toUpperCase();
-      return ['FRESH','RECENT','ACTIVE'].includes(state) ? state : 'OFF';
+    const publicTimestamp = value => {
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
     };
+
+    const gcState = value =>
+      publicEnum(value, ['FRESH','RECENT','ACTIVE'], 'OFF');
 
     const gcCandleAge = (value, state) => {
       if (gcState(state) === 'OFF') return null;
@@ -68,13 +73,13 @@ export default {
       ticker: normalizeTicker(s?.ticker),
       timeframe: normalizeTimeframe(s?.timeframe),
       score: toScore(s?.score),
-      trend: String(s?.trend || ''),
-      setup: String(s?.setup || ''),
+      trend: publicTrend(s?.trend),
+      setup: publicSetup(s?.setup),
       setup_stage: publicStage(s?.setup_stage),
       entry_style: publicEntryStyle(s?.entry_style),
       style_entry_low: publicPrice(s?.style_entry_low),
       style_entry_high: publicPrice(s?.style_entry_high),
-      status: String(s?.status || ''),
+      status: publicDecision(s?.status),
       entry_low: publicPrice(s?.entry_low),
       entry_high: publicPrice(s?.entry_high),
       trigger: publicPrice(s?.trigger),
@@ -83,24 +88,24 @@ export default {
       target2: publicPrice(s?.target2),
       target3: publicPrice(s?.target3),
       price: publicPrice(s?.price),
-      radar_status: String(s?.radar_status || ''),
-      updated_at: Number(s?.updated_at || 0),
-      received_at: Number(s?.received_at || 0)
+      radar_status: publicRadar(s?.radar_status),
+      updated_at: publicTimestamp(s?.updated_at),
+      received_at: publicTimestamp(s?.received_at)
     });
 
     const publicGc = s => ({
       ticker: normalizeTicker(s?.ticker),
       timeframe: normalizeTimeframe(s?.timeframe),
       score: toScore(s?.score),
-      radar_status: String(s?.radar_status || ''),
-      status: String(s?.status || ''),
+      radar_status: publicRadar(s?.radar_status),
+      status: publicDecision(s?.status),
       ema_gc: gcState(s?.ema_gc),
       ema_gc_candles: gcCandleAge(s?.ema_gc_age, s?.ema_gc),
       sma_gc: gcState(s?.sma_gc),
       sma_gc_candles: gcCandleAge(s?.sma_gc_age, s?.sma_gc),
       double_gc: toBool(s?.double_gc),
-      updated_at: Number(s?.updated_at || 0),
-      received_at: Number(s?.received_at || 0)
+      updated_at: publicTimestamp(s?.updated_at),
+      received_at: publicTimestamp(s?.received_at)
     });
 
     const byScore = (a, b) =>
@@ -157,6 +162,8 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/signals') {
       const timeframe = normalizeTimeframe(url.searchParams.get('timeframe') || '1D');
+      if (!timeframe) return json({ ok: false, error: 'timeframe tidak valid' }, 400);
+
       const all = await readAll(timeframe);
       const signals = all.map(publicSignal).sort(byScore);
 
@@ -170,6 +177,8 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/technical') {
       const timeframe = normalizeTimeframe(url.searchParams.get('timeframe') || '1D');
+      if (!timeframe) return json({ ok: false, error: 'timeframe tidak valid' }, 400);
+
       const internal = await readAll(timeframe);
 
       const ema = internal.filter(s => gcState(s.ema_gc) !== 'OFF');
@@ -185,7 +194,7 @@ export default {
       );
 
       const newest = internal.reduce(
-        (max, s) => Math.max(max, Number(s.updated_at || 0)),
+        (max, s) => Math.max(max, publicTimestamp(s.updated_at)),
         0
       );
 
@@ -241,8 +250,9 @@ export default {
         const item = raw[i] || {};
         const ticker = normalizeTicker(item.ticker);
         const timeframe = normalizeTimeframe(item.timeframe);
+        const decision = publicDecision(item.status);
 
-        if (!ticker || !timeframe || !item.status) {
+        if (!ticker || !timeframe || !item.status || !decision) {
           return json({ ok: false, error: 'payload tidak lengkap', index: i }, 400);
         }
 
