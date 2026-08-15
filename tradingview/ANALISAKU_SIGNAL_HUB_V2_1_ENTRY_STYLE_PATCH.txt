@@ -17,41 +17,66 @@ PUBLIC ENTRY STYLE FROM ENGINE
 - WEAKNESS
 - NONE / blank
 
-PUBLIC STYLE-SPECIFIC PRICE OUTPUTS
+PUBLIC STYLE-SPECIFIC EXECUTION OUTPUTS
 - style_entry_low
 - style_entry_high
 - style_stop
 
-These fields contain the final public entry zone and execution-risk boundary selected by the private engine for the active entry style. Public price levels are normalized to valid tradable price increments before being sent. The website must not derive or reproduce the private calculation.
+The private engine selects the final entry zone and risk boundary for the active entry style. Public price levels are normalized to valid exchange price increments before being sent. The website must not derive or reproduce the private signal formula.
 
 PUBLIC MARKET RADAR PRESENTATION
-The website presents the engine output in a more descriptive form without exposing private logic:
-- BREAKOUT + EARLY WATCH => BREAKOUT WATCH / AREA KONFIRMASI / planned risk boundary
-- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED / BREAKOUT ENTRY / breakout stop
-- PULLBACK => PULLBACK / PULLBACK ENTRY / pullback stop
-- WEAKNESS => BUY ON WEAKNESS / WEAKNESS ENTRY / weakness stop
+- BREAKOUT + EARLY WATCH => BREAKOUT WATCH / AREA KONFIRMASI / BATAS RISIKO RENCANA
+- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED / BREAKOUT ENTRY / STOP BREAKOUT
+- PULLBACK => PULLBACK / PULLBACK ENTRY / STOP PULLBACK
+- WEAKNESS => BUY ON WEAKNESS / WEAKNESS ENTRY / STOP WEAKNESS
 
-RISK / INVALIDATION DISTINCTION
-- invalidation remains the generic structural failure level of the underlying setup.
-- style_stop is the execution-specific risk boundary for the active entry style.
-- The style-specific stop is expected to be derived independently for each execution style; different styles may occasionally resolve to the same tradable price after rounding when the underlying structures overlap.
-- When an entry style exists but style_stop is not yet available, the frontend must show a pending state instead of presenting the generic invalidation as if it were a style-specific stop.
+EXECUTION PLAN DERIVED FROM PUBLIC OUTPUTS
+The website may calculate presentation-only metrics from approved public prices:
+- PRICE POSITION: BELOW ZONE / IN ZONE / ABOVE ZONE / INVALID
+- NEXT TARGET: first still-relevant target based on current price and trend direction
+- RISK %: conservative risk from the upper edge of the active bullish entry zone to style_stop
+- RISK : REWARD: conservative reward from the upper edge of the active bullish entry zone to NEXT TARGET, divided by the same risk
+These calculations do not reproduce proprietary signal rules.
+
+LIFECYCLE RULES
+- BREAKOUT WATCH is strictly pre-breakout and must not reappear for the same pattern after that pattern has already broken.
+- BREAKOUT CONFIRMED is the confirmation phase.
+- A valid post-breakout retest can become PULLBACK.
+- PULLBACK may persist briefly through a healthy rebound candle while the retest remains valid.
+- BUY ON WEAKNESS applies only before the current pattern has broken and while the bullish structure remains valid.
+
+RISK MODEL
+- style_stop is the execution risk boundary for the current entry style.
+- invalidation remains the structural invalidation of the broader setup.
+- A style stop may be reached before the broader structural setup is fully invalidated.
+- Different styles use different risk logic. Resulting prices are not forced to be numerically different if separate calculations legitimately normalize to the same exchange price increment.
+
+TARGET MODEL
+- target1 / target2 / target3 remain structural targets.
+- The website presents NEXT TARGET rather than blindly showing Target 1 if a prior target has already been passed.
+
+PRICE FRACTION NORMALIZATION
+- Exchange price fraction rules apply for one full Exchange Day and are adjusted on the following Exchange Day when the closing price moves into another price band.
+- Intraday execution-plan snapshots use the active session reference; confirmed daily-close plans prepare levels using the newly confirmed closing price band.
+- Public levels are rounded conservatively according to their role (entry zone, confirmation level, risk boundary, or target).
 
 BACKWARD COMPATIBILITY
-- entry_low / entry_high remain the generic structural reference area.
-- style_entry_low / style_entry_high are the style-specific reference zone.
-- When an entry style exists but its style-specific zone is not yet available, the frontend must show a pending state instead of reusing the generic entry as if it were style-specific.
-- When no entry style is active, the generic entry may be shown only as ENTRY REFERENSI / structural reference.
+- entry_low / entry_high remain generic structural reference areas.
+- style_entry_low / style_entry_high are the active style-specific execution reference zone.
+- style_stop is the active style-specific risk boundary.
+- If a style exists but its style-specific output is not available yet, the frontend must show a pending state instead of substituting the generic structural level as if it were style-specific.
+- When no entry style is active, generic entry/invalidation may be shown only as structural references.
 
 FRESHNESS
-- Price-level changes, style-entry changes, style-stop changes, and public Golden Cross state/age changes are part of the Signal Hub change state so daily public snapshots remain current.
+- Price-level changes, style entry/risk changes, decision changes, and public Golden Cross state/age changes are included in the Signal Hub state-change comparison so public snapshots remain current.
 
 DATA MINIMIZATION
-- New Signal Hub payloads send only fields required for approved public outputs and Golden Cross public state/age.
-- Private component scores, proprietary intermediate values, private thresholds, and internal calculation diagnostics are not included in the new webhook payload.
+- Signal Hub webhook payloads send only fields required for approved public outputs and Golden Cross public state/age.
+- Private component scores, proprietary intermediate values, private thresholds, and internal calculation diagnostics are not included in the webhook payload.
+- Worker ingestion whitelists approved fields before writing to KV.
 
 NOTES
-- These labels, zones, and stops are classifications/reference outputs, not automatic transaction recommendations.
+- These labels, zones, stops, targets, and derived metrics are analytical reference outputs, not automatic transaction recommendations.
 - Decision/status remains a separate output.
 - The public website must not expose calculation formulas, indicator periods, proprietary thresholds, component weights, or internal reference values.
 - Private implementation belongs only in the TradingView/Pine source and other non-public secure locations.
