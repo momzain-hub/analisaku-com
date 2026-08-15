@@ -39,6 +39,10 @@ BACKWARD COMPATIBILITY
 FRESHNESS
 - Price-level changes and public Golden Cross state/age changes are part of the Signal Hub change state so daily public snapshots remain current.
 
+DATA MINIMIZATION
+- New Signal Hub payloads send only fields required for approved public outputs and Golden Cross public state/age.
+- Private component scores, proprietary intermediate values, private thresholds, and internal calculation diagnostics are not included in the new webhook payload.
+
 NOTES
 - These labels and zones are classifications/reference outputs, not automatic transaction recommendations.
 - Decision/status remains a separate output.
