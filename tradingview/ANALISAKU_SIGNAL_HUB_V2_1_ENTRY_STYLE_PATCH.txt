@@ -20,15 +20,22 @@ PUBLIC ENTRY STYLE FROM ENGINE
 PUBLIC STYLE-SPECIFIC PRICE OUTPUTS
 - style_entry_low
 - style_entry_high
+- style_stop
 
-These fields contain the final public price zone selected by the private engine for the active entry style. Public price levels are normalized to valid tradable price increments before being sent. The website must not derive or reproduce the private calculation.
+These fields contain the final public entry zone and execution-risk boundary selected by the private engine for the active entry style. Public price levels are normalized to valid tradable price increments before being sent. The website must not derive or reproduce the private calculation.
 
 PUBLIC MARKET RADAR PRESENTATION
 The website presents the engine output in a more descriptive form without exposing private logic:
-- BREAKOUT + EARLY WATCH => BREAKOUT WATCH / AREA KONFIRMASI
-- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED / BREAKOUT ENTRY
-- PULLBACK => PULLBACK / PULLBACK ENTRY
-- WEAKNESS => BUY ON WEAKNESS / WEAKNESS ENTRY
+- BREAKOUT + EARLY WATCH => BREAKOUT WATCH / AREA KONFIRMASI / planned risk boundary
+- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED / BREAKOUT ENTRY / breakout stop
+- PULLBACK => PULLBACK / PULLBACK ENTRY / pullback stop
+- WEAKNESS => BUY ON WEAKNESS / WEAKNESS ENTRY / weakness stop
+
+RISK / INVALIDATION DISTINCTION
+- invalidation remains the generic structural failure level of the underlying setup.
+- style_stop is the execution-specific risk boundary for the active entry style.
+- The style-specific stop is expected to be derived independently for each execution style; different styles may occasionally resolve to the same tradable price after rounding when the underlying structures overlap.
+- When an entry style exists but style_stop is not yet available, the frontend must show a pending state instead of presenting the generic invalidation as if it were a style-specific stop.
 
 BACKWARD COMPATIBILITY
 - entry_low / entry_high remain the generic structural reference area.
@@ -37,14 +44,14 @@ BACKWARD COMPATIBILITY
 - When no entry style is active, the generic entry may be shown only as ENTRY REFERENSI / structural reference.
 
 FRESHNESS
-- Price-level changes and public Golden Cross state/age changes are part of the Signal Hub change state so daily public snapshots remain current.
+- Price-level changes, style-entry changes, style-stop changes, and public Golden Cross state/age changes are part of the Signal Hub change state so daily public snapshots remain current.
 
 DATA MINIMIZATION
 - New Signal Hub payloads send only fields required for approved public outputs and Golden Cross public state/age.
 - Private component scores, proprietary intermediate values, private thresholds, and internal calculation diagnostics are not included in the new webhook payload.
 
 NOTES
-- These labels and zones are classifications/reference outputs, not automatic transaction recommendations.
+- These labels, zones, and stops are classifications/reference outputs, not automatic transaction recommendations.
 - Decision/status remains a separate output.
 - The public website must not expose calculation formulas, indicator periods, proprietary thresholds, component weights, or internal reference values.
 - Private implementation belongs only in the TradingView/Pine source and other non-public secure locations.
