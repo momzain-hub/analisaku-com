@@ -48,24 +48,10 @@
     const styleLow=numeric(d?.style_entry_low);
     const styleHigh=numeric(d?.style_entry_high);
     if(mode){
-      return {
-        mode,
-        label:labelOf(mode),
-        low:styleLow,
-        high:styleHigh,
-        ready:styleLow!==null||styleHigh!==null,
-        reference:false
-      };
+      return {mode,label:labelOf(mode),low:styleLow,high:styleHigh,ready:styleLow!==null||styleHigh!==null,reference:false};
     }
     const low=numeric(d?.entry_low),high=numeric(d?.entry_high);
-    return {
-      mode:'',
-      label:'ENTRY REFERENSI',
-      low,
-      high,
-      ready:low!==null||high!==null,
-      reference:true
-    };
+    return {mode:'',label:'ENTRY REFERENSI',low,high,ready:low!==null||high!==null,reference:true};
   }
 
   function range(area){
@@ -96,7 +82,7 @@
     const table=document.querySelector('.market-radar-table');
     if(!table)return;
     const header=table.querySelector('thead th:nth-child(7)');
-    if(header)header.textContent='Area Skenario';
+    if(header&&header.textContent!=='Area Skenario')header.textContent='Area Skenario';
 
     table.querySelectorAll('tbody tr[data-symbol]').forEach(row=>{
       const ticker=String(row.dataset.symbol||'').toUpperCase();
@@ -108,7 +94,9 @@
       const area=areaOf(d);
       const position=positionOf(d,area);
       const state=cellState(area,position);
-
+      const signature=[area.label,range(area),state.className,state.text].join('|');
+      if(cell.dataset.styleEntrySignature===signature)return;
+      cell.dataset.styleEntrySignature=signature;
       cell.innerHTML=`<div class="style-entry-cell">
         <small>${area.label}</small>
         <strong>${range(area)}</strong>
@@ -131,15 +119,22 @@
         const meta=card.querySelector('.market-setup-meta');
         if(meta)meta.insertAdjacentElement('afterend',zone);else card.appendChild(zone);
       }
-      zone.innerHTML=`<small>${area.label}</small><strong>${range(area)}</strong><span>${area.ready?'STYLE ZONE':'MENUNGGU ZONE'}</span>`;
+      const signature=[area.label,range(area),area.ready?'STYLE ZONE':'MENUNGGU ZONE'].join('|');
+      if(zone.dataset.styleEntrySignature!==signature){
+        zone.dataset.styleEntrySignature=signature;
+        zone.innerHTML=`<small>${area.label}</small><strong>${range(area)}</strong><span>${area.ready?'STYLE ZONE':'MENUNGGU ZONE'}</span>`;
+      }
       zone.classList.toggle('pending',!area.ready);
     });
   }
 
+  function setText(el,value){if(el&&el.textContent!==value)el.textContent=value;}
+
   function decorateDetail(){
-    const modal=document.querySelector('.radar-detail-modal');
+    const overlay=document.querySelector('.radar-detail-overlay');
+    const modal=overlay?.querySelector('.radar-detail-modal');
     const title=modal?.querySelector('#radarDetailTitle');
-    if(!modal||!title||modal.closest('.radar-detail-overlay')?.hidden)return;
+    if(!overlay||overlay.hidden||!modal||!title)return;
     const ticker=String(title.firstChild?.nodeValue||'').trim().toUpperCase();
     const d=map.get(ticker);
     if(!d)return;
@@ -147,34 +142,24 @@
     const area=areaOf(d);
     const tags=modal.querySelector('.radar-detail-tags');
     if(tags){
-      tags.querySelectorAll('[data-style-chip]').forEach(el=>el.remove());
       const stage=String(d.setup_stage||'').toUpperCase();
-      if(stage){
-        const chip=document.createElement('span');
-        chip.className='radar-detail-chip';
-        chip.dataset.styleChip='stage';
-        chip.textContent=stage;
-        tags.appendChild(chip);
-      }
-      if(area.mode){
-        const chip=document.createElement('span');
-        chip.className='radar-detail-chip strong';
-        chip.dataset.styleChip='mode';
-        chip.textContent=area.mode;
-        tags.appendChild(chip);
-      }
+      let stageChip=tags.querySelector('[data-style-chip="stage"]');
+      if(stage&&!stageChip){stageChip=document.createElement('span');stageChip.className='radar-detail-chip';stageChip.dataset.styleChip='stage';tags.appendChild(stageChip);}
+      if(stageChip){if(stage)setText(stageChip,stage);else stageChip.remove();}
+
+      let modeChip=tags.querySelector('[data-style-chip="mode"]');
+      if(area.mode&&!modeChip){modeChip=document.createElement('span');modeChip.className='radar-detail-chip strong';modeChip.dataset.styleChip='mode';tags.appendChild(modeChip);}
+      if(modeChip){if(area.mode)setText(modeChip,area.mode);else modeChip.remove();}
     }
 
     const grid=modal.querySelector('.radar-detail-grid');
     if(grid){
       const fields=[...grid.querySelectorAll('.radar-detail-field')];
-      let entryField=fields.find(field=>String(field.querySelector('small')?.textContent||'').trim().toUpperCase()==='ENTRY');
-      if(!entryField)entryField=fields.find(field=>field.dataset.styleEntryField==='true');
+      let entryField=fields.find(field=>String(field.querySelector('small')?.textContent||'').trim().toUpperCase()==='ENTRY')||fields.find(field=>field.dataset.styleEntryField==='true');
       if(entryField){
         entryField.dataset.styleEntryField='true';
-        const small=entryField.querySelector('small'),strong=entryField.querySelector('strong');
-        if(small)small.textContent=area.label;
-        if(strong)strong.textContent=range(area);
+        setText(entryField.querySelector('small'),area.label);
+        setText(entryField.querySelector('strong'),range(area));
         entryField.classList.toggle('is-empty',!area.ready);
       }
 
@@ -186,18 +171,11 @@
         priceField.innerHTML='<small>Current Price</small><strong></strong>';
         grid.prepend(priceField);
       }
-      if(priceField){
-        const strong=priceField.querySelector('strong');
-        if(strong)strong.textContent=fmt(d.price);
-      }
+      if(priceField)setText(priceField.querySelector('strong'),fmt(d.price));
     }
   }
 
-  function decorate(){
-    decorateTable();
-    decorateOpportunities();
-    decorateDetail();
-  }
+  function decorate(){decorateTable();decorateOpportunities();decorateDetail();}
 
   async function load(){
     try{
@@ -211,10 +189,13 @@
   }
 
   const observer=new MutationObserver(()=>decorate());
+
   function bindDetailObserver(){
-    const modal=document.querySelector('.radar-detail-overlay');
-    if(!modal){setTimeout(bindDetailObserver,300);return;}
-    observer.observe(modal,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+    const overlay=document.querySelector('.radar-detail-overlay');
+    const content=overlay?.querySelector('.radar-detail-content');
+    if(!overlay||!content){setTimeout(bindDetailObserver,300);return;}
+    observer.observe(overlay,{attributes:true,attributeFilter:['hidden']});
+    observer.observe(content,{childList:true,subtree:false});
     decorateDetail();
   }
 
@@ -222,8 +203,8 @@
     const body=document.getElementById('signalMonitorBody');
     const opportunities=document.getElementById('marketOpportunities');
     if(!body||!opportunities){setTimeout(bind,250);return;}
-    observer.observe(body,{childList:true,subtree:true});
-    observer.observe(opportunities,{childList:true,subtree:true});
+    observer.observe(body,{childList:true,subtree:false});
+    observer.observe(opportunities,{childList:true,subtree:false});
     decorate();
     load();
     bindDetailObserver();
