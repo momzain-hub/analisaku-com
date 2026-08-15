@@ -135,6 +135,9 @@
       const entryCell=row.querySelector('td:nth-child(7)');
       const riskCell=row.querySelector('td:nth-child(8)');
       const targetCell=row.querySelector('td:nth-child(9)');
+      if(entryCell)entryCell.dataset.label='Area Skenario';
+      if(riskCell)riskCell.dataset.label='Risk Boundary';
+      if(targetCell)targetCell.dataset.label='Next Target';
 
       if(entryCell){
         const sig=[plan.area.label,range(plan.area),plan.position.className,plan.position.text].join('|');
