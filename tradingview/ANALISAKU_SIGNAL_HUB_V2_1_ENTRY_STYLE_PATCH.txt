@@ -21,7 +21,7 @@ PUBLIC STYLE-SPECIFIC PRICE OUTPUTS
 - style_entry_low
 - style_entry_high
 
-These fields contain the final public price zone selected by the private engine for the active entry style. The website must not derive or reproduce the private calculation.
+These fields contain the final public price zone selected by the private engine for the active entry style. Public price levels are normalized to valid tradable price increments before being sent. The website must not derive or reproduce the private calculation.
 
 PUBLIC MARKET RADAR PRESENTATION
 The website presents the engine output in a more descriptive form without exposing private logic:
@@ -32,8 +32,12 @@ The website presents the engine output in a more descriptive form without exposi
 
 BACKWARD COMPATIBILITY
 - entry_low / entry_high remain the generic structural reference area.
-- style_entry_low / style_entry_high are the style-specific actionable reference zone.
-- If style-specific fields are not available yet, the frontend may display the generic area only as a structural reference and must not mislabel it as a style-specific entry.
+- style_entry_low / style_entry_high are the style-specific reference zone.
+- When an entry style exists but its style-specific zone is not yet available, the frontend must show a pending state instead of reusing the generic entry as if it were style-specific.
+- When no entry style is active, the generic entry may be shown only as ENTRY REFERENSI / structural reference.
+
+FRESHNESS
+- Price-level changes and public Golden Cross state/age changes are part of the Signal Hub change state so daily public snapshots remain current.
 
 NOTES
 - These labels and zones are classifications/reference outputs, not automatic transaction recommendations.
