@@ -1,12 +1,12 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260815-2355';
+  const VERSION='20260816-0002';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
-    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"],link[href*="market-strategy.css"]').forEach(el=>el.remove());
+    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"],link[href*="market-strategy.css"],link[href*="style-entry-ui.css"]').forEach(el=>el.remove());
 
-    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css','../css/market-strategy.css'].forEach(path=>{
+    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css','../css/market-strategy.css','../css/style-entry-ui.css'].forEach(path=>{
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href=new URL(path,base).href+'?v='+VERSION;
@@ -31,6 +31,16 @@
     gc.async=true;
     gc.dataset.analisakuGcCandles='true';
     document.head.appendChild(gc);
+  }
+
+  function loadStyleEntryUi(){
+    document.querySelectorAll('script[data-analisaku-style-entry]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.styleEntryUiBound;
+    const styleEntry=document.createElement('script');
+    styleEntry.src=new URL('style-entry-ui.js',base).href+'?v='+VERSION;
+    styleEntry.async=true;
+    styleEntry.dataset.analisakuStyleEntry='true';
+    document.head.appendChild(styleEntry);
   }
 
   function loadEnhancer(){
@@ -60,7 +70,7 @@
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
     s.async=true;
     s.dataset.analisakuMonitorV2='true';
-    s.onload=loadEnhancer;
+    s.onload=()=>{loadEnhancer();loadStyleEntryUi();};
     document.head.appendChild(s);
   }
 
