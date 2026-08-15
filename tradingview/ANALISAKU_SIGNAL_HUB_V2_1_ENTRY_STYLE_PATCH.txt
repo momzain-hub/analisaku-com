@@ -1,5 +1,5 @@
-ANALISAKU SIGNAL HUB V2.1 — PUBLIC OUTPUT CONTRACT
-==================================================
+ANALISAKU SIGNAL HUB — PUBLIC OUTPUT CONTRACT
+==============================================
 
 PURPOSE
 This file documents public-safe outputs only.
@@ -17,15 +17,26 @@ PUBLIC ENTRY STYLE FROM ENGINE
 - WEAKNESS
 - NONE / blank
 
+PUBLIC STYLE-SPECIFIC PRICE OUTPUTS
+- style_entry_low
+- style_entry_high
+
+These fields contain the final public price zone selected by the private engine for the active entry style. The website must not derive or reproduce the private calculation.
+
 PUBLIC MARKET RADAR PRESENTATION
 The website presents the engine output in a more descriptive form without exposing private logic:
-- BREAKOUT + EARLY WATCH => BREAKOUT WATCH
-- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED
-- PULLBACK => PULLBACK
-- WEAKNESS => BUY ON WEAKNESS
+- BREAKOUT + EARLY WATCH => BREAKOUT WATCH / AREA KONFIRMASI
+- BREAKOUT + CONFIRMED => BREAKOUT CONFIRMED / BREAKOUT ENTRY
+- PULLBACK => PULLBACK / PULLBACK ENTRY
+- WEAKNESS => BUY ON WEAKNESS / WEAKNESS ENTRY
+
+BACKWARD COMPATIBILITY
+- entry_low / entry_high remain the generic structural reference area.
+- style_entry_low / style_entry_high are the style-specific actionable reference zone.
+- If style-specific fields are not available yet, the frontend may display the generic area only as a structural reference and must not mislabel it as a style-specific entry.
 
 NOTES
-- These labels are classifications, not automatic transaction recommendations.
+- These labels and zones are classifications/reference outputs, not automatic transaction recommendations.
 - Decision/status remains a separate output.
 - The public website must not expose calculation formulas, indicator periods, proprietary thresholds, component weights, or internal reference values.
 - Private implementation belongs only in the TradingView/Pine source and other non-public secure locations.
