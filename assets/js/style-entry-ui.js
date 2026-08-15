@@ -17,6 +17,7 @@
   };
   const pct=v=>Number.isFinite(v)?`${v.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})}%`:'—';
   const rr=v=>Number.isFinite(v)&&v>0?`1 : ${v.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:2})}`:'—';
+  const setText=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value;};
 
   function endpoint(){
     const url=new URL(API);
@@ -135,21 +136,21 @@
       const riskCell=row.querySelector('td:nth-child(8)');
       const targetCell=row.querySelector('td:nth-child(9)');
 
-      if(entryCell)entryCell.innerHTML=`<div class="style-entry-cell">
-        <small>${plan.area.label}</small><strong>${range(plan.area)}</strong>
-        <em class="${plan.position.className}">${plan.position.text}</em>
-      </div>`;
-
-      if(riskCell)riskCell.innerHTML=`<div class="style-risk-cell">
-        <small>${plan.risk.label}</small><strong>${plan.risk.ready?fmt(plan.risk.value):'—'}</strong>
-        <em>${plan.area.mode&&plan.risk.ready?`RISK ${pct(plan.metrics.riskPct)}`:(plan.area.mode?'MENUNGGU RISK BOUNDARY':'STRUKTURAL')}</em>
-      </div>`;
-
-      if(targetCell)targetCell.innerHTML=`<div class="style-target-cell">
-        <small>${plan.target.value!==null?`NEXT TARGET${plan.target.index?` ${plan.target.index}`:''}`:'NEXT TARGET'}</small>
-        <strong>${plan.target.value!==null?fmt(plan.target.value):'—'}</strong>
-        <em>${plan.area.mode&&plan.target.value!==null?`R:R ${rr(plan.metrics.rr)}`:(plan.target.passed?'TARGET EKSTENSI TERLEWATI':'')}</em>
-      </div>`;
+      if(entryCell){
+        const sig=[plan.area.label,range(plan.area),plan.position.className,plan.position.text].join('|');
+        if(entryCell.dataset.executionSignature!==sig){entryCell.dataset.executionSignature=sig;entryCell.innerHTML=`<div class="style-entry-cell"><small>${plan.area.label}</small><strong>${range(plan.area)}</strong><em class="${plan.position.className}">${plan.position.text}</em></div>`;}
+      }
+      if(riskCell){
+        const riskText=plan.area.mode&&plan.risk.ready?`${plan.area.mode==='BREAKOUT WATCH'?'PLANNED RISK':'RISK'} ${pct(plan.metrics.riskPct)}`:(plan.area.mode?'MENUNGGU RISK BOUNDARY':'STRUKTURAL');
+        const sig=[plan.risk.label,plan.risk.ready?fmt(plan.risk.value):'—',riskText].join('|');
+        if(riskCell.dataset.executionSignature!==sig){riskCell.dataset.executionSignature=sig;riskCell.innerHTML=`<div class="style-risk-cell"><small>${plan.risk.label}</small><strong>${plan.risk.ready?fmt(plan.risk.value):'—'}</strong><em>${riskText}</em></div>`;}
+      }
+      if(targetCell){
+        const rrText=plan.area.mode&&plan.target.value!==null?`${plan.area.mode==='BREAKOUT WATCH'?'PLANNED R:R':'R:R'} ${rr(plan.metrics.rr)}`:(plan.target.passed?'TARGET EKSTENSI TERLEWATI':'');
+        const label=plan.target.value!==null?`NEXT TARGET${plan.target.index?` ${plan.target.index}`:''}`:'NEXT TARGET';
+        const sig=[label,plan.target.value!==null?fmt(plan.target.value):'—',rrText].join('|');
+        if(targetCell.dataset.executionSignature!==sig){targetCell.dataset.executionSignature=sig;targetCell.innerHTML=`<div class="style-target-cell"><small>${label}</small><strong>${plan.target.value!==null?fmt(plan.target.value):'—'}</strong><em>${rrText}</em></div>`;}
+      }
     });
   }
 
@@ -165,11 +166,12 @@
         const meta=card.querySelector('.market-setup-meta');
         if(meta)meta.insertAdjacentElement('afterend',host);else card.appendChild(host);
       }
-      host.innerHTML=`
-        <div><small>${plan.area.label}</small><b>${range(plan.area)}</b></div>
-        <div><small>${plan.risk.label}</small><b>${plan.risk.ready?fmt(plan.risk.value):'—'}</b></div>
-        <div><small>NEXT TARGET</small><b>${plan.target.value!==null?fmt(plan.target.value):'—'}</b></div>
-        <span class="${plan.position.className}">${plan.position.text}${Number.isFinite(plan.metrics.rr)?` • R:R ${rr(plan.metrics.rr)}`:''}</span>`;
+      const ratioLabel=Number.isFinite(plan.metrics.rr)?`${plan.area.mode==='BREAKOUT WATCH'?' • PLANNED R:R ':' • R:R '}${rr(plan.metrics.rr)}`:'';
+      const sig=[plan.area.label,range(plan.area),plan.risk.label,plan.risk.ready?fmt(plan.risk.value):'—',plan.target.value!==null?fmt(plan.target.value):'—',plan.position.className,plan.position.text,ratioLabel].join('|');
+      if(host.dataset.executionSignature!==sig){
+        host.dataset.executionSignature=sig;
+        host.innerHTML=`<div><small>${plan.area.label}</small><b>${range(plan.area)}</b></div><div><small>${plan.risk.label}</small><b>${plan.risk.ready?fmt(plan.risk.value):'—'}</b></div><div><small>NEXT TARGET</small><b>${plan.target.value!==null?fmt(plan.target.value):'—'}</b></div><span class="${plan.position.className}">${plan.position.text}${ratioLabel}</span>`;
+      }
     });
   }
 
@@ -197,13 +199,13 @@
     const findField=label=>fields.find(field=>String(field.querySelector('small')?.textContent||'').trim().toUpperCase()===label);
 
     let entry=findField('ENTRY')||grid.querySelector('[data-execution-entry]');
-    if(entry){entry.dataset.executionEntry='true';entry.querySelector('small').textContent=plan.area.label;entry.querySelector('strong').textContent=range(plan.area);}
+    if(entry){entry.dataset.executionEntry='true';setText(entry.querySelector('small'),plan.area.label);setText(entry.querySelector('strong'),range(plan.area));}
 
     let invalid=findField('INVALIDATION')||grid.querySelector('[data-execution-risk]');
-    if(invalid){invalid.dataset.executionRisk='true';invalid.querySelector('small').textContent=plan.risk.label;invalid.querySelector('strong').textContent=plan.risk.ready?fmt(plan.risk.value):'—';}
+    if(invalid){invalid.dataset.executionRisk='true';setText(invalid.querySelector('small'),plan.risk.label);setText(invalid.querySelector('strong'),plan.risk.ready?fmt(plan.risk.value):'—');}
 
     let t1=findField('TARGET 1')||grid.querySelector('[data-execution-target]');
-    if(t1){t1.dataset.executionTarget='true';t1.querySelector('small').textContent='NEXT TARGET';t1.querySelector('strong').textContent=plan.target.value!==null?fmt(plan.target.value):'—';}
+    if(t1){t1.dataset.executionTarget='true';setText(t1.querySelector('small'),'NEXT TARGET');setText(t1.querySelector('strong'),plan.target.value!==null?fmt(plan.target.value):'—');}
 
     grid.querySelectorAll('[data-execution-metric]').forEach(el=>el.remove());
     if(plan.area.mode){
@@ -232,9 +234,11 @@
 
   const observer=new MutationObserver(scheduleDecorate);
   function bindDetailObserver(){
-    const modal=document.querySelector('.radar-detail-overlay');
-    if(!modal){setTimeout(bindDetailObserver,300);return;}
-    observer.observe(modal,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+    const overlay=document.querySelector('.radar-detail-overlay');
+    const content=overlay?.querySelector('.radar-detail-content');
+    if(!overlay||!content){setTimeout(bindDetailObserver,300);return;}
+    observer.observe(overlay,{attributes:true,attributeFilter:['hidden']});
+    observer.observe(content,{childList:true,subtree:false});
     decorateDetail();
   }
 
