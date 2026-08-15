@@ -39,6 +39,12 @@
     return {mode:'',low,high,ready:low!==null||high!==null,reference:true};
   }
 
+  function rangeOf(area){
+    if(!area?.ready)return '—';
+    const values=[area.low,area.high].filter(v=>v!==null);
+    return values.map(fmt).join(' – ')||'—';
+  }
+
   function areaLabel(mode,ctxKey='UNKNOWN'){
     if(mode==='BREAKOUT WATCH')return ['AREA KONFIRMASI','Zona yang perlu diuji sebelum breakout dianggap siap'];
     if(mode==='BREAKOUT CONFIRMED')return ['BREAKOUT ENTRY','Area eksekusi setelah breakout terkonfirmasi'];
@@ -77,6 +83,14 @@
       positionCard.className='decision-card decision-position-card';
       positionCard.innerHTML='<span>PRICE POSITION</span><strong id="dPricePosition">—</strong><small id="dPricePositionNote">Posisi harga terhadap area skenario</small>';
       grid.insertBefore(positionCard,priceCard.nextSibling);
+    }
+
+    if(!$('dEntryStyle')){
+      const card=document.createElement('div');
+      card.className='decision-card decision-entry-style-card';
+      card.innerHTML='<span>ENTRY STYLE</span><strong id="dEntryStyle">—</strong><small>Klasifikasi skenario aktif</small>';
+      const setupCard=$('dSetup')?.closest('.decision-card');
+      if(setupCard)setupCard.insertAdjacentElement('afterend',card);else grid.appendChild(card);
     }
 
     const entry=$('dEntry')?.closest('.decision-card');
@@ -159,16 +173,19 @@
 
   function render(data){
     ensureCards();
-    const ctx=contextOf(data),p=numeric(data?.price);
+    const ctx=contextOf(data),p=numeric(data?.price),mode=ctx.area?.mode||'';
     if($('dCurrentPrice'))$('dCurrentPrice').textContent=p===null?'—':fmt(p);
     if($('dPricePosition')){$('dPricePosition').textContent=ctx.label;$('dPricePosition').dataset.position=ctx.key;}
     if($('dPricePositionNote'))$('dPricePositionNote').textContent=ctx.note;
+    if($('dEntryStyle'))$('dEntryStyle').textContent=mode||'—';
+    if($('dSetup'))$('dSetup').textContent=String(data?.setup_stage||data?.setup||'INACTIVE').toUpperCase();
+    if($('dEntry'))$('dEntry').textContent=rangeOf(ctx.area);
 
     const entryLabel=$('dEntryLabel'),entryNote=$('dEntryNote');
     if(entryLabel&&entryNote){
-      const copy=areaLabel(ctx.area?.mode||'',ctx.key);
+      const copy=areaLabel(mode,ctx.key);
       entryLabel.textContent=copy[0];
-      entryNote.textContent=ctx.area?.mode&&!ctx.area?.ready?'Menunggu area khusus dari Signal Hub':copy[1];
+      entryNote.textContent=mode&&!ctx.area?.ready?'Menunggu area khusus dari Signal Hub':copy[1];
     }
 
     const custom=decisionText(data?.status,ctx,data);
