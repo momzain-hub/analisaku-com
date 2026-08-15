@@ -42,11 +42,12 @@ export default {
       return allowed.includes(v) ? v : fallback;
     };
 
+    const DECISIONS = ['WAIT','WATCH','BUY SETUP','HOLD','TAKE PROFIT','EXIT'];
     const publicTrend = value => publicEnum(value, ['BULLISH','NEUTRAL','BEARISH'], 'NEUTRAL');
     const publicSetup = value => publicEnum(value, ['ACTIVE','INACTIVE'], 'INACTIVE');
     const publicStage = value => publicEnum(value, ['EARLY WATCH','CONFIRMED','ACTIVE']);
     const publicEntryStyle = value => publicEnum(value, ['BREAKOUT','PULLBACK','WEAKNESS']);
-    const publicDecision = value => publicEnum(value, ['WAIT','WATCH','BUY SETUP','HOLD','TAKE PROFIT','EXIT'], 'WAIT');
+    const publicDecision = value => publicEnum(value, DECISIONS, 'WAIT');
     const publicRadar = value => publicEnum(value, ['AVOID','WATCH','READY','HOT','EXTENDED'], 'AVOID');
 
     const publicPrice = value => {
@@ -106,6 +107,35 @@ export default {
       double_gc: toBool(s?.double_gc),
       updated_at: publicTimestamp(s?.updated_at),
       received_at: publicTimestamp(s?.received_at)
+    });
+
+    const sanitizeForStorage = (item, ticker, timeframe, receivedAt) => ({
+      ticker,
+      timeframe,
+      score: toScore(item?.score),
+      trend: publicTrend(item?.trend),
+      setup: publicSetup(item?.setup),
+      setup_stage: publicStage(item?.setup_stage),
+      entry_style: publicEntryStyle(item?.entry_style),
+      style_entry_low: publicPrice(item?.style_entry_low),
+      style_entry_high: publicPrice(item?.style_entry_high),
+      status: publicDecision(item?.status),
+      entry_low: publicPrice(item?.entry_low),
+      entry_high: publicPrice(item?.entry_high),
+      trigger: publicPrice(item?.trigger),
+      invalidation: publicPrice(item?.invalidation),
+      target1: publicPrice(item?.target1),
+      target2: publicPrice(item?.target2),
+      target3: publicPrice(item?.target3),
+      price: publicPrice(item?.price),
+      radar_status: publicRadar(item?.radar_status),
+      ema_gc: gcState(item?.ema_gc),
+      ema_gc_age: gcCandleAge(item?.ema_gc_age, item?.ema_gc),
+      sma_gc: gcState(item?.sma_gc),
+      sma_gc_age: gcCandleAge(item?.sma_gc_age, item?.sma_gc),
+      double_gc: toBool(item?.double_gc),
+      updated_at: publicTimestamp(item?.updated_at),
+      received_at: receivedAt
     });
 
     const byScore = (a, b) =>
@@ -250,22 +280,15 @@ export default {
         const item = raw[i] || {};
         const ticker = normalizeTicker(item.ticker);
         const timeframe = normalizeTimeframe(item.timeframe);
-        const decision = publicDecision(item.status);
+        const rawStatus = String(item.status || '').toUpperCase().trim();
 
-        if (!ticker || !timeframe || !item.status || !decision) {
-          return json({ ok: false, error: 'payload tidak lengkap', index: i }, 400);
+        if (!ticker || !timeframe || !DECISIONS.includes(rawStatus)) {
+          return json({ ok: false, error: 'payload tidak lengkap / status tidak valid', index: i }, 400);
         }
-
-        const stored = {
-          ...item,
-          ticker,
-          timeframe,
-          received_at: receivedAt
-        };
 
         writes.push({
           key: `signal:${ticker}:${timeframe}`,
-          value: stored
+          value: sanitizeForStorage(item, ticker, timeframe, receivedAt)
         });
       }
 
