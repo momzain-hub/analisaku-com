@@ -16,10 +16,27 @@
 .opportunity-execution-plan>span.inside{color:var(--green)}
 .opportunity-execution-plan>span.invalid{color:var(--red)}
 .opportunity-execution-plan>span.below,.opportunity-execution-plan>span.above{color:var(--gold)}
+
+/* Decision Panel: one-glance execution action */
+.decision-action-card{grid-column:1/-1;display:grid;grid-template-columns:minmax(190px,.85fr) minmax(0,2.15fr);column-gap:22px;align-items:center;min-height:92px}
+.decision-action-card>span{grid-column:1/-1}
+.decision-action-card>strong{font-size:22px;line-height:1.15;letter-spacing:-.015em}
+.decision-action-card>small{font-size:11px;line-height:1.55}
+.decision-action-card[data-action="buy"]{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
+.decision-action-card[data-action="buy"]>strong{color:var(--green)}
+.decision-action-card[data-action="wait"]{border-color:color-mix(in srgb,var(--gold) 45%,var(--line))}
+.decision-action-card[data-action="wait"]>strong{color:var(--gold)}
+.decision-action-card[data-action="avoid"]{border-color:color-mix(in srgb,var(--red) 55%,var(--line))}
+.decision-action-card[data-action="avoid"]>strong{color:var(--red)}
+.decision-action-card[data-action="manage"]{border-color:color-mix(in srgb,#76a9ff 45%,var(--line))}
+
 @media(max-width:720px){
   .style-entry-cell,.style-risk-cell,.style-target-cell{min-width:104px}
   .style-entry-cell strong,.style-risk-cell strong,.style-target-cell strong{font-size:10px}
   .style-entry-cell small,.style-entry-cell em,.style-risk-cell small,.style-risk-cell em,.style-target-cell small,.style-target-cell em{font-size:6.8px}
   .opportunity-execution-plan{grid-template-columns:1fr 1fr}
   .opportunity-execution-plan>div:nth-child(3){grid-column:1/-1}
+  .decision-action-card{grid-template-columns:1fr;gap:6px;min-height:0}
+  .decision-action-card>strong{font-size:19px}
+  .decision-action-card>small{font-size:10px}
 }
