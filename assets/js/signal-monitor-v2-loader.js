@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260816-0100';
+  const VERSION='20260818-1412';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
@@ -22,6 +22,16 @@
     context.async=true;
     context.dataset.analisakuDecisionPrice='true';
     document.head.appendChild(context);
+  }
+
+  function loadDecisionActionUi(){
+    document.querySelectorAll('script[data-analisaku-decision-action]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.decisionActionUiBound;
+    const action=document.createElement('script');
+    action.src=new URL('decision-action-ui.js',base).href+'?v='+VERSION;
+    action.async=true;
+    action.dataset.analisakuDecisionAction='true';
+    document.head.appendChild(action);
   }
 
   function loadGcCandleUi(){
@@ -65,6 +75,7 @@
 
     loadStyles();
     loadDecisionPriceContext();
+    loadDecisionActionUi();
 
     const s=document.createElement('script');
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
