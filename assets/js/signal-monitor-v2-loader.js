@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260818-1426';
+  const VERSION='20260818-1437';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
@@ -82,6 +82,7 @@
     document.getElementById('signalMonitor')?.remove();
     document.getElementById('goldenCrossRadar')?.remove();
     document.getElementById('actionRadar')?.remove();
+    document.getElementById('topSetupNow')?.remove();
     document.querySelectorAll('script[data-analisaku-monitor-v2]').forEach(el=>el.remove());
 
     loadStyles();
