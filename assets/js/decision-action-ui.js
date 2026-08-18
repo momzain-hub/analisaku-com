@@ -30,7 +30,7 @@
     if(status==='EXIT')return {key:'INVALID',mode,status};
     if(mode&&price!==null&&stop!==null&&price<=stop)return {key:'INVALID',mode,status};
     if(!mode)return {key:'NONE',mode,status};
-    if(price===null||(!low&&!high))return {key:'UNKNOWN',mode,status};
+    if(price===null||(low===null&&high===null))return {key:'UNKNOWN',mode,status};
 
     const values=[low,high].filter(v=>v!==null);
     const lo=Math.min(...values),hi=Math.max(...values);
@@ -88,8 +88,8 @@
       card=document.createElement('div');
       card.className='decision-card decision-action-card';
       card.innerHTML='<span>ACTION</span><strong id="dAction">—</strong><small id="dActionNote">Menentukan apakah area beli sedang aktif</small>';
-      grid.insertBefore(card,grid.firstChild);
     }
+    if(grid.firstElementChild!==card)grid.insertBefore(card,grid.firstChild);
     return card;
   }
 
@@ -119,6 +119,7 @@
     $('tvTicker')?.addEventListener('keydown',e=>{if(e.key==='Enter')schedule()});
     document.querySelectorAll('.tv-chip').forEach(btn=>btn.addEventListener('click',schedule));
     const source=$('decisionSource');if(source)new MutationObserver(schedule).observe(source,{childList:true,subtree:true,characterData:true});
+    const grid=$('decisionPanel')?.querySelector('.decision-grid');if(grid)new MutationObserver(()=>ensureCard()).observe(grid,{childList:true});
     setInterval(refresh,60000);
   }
   function wait(){
