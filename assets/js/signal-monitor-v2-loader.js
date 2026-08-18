@@ -1,12 +1,12 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260818-1412';
+  const VERSION='20260818-1420';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
-    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"],link[href*="market-strategy.css"],link[href*="style-entry-ui.css"]').forEach(el=>el.remove());
+    document.querySelectorAll('link[href*="signal-monitor.css"],link[href*="signal-monitor-plus.css"],link[href*="signal-monitor-mobile.css"],link[href*="signal-monitor-actions.css"],link[href*="gc-candle-ui.css"],link[href*="market-strategy.css"],link[href*="style-entry-ui.css"],link[href*="action-radar-ui.css"]').forEach(el=>el.remove());
 
-    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css','../css/market-strategy.css','../css/style-entry-ui.css'].forEach(path=>{
+    ['../css/signal-monitor.css','../css/signal-monitor-plus.css','../css/signal-monitor-mobile.css','../css/signal-monitor-actions.css','../css/gc-candle-ui.css','../css/market-strategy.css','../css/style-entry-ui.css','../css/action-radar-ui.css'].forEach(path=>{
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href=new URL(path,base).href+'?v='+VERSION;
@@ -32,6 +32,16 @@
     action.async=true;
     action.dataset.analisakuDecisionAction='true';
     document.head.appendChild(action);
+  }
+
+  function loadActionRadarUi(){
+    document.querySelectorAll('script[data-analisaku-action-radar]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.actionRadarUiBound;
+    const actionRadar=document.createElement('script');
+    actionRadar.src=new URL('action-radar-ui.js',base).href+'?v='+VERSION;
+    actionRadar.async=true;
+    actionRadar.dataset.analisakuActionRadar='true';
+    document.head.appendChild(actionRadar);
   }
 
   function loadGcCandleUi(){
@@ -71,6 +81,7 @@
 
     document.getElementById('signalMonitor')?.remove();
     document.getElementById('goldenCrossRadar')?.remove();
+    document.getElementById('actionRadar')?.remove();
     document.querySelectorAll('script[data-analisaku-monitor-v2]').forEach(el=>el.remove());
 
     loadStyles();
@@ -81,7 +92,7 @@
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
     s.async=true;
     s.dataset.analisakuMonitorV2='true';
-    s.onload=()=>{loadEnhancer();loadStyleEntryUi();};
+    s.onload=()=>{loadEnhancer();loadStyleEntryUi();loadActionRadarUi();};
     document.head.appendChild(s);
   }
 
