@@ -72,41 +72,315 @@
       return u.href;
     }catch(e){return ''}
   }
-
   function pulseCard(label){
-    return [...document.querySelectorAll('.pulse-card')].find(card=>
-      String(card.querySelector('small')?.textContent||'').trim().toUpperCase()===label
+    return [...document.querySelectorAll('.pulse-card')].find(card =>
+      String(card.querySelector('small')?.textContent || '')
+        .trim()
+        .toUpperCase() === label
     );
   }
 
   function formatPercent(v){
-    const n=Number(v);
-    if(!Number.isFinite(n))return '';
-    return `${n>0?'+':''}${n.toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})}%`;
+    const n = Number(v);
+
+    if(!Number.isFinite(n)) return '—';
+
+    return `${n > 0 ? '+' : ''}${n.toLocaleString('id-ID',{
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}%`;
   }
 
-  function renderRupiah(rupiah){
-    const card=pulseCard('RUPIAH');
-    if(!card||!rupiah)return;
-    const status=String(rupiah.status||'').toUpperCase()||'—';
-    const value=Number(rupiah.value);
-    const change5d=Number(rupiah.change_5d);
-    const date=String(rupiah.date||'');
-    const strong=card.querySelector('strong');
-    const detail=card.querySelector('span');
-    if(strong)strong.textContent=status;
-    if(detail){
-      const parts=[];
-      if(Number.isFinite(value))parts.push(`JISDOR ${value.toLocaleString('id-ID',{maximumFractionDigits:2})}`);
-      if(Number.isFinite(change5d))parts.push(`5D ${formatPercent(change5d)}`);
-      if(date)parts.push(date);
-      detail.textContent=parts.join(' • ')||'Sumber: BI / JISDOR';
+  function formatMoney(v){
+    const n = Math.abs(Number(v));
+
+    if(!Number.isFinite(n)) return '—';
+
+    if(n >= 1e12){
+      return `Rp${(n / 1e12).toLocaleString('id-ID',{
+        maximumFractionDigits: 2
+      })} T`;
     }
+
+    if(n >= 1e9){
+      return `Rp${(n / 1e9).toLocaleString('id-ID',{
+        maximumFractionDigits: 2
+      })} M`;
+    }
+
+    if(n >= 1e6){
+      return `Rp${(n / 1e6).toLocaleString('id-ID',{
+        maximumFractionDigits: 2
+      })} Jt`;
+    }
+
+    return `Rp${n.toLocaleString('id-ID')}`;
+  }
+
+  function formatDate(date){
+    if(!date) return '';
+
+    try{
+      return new Date(`${date}T00:00:00+07:00`)
+        .toLocaleDateString('id-ID',{
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+    }catch(e){
+      return date;
+    }
+  }
+
+  function setPulseCard(label,status,detail){
+    const card = pulseCard(label);
+
+    if(!card) return;
+
+    const strong = card.querySelector('strong');
+    const span = card.querySelector('span');
+
+    if(strong){
+      strong.textContent =
+        String(status || '—').toUpperCase();
+    }
+
+    if(span){
+      span.textContent = detail || '—';
+    }
+
     card.classList.remove('pending');
-    card.dataset.pulseStatus=status;
+
+    card.dataset.pulseStatus =
+      String(status || '').toUpperCase();
+  }
+
+  function renderForeignFlow(data){
+    if(!data) return;
+
+    const parts = [];
+
+    if(Number.isFinite(Number(data.value))){
+      parts.push(formatMoney(data.value));
+    }
+
+    if(data.date){
+      parts.push(formatDate(data.date));
+    }
+
+    setPulseCard(
+      'FOREIGN FLOW',
+      data.status,
+      parts.join(' • ') || 'Sumber: BEI / IDX'
+    );
+  }
+
+  function renderRupiah(data){
+    if(!data) return;
+
+    const parts = [];
+
+    const value = Number(data.value);
+
+    if(Number.isFinite(value)){
+      parts.push(
+        `JISDOR ${value.toLocaleString('id-ID',{
+          maximumFractionDigits: 2
+        })}`
+      );
+    }
+
+    if(Number.isFinite(Number(data.change_5d))){
+      parts.push(`5D ${formatPercent(data.change_5d)}`);
+    }
+
+    setPulseCard(
+      'RUPIAH',
+      data.status,
+      parts.join(' • ') || 'Sumber: BI / JISDOR'
+    );
+  }
+
+  function renderGlobalSentiment(data){
+    if(!data) return;
+
+    setPulseCard(
+      'GLOBAL SENTIMENT',
+      data.status,
+      data.detail || 'Global market data'
+    );
+  }
+
+  function renderBreadth(data){
+    if(!data) return;
+
+    const adv = Number(data.advancers);
+    const dec = Number(data.decliners);
+
+    const detail =
+      Number.isFinite(adv) && Number.isFinite(dec)
+        ? `${adv.toLocaleString('id-ID')} naik • ${dec.toLocaleString('id-ID')} turun`
+        : 'IDX market breadth';
+
+    setPulseCard(
+      'MARKET BREADTH',
+      data.status,
+      detail
+    );
+  }
+
+  function renderEnvironment(status){
+    const box =
+      document.querySelector('.market-environment');
+
+    if(!box) return;
+
+    const strong = box.querySelector('strong');
+    const detail = box.querySelector('p');
+
+    const value =
+      String(status || 'NEUTRAL').toUpperCase();
+
+    const descriptions = {
+      'CONSTRUCTIVE':
+        'Kondisi pasar relatif mendukung untuk mencari peluang, dengan tetap memperhatikan seleksi sektor dan saham.',
+
+      'NEUTRAL':
+        'Kondisi pasar belum menunjukkan dominasi arah yang cukup kuat.',
+
+      'CAUTIOUS':
+        'Tekanan pasar mulai meningkat. Seleksi saham dan pengelolaan risiko perlu diperketat.',
+
+      'RISK OFF':
+        'Lingkungan pasar sedang defensif. Prioritaskan perlindungan modal dan hindari mengejar harga.'
+    };
+
+    if(strong){
+      strong.textContent = value;
+    }
+
+    if(detail){
+      detail.textContent =
+        descriptions[value] ||
+        descriptions.NEUTRAL;
+    }
+
+    box.dataset.environment = value;
+  }
+
+  function renderSectorLeadership(data){
+    if(!data) return;
+
+    const items =
+      [...document.querySelectorAll('.sector-item')];
+
+    const leaders =
+      Array.isArray(data.leaders)
+        ? data.leaders.slice(0,3)
+        : [];
+
+    leaders.forEach((sector,index) => {
+      const item = items[index];
+
+      if(!item) return;
+
+      const strong =
+        item.querySelector('strong');
+
+      const span =
+        item.querySelector('span');
+
+      if(strong){
+        strong.textContent =
+          String(sector.sector || '—')
+            .toUpperCase();
+      }
+
+      if(span){
+        span.textContent =
+          formatPercent(sector.change);
+      }
+    });
+
+    const weakest = data.weakest;
+    const weakItem = items[3];
+
+    if(weakest && weakItem){
+      const strong =
+        weakItem.querySelector('strong');
+
+      const span =
+        weakItem.querySelector('span');
+
+      if(strong){
+        strong.textContent =
+          String(weakest.sector || '—')
+            .toUpperCase();
+      }
+
+      if(span){
+        span.textContent =
+          formatPercent(weakest.change);
+      }
+    }
+  }
+
+  function renderMarketContext(data){
+    if(!data || !data.ok) return;
+
+    const pulse = data.market_pulse;
+
+    if(pulse){
+      renderForeignFlow(
+        pulse.foreign_flow
+      );
+
+      renderRupiah(
+        pulse.rupiah
+      );
+
+      renderGlobalSentiment(
+        pulse.global_sentiment
+      );
+
+      renderBreadth(
+        pulse.market_breadth
+      );
+
+      renderEnvironment(
+        pulse.environment
+      );
+    }
+
+    renderSectorLeadership(
+      data.sector_leadership
+    );
   }
 
   async function fetchMarketPulse(){
+    const endpoint =
+      workerEndpoint('/market-context');
+
+    if(!endpoint) return;
+
+    try{
+      const response =
+        await fetch(endpoint,{
+          cache:'no-store'
+        });
+
+      if(!response.ok) return;
+
+      const data =
+        await response.json();
+
+      renderMarketContext(data);
+
+    }catch(e){
+      // Jika API gagal, placeholder Home tetap tampil.
+    }
+  }
+  
     const endpoint=workerEndpoint('/market-pulse');
     if(!endpoint)return;
     try{
