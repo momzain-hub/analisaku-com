@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260818-1437';
+  const VERSION='20260819-1025';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
@@ -44,6 +44,16 @@
     document.head.appendChild(actionRadar);
   }
 
+  function loadSignalHealthUi(){
+    document.querySelectorAll('script[data-analisaku-signal-health]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.signalHealthUiBound;
+    const health=document.createElement('script');
+    health.src=new URL('signal-health-ui.js',base).href+'?v='+VERSION;
+    health.async=true;
+    health.dataset.analisakuSignalHealth='true';
+    document.head.appendChild(health);
+  }
+
   function loadGcCandleUi(){
     document.querySelectorAll('script[data-analisaku-gc-candles]').forEach(el=>el.remove());
     const gc=document.createElement('script');
@@ -83,6 +93,7 @@
     document.getElementById('goldenCrossRadar')?.remove();
     document.getElementById('actionRadar')?.remove();
     document.getElementById('topSetupNow')?.remove();
+    document.getElementById('signalHealth')?.remove();
     document.querySelectorAll('script[data-analisaku-monitor-v2]').forEach(el=>el.remove());
 
     loadStyles();
@@ -93,7 +104,7 @@
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
     s.async=true;
     s.dataset.analisakuMonitorV2='true';
-    s.onload=()=>{loadEnhancer();loadStyleEntryUi();loadActionRadarUi();};
+    s.onload=()=>{loadEnhancer();loadStyleEntryUi();loadActionRadarUi();loadSignalHealthUi();};
     document.head.appendChild(s);
   }
 
