@@ -20,9 +20,64 @@
     if(document.getElementById('actionRadarControlStyles'))return;
     const s=document.createElement('style');s.id='actionRadarControlStyles';
     s.textContent=`
+      /* Global Technical form contrast: applies to all modules, not only Action Ranking. */
+      html[data-theme="dark"] body select,
+      html[data-theme="dark"] body input,
+      html[data-theme="dark"] body textarea{
+        color-scheme:dark!important;
+        background-color:#112131!important;
+        color:#f8f7f2!important;
+        border-color:rgba(255,255,255,.17)!important;
+      }
+      html[data-theme="dark"] body select option,
+      html[data-theme="dark"] body select optgroup{
+        background-color:#112131!important;
+        color:#f8f7f2!important;
+      }
+      html[data-theme="dark"] body select option:checked{
+        background:#20364c!important;
+        color:#ffffff!important;
+      }
+      html[data-theme="dark"] body input::placeholder,
+      html[data-theme="dark"] body textarea::placeholder{
+        color:#aab8c6!important;
+        opacity:.9!important;
+      }
+
+      html[data-theme="light"] body select,
+      html[data-theme="light"] body input,
+      html[data-theme="light"] body textarea{
+        color-scheme:light!important;
+        background-color:#fffdf8!important;
+        color:#2c2923!important;
+        border-color:rgba(55,43,22,.22)!important;
+      }
+      html[data-theme="light"] body select option,
+      html[data-theme="light"] body select optgroup{
+        background-color:#fffdf8!important;
+        color:#2c2923!important;
+      }
+      html[data-theme="light"] body select option:checked{
+        background:#f2e7d5!important;
+        color:#11100e!important;
+      }
+      html[data-theme="light"] body input::placeholder,
+      html[data-theme="light"] body textarea::placeholder{
+        color:#6f685e!important;
+        opacity:.9!important;
+      }
+
+      body select:focus,
+      body input:focus,
+      body textarea:focus{
+        outline:none!important;
+        border-color:var(--gold)!important;
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 14%,transparent)!important;
+      }
+
       .action-radar-controls{display:grid;grid-template-columns:minmax(170px,1.35fr) repeat(3,minmax(120px,.7fr));gap:8px;margin:0 0 10px}
       .action-radar-control{display:grid;gap:4px}.action-radar-control span{font-size:8px;font-weight:900;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
-      .action-radar-control input,.action-radar-control select{width:100%;min-height:36px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:inherit;font-size:10px;outline:none}
+      .action-radar-control input,.action-radar-control select{width:100%;min-height:36px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:10px;outline:none}
       .action-radar-control input:focus,.action-radar-control select:focus{border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
       .action-radar-view-bar .action-radar-native-limit{display:none!important}
       @media(max-width:800px){.action-radar-controls{grid-template-columns:1fr 1fr}.action-radar-control.search{grid-column:1/-1}}
@@ -89,6 +144,7 @@
   function bind(){
     const section=document.getElementById('actionRadar');
     if(!section){setTimeout(bind,250);return;}
+    ensureStyles();
     ensureControls(section);forceUnderlyingAll(section);apply(section);
     const body=section.querySelector('#actionRadarBody');
     if(body){
