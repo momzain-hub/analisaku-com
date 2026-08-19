@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260819-1033';
+  const VERSION='20260819-1040';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
