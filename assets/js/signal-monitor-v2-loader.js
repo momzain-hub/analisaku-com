@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260819-1109';
+  const VERSION='20260819-1115';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
@@ -54,6 +54,16 @@
     actionRadar.onload=loadActionRadarControls;
     actionRadar.onerror=loadActionRadarControls;
     document.head.appendChild(actionRadar);
+  }
+
+  function loadCustomSelectUi(){
+    document.querySelectorAll('script[data-analisaku-custom-select]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.customSelectUiBound;
+    const custom=document.createElement('script');
+    custom.src=new URL('custom-select-ui.js',base).href+'?v='+VERSION;
+    custom.async=true;
+    custom.dataset.analisakuCustomSelect='true';
+    document.head.appendChild(custom);
   }
 
   function loadSignalHealthUi(){
@@ -116,7 +126,7 @@
     s.src=new URL('signal-monitor.js',base).href+'?v='+VERSION;
     s.async=true;
     s.dataset.analisakuMonitorV2='true';
-    s.onload=()=>{loadEnhancer();loadStyleEntryUi();loadActionRadarUi();loadSignalHealthUi();};
+    s.onload=()=>{loadEnhancer();loadStyleEntryUi();loadActionRadarUi();loadSignalHealthUi();loadCustomSelectUi();};
     document.head.appendChild(s);
   }
 
