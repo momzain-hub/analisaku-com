@@ -1,6 +1,6 @@
 /* Analisaku Technical Monitor cache-busting loader */
 (function(){
-  const VERSION='20260819-1050';
+  const VERSION='20260819-1058';
   const base=document.currentScript?.src||location.href;
 
   function loadStyles(){
@@ -34,6 +34,16 @@
     document.head.appendChild(action);
   }
 
+  function loadActionRadarControls(){
+    document.querySelectorAll('script[data-analisaku-action-controls]').forEach(el=>el.remove());
+    delete document.documentElement.dataset.actionRadarControlsBound;
+    const controls=document.createElement('script');
+    controls.src=new URL('action-radar-controls.js',base).href+'?v='+VERSION;
+    controls.async=true;
+    controls.dataset.analisakuActionControls='true';
+    document.head.appendChild(controls);
+  }
+
   function loadActionRadarUi(){
     document.querySelectorAll('script[data-analisaku-action-radar]').forEach(el=>el.remove());
     delete document.documentElement.dataset.actionRadarUiBound;
@@ -41,6 +51,8 @@
     actionRadar.src=new URL('action-radar-ui.js',base).href+'?v='+VERSION;
     actionRadar.async=true;
     actionRadar.dataset.analisakuActionRadar='true';
+    actionRadar.onload=loadActionRadarControls;
+    actionRadar.onerror=loadActionRadarControls;
     document.head.appendChild(actionRadar);
   }
 
