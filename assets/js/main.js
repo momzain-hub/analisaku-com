@@ -8,6 +8,7 @@ const activeScript=document.currentScript;
 const assetUrl=(relative,fallback)=>activeScript?new URL(relative,activeScript.src).href:fallback;
 const themeCssUrl=assetUrl('../css/theme.css','assets/css/theme.css');
 const functionalCssUrl=assetUrl('../css/functional.css','assets/css/functional.css');
+const designCssUrl=assetUrl('../css/design-system-v3.css','assets/css/design-system-v3.css');
 const darkLogoUrl=assetUrl('../img/logo-analisaku.svg','assets/img/logo-analisaku.svg');
 const lightLogoUrl=assetUrl('../img/logo-analisaku-light.svg','assets/img/logo-analisaku-light.svg');
 
@@ -24,6 +25,13 @@ if(!document.querySelector('link[data-analisaku-functional],link[href$="function
   link.rel='stylesheet';
   link.href=functionalCssUrl;
   link.dataset.analisakuFunctional='true';
+  document.head.appendChild(link);
+}
+if(!document.querySelector('link[data-analisaku-design],link[href*="design-system-v3.css"]')){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href=designCssUrl+'?v=20260819-1434';
+  link.dataset.analisakuDesign='true';
   document.head.appendChild(link);
 }
 
@@ -67,7 +75,7 @@ function updateThemeMeta(theme){
     meta.name='theme-color';
     document.head.appendChild(meta);
   }
-  meta.content=theme==='light'?'#fbf7ef':'#06111d';
+  meta.content=theme==='light'?'#f7f9fc':'#07111b';
 }
 
 function themeIcon(theme){
