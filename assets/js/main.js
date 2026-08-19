@@ -30,7 +30,7 @@ if(!document.querySelector('link[data-analisaku-functional],link[href$="function
 if(!document.querySelector('link[data-analisaku-design],link[href*="design-system-v3.css"]')){
   const link=document.createElement('link');
   link.rel='stylesheet';
-  link.href=designCssUrl+'?v=20260819-1434';
+  link.href=designCssUrl+'?v=20260819-1504';
   link.dataset.analisakuDesign='true';
   document.head.appendChild(link);
 }
