@@ -1,4 +1,4 @@
-/* Analisaku Signal Health — public delivery coverage monitor only. */
+/* Analisaku Signal Health — compact public delivery coverage monitor only. */
 (function(){
   if(document.documentElement.dataset.signalHealthUiBound==='true')return;
   document.documentElement.dataset.signalHealthUiBound='true';
@@ -15,29 +15,24 @@
   const endpoint=()=>{const u=new URL(API);u.pathname='/signals';u.search='';u.hash='';u.searchParams.set('timeframe','1D');return u;};
 
   function ageLabel(stamp){
-    if(!stamp)return 'belum ada delivery';
+    if(!stamp)return 'belum ada';
     const ms=Math.max(0,Date.now()-stamp),mins=Math.floor(ms/60000),hours=ms/3600000;
     if(mins<1)return 'baru saja';
-    if(mins<60)return `${mins} menit lalu`;
-    if(hours<24)return `${Math.floor(hours)} jam lalu`;
-    return `${Math.floor(hours/24)} hari lalu`;
+    if(mins<60)return `${mins}m lalu`;
+    if(hours<24)return `${Math.floor(hours)}j lalu`;
+    return `${Math.floor(hours/24)}h lalu`;
   }
 
-  function timeLabel(stamp){
-    if(!stamp)return '—';
-    return new Date(stamp).toLocaleString('id-ID',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  }
-
-  function healthFor(name,list,map){
+  function healthFor(list,map){
     const present=list.filter(t=>map.has(t));
     const missing=list.filter(t=>!map.has(t));
     const latest=Math.max(0,...present.map(t=>stampOf(map.get(t))));
     const ageHours=latest?Math.max(0,(Date.now()-latest)/3600000):Infinity;
     let state='ACTIVE',tone='active';
     if(missing.length){state='INCOMPLETE';tone='check';}
-    else if(!latest||ageHours>96){state='CHECK ALERT';tone='check';}
+    else if(!latest||ageHours>96){state='CHECK';tone='check';}
     else if(ageHours>48){state='QUIET';tone='quiet';}
-    return {name,total:list.length,present:present.length,missing,latest,state,tone};
+    return {total:list.length,present:present.length,missing,latest,state,tone};
   }
 
   function ensure(){
@@ -47,14 +42,16 @@
     if(!anchor)return null;
     section=document.createElement('section');
     section.id='signalHealth';
-    section.className='signal-health';
+    section.className='signal-health compact';
     section.innerHTML=`<style>
-      .signal-health{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--panel) 96%,transparent)}
-      .signal-health-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}.signal-health-head h3{margin:3px 0 4px;font-size:20px}.signal-health-head h3 small{font-size:11px;color:var(--gold)}.signal-health-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.5;max-width:780px}.signal-health-badge{display:inline-flex;align-items:center;padding:7px 9px;border:1px solid var(--line);border-radius:999px;font-size:8px;font-weight:900;letter-spacing:.045em;white-space:nowrap}.signal-health-badge.active{color:var(--green);border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:color-mix(in srgb,var(--green) 8%,transparent)}.signal-health-badge.quiet{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,var(--line));background:color-mix(in srgb,var(--gold) 8%,transparent)}.signal-health-badge.check{color:var(--red);border-color:color-mix(in srgb,var(--red) 45%,var(--line));background:color-mix(in srgb,var(--red) 8%,transparent)}
-      .signal-health-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}.signal-health-card{padding:12px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--panel) 88%,transparent)}.signal-health-card>span{display:block;font-size:7.5px;font-weight:900;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}.signal-health-card strong{display:block;font-size:18px;line-height:1.1;margin-bottom:5px}.signal-health-card small{display:block;color:var(--muted);font-size:9px;line-height:1.45}.signal-health-card.active strong{color:var(--green)}.signal-health-card.quiet strong{color:var(--gold)}.signal-health-card.check strong{color:var(--red)}
-      .signal-health-foot{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:8.5px;line-height:1.45}.signal-health-missing{color:var(--red);font-weight:800}
-      @media(max-width:720px){.signal-health{padding:14px}.signal-health-head{display:grid}.signal-health-grid{grid-template-columns:1fr}.signal-health-foot{display:grid}.signal-health-card strong{font-size:16px}}
-    </style><div class="signal-health-head"><div><div class="kicker">ANALISAKU SYSTEM HEALTH</div><h3>Signal Health <small>1D</small></h3><p>Memantau coverage 40 ticker dan aktivitas delivery terakhir Hub A / Hub B. Health ini memeriksa jalur data publik, bukan formula internal.</p></div><span id="signalHealthOverall" class="signal-health-badge quiet">CHECKING</span></div><div id="signalHealthGrid" class="signal-health-grid"></div><div id="signalHealthFoot" class="signal-health-foot"></div>`;
+      .signal-health.compact{margin-top:14px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel) 96%,transparent)}
+      .signal-health-row{display:flex;align-items:center;gap:10px;min-width:0}
+      .signal-health-title{display:flex;align-items:center;gap:7px;min-width:145px}.signal-health-title .kicker{margin:0;font-size:7px;white-space:nowrap}.signal-health-title b{font-size:12px;white-space:nowrap}.signal-health-title small{font-size:8px;color:var(--gold)}
+      .signal-health-items{display:flex;align-items:center;gap:7px;flex:1;min-width:0}.signal-health-item{display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;white-space:nowrap;font-size:8px;color:var(--muted)}.signal-health-item span{font-weight:900;text-transform:uppercase;letter-spacing:.035em}.signal-health-item strong{font-size:10px;color:var(--text)}.signal-health-item.active strong{color:var(--green)}.signal-health-item.quiet strong{color:var(--gold)}.signal-health-item.check strong{color:var(--red)}
+      .signal-health-badge{margin-left:auto;display:inline-flex;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:7px;font-weight:900;letter-spacing:.045em;white-space:nowrap}.signal-health-badge.active{color:var(--green);border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:color-mix(in srgb,var(--green) 8%,transparent)}.signal-health-badge.quiet{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,var(--line));background:color-mix(in srgb,var(--gold) 8%,transparent)}.signal-health-badge.check{color:var(--red);border-color:color-mix(in srgb,var(--red) 45%,var(--line));background:color-mix(in srgb,var(--red) 8%,transparent)}
+      .signal-health-meta{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent);display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:7.5px;line-height:1.35}.signal-health-missing{color:var(--red);font-weight:800}
+      @media(max-width:820px){.signal-health-row{flex-wrap:wrap}.signal-health-title{min-width:auto}.signal-health-items{order:3;width:100%;overflow:auto;padding-bottom:1px}.signal-health-badge{margin-left:auto}.signal-health-meta{display:none}}
+    </style><div class="signal-health-row"><div class="signal-health-title"><div class="kicker">SYSTEM HEALTH</div><b>Signal Health <small>1D</small></b></div><div id="signalHealthItems" class="signal-health-items"></div><span id="signalHealthOverall" class="signal-health-badge quiet">CHECKING</span></div><div id="signalHealthMeta" class="signal-health-meta"></div>`;
     anchor.insertAdjacentElement('beforebegin',section);
     return section;
   }
@@ -64,22 +61,25 @@
     const map=new Map((signals||[]).map(d=>[upper(d?.ticker),d]).filter(([t])=>t));
     const allPresent=EXPECTED.filter(t=>map.has(t));
     const allMissing=EXPECTED.filter(t=>!map.has(t));
-    const a=healthFor('HUB A',HUBS.A,map),b=healthFor('HUB B',HUBS.B,map);
-    const overall=document.getElementById('signalHealthOverall');
+    const a=healthFor(HUBS.A,map),b=healthFor(HUBS.B,map);
     const healthy=allMissing.length===0&&a.tone!=='check'&&b.tone!=='check';
     const quiet=healthy&&(a.tone==='quiet'||b.tone==='quiet');
-    overall.textContent=healthy?(quiet?'SYSTEM QUIET':'SYSTEM HEALTHY'):'CHECK SIGNAL HUB';
+
+    const overall=document.getElementById('signalHealthOverall');
+    overall.textContent=healthy?(quiet?'SYSTEM QUIET':'SYSTEM HEALTHY'):'CHECK HUB';
     overall.className=`signal-health-badge ${healthy?(quiet?'quiet':'active'):'check'}`;
 
-    const grid=document.getElementById('signalHealthGrid');
-    grid.innerHTML=`
-      <div class="signal-health-card ${allMissing.length?'check':'active'}"><span>Coverage</span><strong>${allPresent.length}/${EXPECTED.length}</strong><small>${allMissing.length?`${allMissing.length} ticker belum tersedia`:'Seluruh watchlist A+B tersedia'}</small></div>
-      <div class="signal-health-card ${a.tone}"><span>Hub A</span><strong>${a.present}/${a.total} · ${a.state}</strong><small>Last delivery ${ageLabel(a.latest)} · ${timeLabel(a.latest)}</small></div>
-      <div class="signal-health-card ${b.tone}"><span>Hub B</span><strong>${b.present}/${b.total} · ${b.state}</strong><small>Last delivery ${ageLabel(b.latest)} · ${timeLabel(b.latest)}</small></div>`;
+    const items=document.getElementById('signalHealthItems');
+    items.innerHTML=`
+      <div class="signal-health-item ${allMissing.length?'check':'active'}"><span>Coverage</span><strong>${allPresent.length}/${EXPECTED.length}</strong></div>
+      <div class="signal-health-item ${a.tone}"><span>Hub A</span><strong>${a.present}/${a.total} · ${a.state}</strong></div>
+      <div class="signal-health-item ${b.tone}"><span>Hub B</span><strong>${b.present}/${b.total} · ${b.state}</strong></div>`;
 
     const missing=[...new Set([...a.missing,...b.missing])];
-    const foot=document.getElementById('signalHealthFoot');
-    foot.innerHTML=`<span>ACTIVE ≤48 jam · QUIET 48–96 jam · CHECK ALERT &gt;96 jam atau coverage tidak lengkap.</span>${missing.length?`<span class="signal-health-missing">Missing: ${missing.join(', ')}</span>`:'<span>Catatan: ticker yang tidak berubah bisa memiliki timestamp signal lebih lama; indikator kesehatan memakai aktivitas delivery terbaru per hub.</span>'}`;
+    const meta=document.getElementById('signalHealthMeta');
+    meta.innerHTML=missing.length
+      ? `<span>Last delivery: Hub A ${ageLabel(a.latest)} · Hub B ${ageLabel(b.latest)}</span><span class="signal-health-missing">Missing: ${missing.join(', ')}</span>`
+      : `<span>Last delivery: Hub A ${ageLabel(a.latest)} · Hub B ${ageLabel(b.latest)}</span><span>ACTIVE ≤48j · QUIET 48–96j · CHECK &gt;96j</span>`;
   }
 
   async function load(){
@@ -92,7 +92,7 @@
     }catch(e){
       ensure();
       const overall=document.getElementById('signalHealthOverall');if(overall){overall.textContent='API CHECK';overall.className='signal-health-badge check';}
-      const grid=document.getElementById('signalHealthGrid');if(grid)grid.innerHTML='<div class="signal-health-card check"><span>Signal API</span><strong>TIDAK TERBACA</strong><small>Coba refresh halaman. Jika berlanjut, cek Worker/API.</small></div>';
+      const items=document.getElementById('signalHealthItems');if(items)items.innerHTML='<div class="signal-health-item check"><span>API</span><strong>TIDAK TERBACA</strong></div>';
     }
   }
 
