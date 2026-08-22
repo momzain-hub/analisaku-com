@@ -8,7 +8,7 @@
   <title>Analisaku.com | Market Direction & Weekly IHSG Outlook</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/home-market.css?v=20260822-2238">
+  <link rel="stylesheet" href="assets/css/home-market.css?v=20260822-2248">
   <link rel="stylesheet" href="assets/css/home-radar.css?v=20260814-0720">
   <style>
     @media (min-width:981px){.market-pulse-grid{grid-template-columns:repeat(2,1fr)}}
@@ -71,7 +71,7 @@
         </div>
         <div class="market-environment">
           <div><small>MARKET ENVIRONMENT</small><strong>Menunggu data otomatis</strong></div>
-          <p>Nantinya kondisi diringkas menjadi <b>Constructive</b>, <b>Mixed</b>, atau <b>Defensive</b>.</p>
+          <p>Dirangkum otomatis dari Rupiah, kekuatan sektor, dan Hot Issues.</p>
         </div>
       </div>
     </section>
@@ -184,7 +184,108 @@
     <div class="container footer-note">Informasi di Analisaku.com bersifat analisis dan edukasi, bukan rekomendasi personal untuk membeli atau menjual efek tertentu. © <span id="year"></span> Analisaku.com.</div>
   </footer>
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/home-market.js?v=20260819-1236"></script>
+  <script src="assets/js/home-market.js?v=20260822-2248"></script>
+  <script>
+    (function () {
+      const endpoint = 'https://analisaku-signal.pitizain.workers.dev/market-context';
+
+      function rupiahScore(rupiah) {
+        const status = String(rupiah?.status || '').toUpperCase();
+        if (status === 'STRENGTHENING') return 1;
+        if (status === 'WEAKENING') return -1;
+        if (status === 'STABLE') return 0;
+        return null;
+      }
+
+      function sectorScore(sectorLeadership) {
+        const leaders = Array.isArray(sectorLeadership?.leaders)
+          ? sectorLeadership.leaders.slice(0, 3)
+          : [];
+
+        const changes = leaders
+          .map(item => Number(item?.change))
+          .filter(Number.isFinite);
+
+        if (!changes.length) return null;
+
+        const positiveCount = changes.filter(value => value > 0).length;
+        const average = changes.reduce((sum, value) => sum + value, 0) / changes.length;
+
+        if (positiveCount >= 2 && average > 0) return 1;
+        if (positiveCount === 0 || average < 0) return -1;
+        return 0;
+      }
+
+      function issuesScore(issues) {
+        if (!Array.isArray(issues) || !issues.length) return null;
+
+        const risks = issues.map(item => String(item?.risk || '').toUpperCase());
+        const highCount = risks.filter(risk => risk === 'HIGH').length;
+        const elevatedCount = risks.filter(risk => risk === 'ELEVATED').length;
+
+        if (highCount > 0) return -2;
+        if (elevatedCount >= 2) return -1;
+        return 0;
+      }
+
+      function deriveEnvironment(data) {
+        const scores = [
+          rupiahScore(data?.market_pulse?.rupiah),
+          sectorScore(data?.sector_leadership),
+          issuesScore(data?.hot_issues)
+        ].filter(value => value !== null);
+
+        if (scores.length < 2) return null;
+
+        const total = scores.reduce((sum, value) => sum + value, 0);
+
+        if (total >= 2) return 'CONSTRUCTIVE';
+        if (total >= 0) return 'NEUTRAL';
+        if (total === -1) return 'CAUTIOUS';
+        return 'RISK OFF';
+      }
+
+      function applyEnvironment(status) {
+        if (!status) return;
+
+        const box = document.querySelector('.market-environment');
+        if (!box) return;
+
+        const strong = box.querySelector('strong');
+        const detail = box.querySelector('p');
+
+        const descriptions = {
+          CONSTRUCTIVE: 'Rupiah dan kekuatan sektor relatif mendukung, sementara risiko Hot Issues masih terkendali.',
+          NEUTRAL: 'Sinyal Rupiah, sektor, dan Hot Issues masih bercampur. Seleksi saham tetap menjadi prioritas.',
+          CAUTIOUS: 'Tekanan dari Rupiah, sektor, atau Hot Issues mulai meningkat. Perketat seleksi saham dan pengelolaan risiko.',
+          'RISK OFF': 'Tekanan pasar sedang dominan. Prioritaskan perlindungan modal dan hindari mengejar harga.'
+        };
+
+        if (strong) strong.textContent = status;
+        if (detail) detail.textContent = descriptions[status] || descriptions.NEUTRAL;
+
+        box.dataset.environment = status;
+        box.dataset.environmentSource = 'AUTO_RUPIAH_SECTOR_HOT_ISSUES';
+      }
+
+      async function refreshAutoEnvironment() {
+        try {
+          const response = await fetch(endpoint, { cache: 'no-store' });
+          if (!response.ok) return;
+
+          const data = await response.json();
+          const status = deriveEnvironment(data);
+          applyEnvironment(status);
+        } catch (error) {
+          /* Keep the existing market-context value if auto calculation cannot run. */
+        }
+      }
+
+      window.addEventListener('load', function () {
+        setTimeout(refreshAutoEnvironment, 1200);
+      });
+    })();
+  </script>
   <script src="assets/js/home-radar-lite.js?v=20260814-0720"></script>
 </body>
 </html>
