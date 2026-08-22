@@ -321,91 +321,6 @@
   }
 
 
-  function formatMoney(value) {
-
-    const n =
-      Math.abs(
-        Number(value)
-      );
-
-    if (!Number.isFinite(n)) {
-      return '—';
-    }
-
-
-    if (n >= 1e12) {
-
-      return (
-        `Rp${(n / 1e12).toLocaleString(
-          'id-ID',
-          {
-            maximumFractionDigits: 2
-          }
-        )} T`
-      );
-
-    }
-
-
-    if (n >= 1e9) {
-
-      return (
-        `Rp${(n / 1e9).toLocaleString(
-          'id-ID',
-          {
-            maximumFractionDigits: 2
-          }
-        )} M`
-      );
-
-    }
-
-
-    if (n >= 1e6) {
-
-      return (
-        `Rp${(n / 1e6).toLocaleString(
-          'id-ID',
-          {
-            maximumFractionDigits: 2
-          }
-        )} Jt`
-      );
-
-    }
-
-
-    return (
-      `Rp${n.toLocaleString('id-ID')}`
-    );
-  }
-
-
-  function formatDate(date) {
-
-    if (!date) return '';
-
-    try {
-
-      return new Date(
-        `${date}T00:00:00+07:00`
-      ).toLocaleDateString(
-        'id-ID',
-        {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
-        }
-      );
-
-    } catch (e) {
-
-      return date;
-
-    }
-  }
-
-
   function setPulseCard(
     label,
     status,
@@ -452,50 +367,6 @@
       String(
         status || ''
       ).toUpperCase();
-  }
-
-
-  function renderForeignFlow(data) {
-
-    if (!data) return;
-
-
-    const parts =
-      [];
-
-
-    if (
-      Number.isFinite(
-        Number(data.value)
-      )
-    ) {
-
-      parts.push(
-        formatMoney(
-          data.value
-        )
-      );
-
-    }
-
-
-    if (data.date) {
-
-      parts.push(
-        formatDate(
-          data.date
-        )
-      );
-
-    }
-
-
-    setPulseCard(
-      'FOREIGN FLOW',
-      data.status,
-      parts.join(' • ') ||
-      'Sumber: BEI / IDX'
-    );
   }
 
 
@@ -551,117 +422,6 @@
       parts.join(' • ') ||
       'Sumber: BI / JISDOR'
     );
-  }
-
-
-  function renderGlobalSentiment(data) {
-
-    if (!data) return;
-
-
-    setPulseCard(
-      'GLOBAL SENTIMENT',
-      data.status,
-      data.detail ||
-      'Global market data'
-    );
-  }
-
-
-  function renderBreadth(data) {
-
-    if (!data) return;
-
-
-    const adv =
-      Number(
-        data.advancers
-      );
-
-    const dec =
-      Number(
-        data.decliners
-      );
-
-
-    const detail =
-      Number.isFinite(adv) &&
-      Number.isFinite(dec)
-        ? (
-            `${adv.toLocaleString('id-ID')} naik` +
-            ` • ` +
-            `${dec.toLocaleString('id-ID')} turun`
-          )
-        : 'IDX market breadth';
-
-
-    setPulseCard(
-      'MARKET BREADTH',
-      data.status,
-      detail
-    );
-  }
-
-
-  function renderEnvironment(status) {
-
-    const box =
-      document.querySelector(
-        '.market-environment'
-      );
-
-    if (!box) return;
-
-
-    const strong =
-      box.querySelector('strong');
-
-    const detail =
-      box.querySelector('p');
-
-
-    const value =
-      String(
-        status || 'NEUTRAL'
-      ).toUpperCase();
-
-
-    const descriptions = {
-
-      'CONSTRUCTIVE':
-        'Kondisi pasar relatif mendukung untuk mencari peluang, dengan tetap memperhatikan seleksi sektor dan saham.',
-
-      'NEUTRAL':
-        'Kondisi pasar belum menunjukkan dominasi arah yang cukup kuat.',
-
-      'CAUTIOUS':
-        'Tekanan pasar mulai meningkat. Seleksi saham dan pengelolaan risiko perlu diperketat.',
-
-      'RISK OFF':
-        'Lingkungan pasar sedang defensif. Prioritaskan perlindungan modal dan hindari mengejar harga.'
-
-    };
-
-
-    if (strong) {
-
-      strong.textContent =
-        value;
-
-    }
-
-
-    if (detail) {
-
-      detail.textContent =
-        descriptions[value] ||
-        descriptions.NEUTRAL;
-
-    }
-
-
-    box.dataset.environment =
-      value;
   }
 
 
@@ -793,24 +553,8 @@
 
     if (pulse) {
 
-      renderForeignFlow(
-        pulse.foreign_flow
-      );
-
       renderRupiah(
         pulse.rupiah
-      );
-
-      renderGlobalSentiment(
-        pulse.global_sentiment
-      );
-
-      renderBreadth(
-        pulse.market_breadth
-      );
-
-      renderEnvironment(
-        pulse.environment
       );
 
     }
@@ -1258,6 +1002,7 @@
         }
 
       }
+
     );
 
   }
