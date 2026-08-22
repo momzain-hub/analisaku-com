@@ -2,6 +2,10 @@
 
 Backend ini menjadi penghubung antara mesin sinyal privat dan website publik Analisaku.com.
 
+## Status deployment
+
+Worker produksi dikelola langsung di Cloudflare. File `backend/cloudflare-worker.js` di repository ini dapat tertinggal dari versi produksi dan **tidak boleh langsung dideploy untuk menimpa Worker live tanpa dibandingkan lebih dulu dengan source terbaru di Cloudflare**.
+
 ## Prinsip publik
 
 - Website dan endpoint publik hanya menampilkan **hasil analisis** yang dibutuhkan pengguna.
