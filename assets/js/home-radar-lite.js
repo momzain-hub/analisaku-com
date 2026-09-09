@@ -1,13 +1,4 @@
 (function(){
-  const sliderCss=document.createElement('link');
-  sliderCss.rel='stylesheet';
-  sliderCss.href='assets/css/weekly-slider.css?v=20260909-1645';
-  document.head.appendChild(sliderCss);
-
-  const sliderScript=document.createElement('script');
-  sliderScript.src='assets/js/weekly-slider.js?v=20260909-1645';
-  document.body.appendChild(sliderScript);
-
   const rows=[...document.querySelectorAll('[data-home-rank]')];
   const meta=document.getElementById('homeRadarMeta');
   if(!rows.length)return;
