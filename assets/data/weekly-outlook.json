@@ -69,6 +69,88 @@
         {"date":"2026-08-27","label":"27 Agu","text":"Recovery momentum","key":false,"closed":false},
         {"date":"2026-08-28","label":"28 Agu","text":"Bullish continuation","key":false,"closed":false}
       ]
+    },
+    {
+      "id": "2026-09-w1",
+      "label": "WEEK 1",
+      "display_range": "1–4 SEPTEMBER 2026",
+      "start": "2026-09-01",
+      "end": "2026-09-04",
+      "bias": "Bullish Momentum",
+      "weekly_call": "Bullish",
+      "strategy": "Hold winner, jangan chase saham yang terlalu extended.",
+      "days": [
+        {"date":"2026-09-01","label":"1 Sep","text":"Rebound momentum","key":false,"closed":false},
+        {"date":"2026-09-02","label":"2 Sep","text":"Peluang penguatan berlanjut","key":false,"closed":false},
+        {"date":"2026-09-03","label":"3 Sep","text":"Bullish continuation","key":false,"closed":false},
+        {"date":"2026-09-04","label":"4 Sep","text":"Momentum Window / Hold","key":true,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-09-w2",
+      "label": "WEEK 2",
+      "display_range": "7–11 SEPTEMBER 2026",
+      "start": "2026-09-07",
+      "end": "2026-09-11",
+      "bias": "Peak Risk → Consolidation",
+      "weekly_call": "Caution / Consolidation",
+      "strategy": "Amankan profit, tunggu koreksi sehat sebelum agresif masuk.",
+      "days": [
+        {"date":"2026-09-07","label":"7 Sep","text":"Profit Taking / Reversal Watch","key":true,"closed":false},
+        {"date":"2026-09-08","label":"8 Sep","text":"Volatility masih tinggi","key":false,"closed":false},
+        {"date":"2026-09-09","label":"9 Sep","text":"Konsolidasi / pressure","key":false,"closed":false},
+        {"date":"2026-09-10","label":"10 Sep","text":"Support test","key":false,"closed":false},
+        {"date":"2026-09-11","label":"11 Sep","text":"Stabilization watch","key":false,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-09-w3",
+      "label": "WEEK 3",
+      "display_range": "14–18 SEPTEMBER 2026",
+      "start": "2026-09-14",
+      "end": "2026-09-18",
+      "bias": "Pressure → Reversal",
+      "weekly_call": "Bearish → Reversal Watch",
+      "strategy": "Cash ready, mulai buy bertahap setelah reversal terlihat.",
+      "days": [
+        {"date":"2026-09-14","label":"14 Sep","text":"Tekanan masih berpotensi berlanjut","key":false,"closed":false},
+        {"date":"2026-09-15","label":"15 Sep","text":"Bottoming watch","key":false,"closed":false},
+        {"date":"2026-09-16","label":"16 Sep","text":"Selling pressure / shakeout","key":false,"closed":false},
+        {"date":"2026-09-17","label":"17 Sep","text":"Potential Bottom / Reversal Window","key":true,"closed":false},
+        {"date":"2026-09-18","label":"18 Sep","text":"Rebound confirmation","key":false,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-09-w4",
+      "label": "WEEK 4",
+      "display_range": "21–25 SEPTEMBER 2026",
+      "start": "2026-09-21",
+      "end": "2026-09-25",
+      "bias": "Recovery → Bullish",
+      "weekly_call": "Bullish Recovery",
+      "strategy": "Buy/add selama trend dan support terjaga.",
+      "days": [
+        {"date":"2026-09-21","label":"21 Sep","text":"Buy / Recovery Window","key":true,"closed":false},
+        {"date":"2026-09-22","label":"22 Sep","text":"Follow-through rebound","key":false,"closed":false},
+        {"date":"2026-09-23","label":"23 Sep","text":"Bullish momentum","key":false,"closed":false},
+        {"date":"2026-09-24","label":"24 Sep","text":"Healthy consolidation","key":false,"closed":false},
+        {"date":"2026-09-25","label":"25 Sep","text":"Continuation watch","key":false,"closed":false}
+      ]
+    },
+    {
+      "id": "2026-09-w5",
+      "label": "WEEK 5",
+      "display_range": "28–30 SEPTEMBER 2026",
+      "start": "2026-09-28",
+      "end": "2026-09-30",
+      "bias": "Bullish → Caution",
+      "weekly_call": "Bullish with Caution",
+      "strategy": "Hold winner, naikkan trailing profit.",
+      "days": [
+        {"date":"2026-09-28","label":"28 Sep","text":"Momentum masih positif","key":false,"closed":false},
+        {"date":"2026-09-29","label":"29 Sep","text":"Bullish continuation","key":false,"closed":false},
+        {"date":"2026-09-30","label":"30 Sep","text":"Mulai evaluasi posisi menjelang Oktober","key":false,"closed":false}
+      ]
     }
   ]
 }
