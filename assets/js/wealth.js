@@ -7,7 +7,7 @@
     if(document.querySelector('link[data-wealth-v2]'))return;
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href=url('../css/wealth-v2.css?v=20260915-1410');
+    link.href=url('../css/wealth-v2.css?v=20260915-1430');
     link.dataset.wealthV2='true';
     document.head.appendChild(link);
   }
@@ -43,8 +43,8 @@
     ).catch(error=>console.warn('PDF library belum termuat',error));
 
     try{
-      await loadScript(url('wealth-engine.js?v=20260915-1410'));
-      await loadScript(url('wealth-report.js?v=20260915-1410'));
+      await loadScript(url('wealth-engine.js?v=20260915-1430'));
+      await loadScript(url('wealth-report.js?v=20260915-1430'));
       await pdfPromise;
     }catch(error){
       console.error('Wealth v2 gagal dimuat',error);
