@@ -35,7 +35,7 @@
     loadCss(url('../css/wealth-products.css?v=20260915-2045'),'wealthProducts');
 
     try{
-      await loadScript(url('wealth-product-intro.js?v=20260915-2045'));
+      await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
     }catch(error){
       console.warn('Product overview Wealth belum termuat',error);
     }
@@ -47,7 +47,7 @@
     }
 
     try{
-      await loadScript(url('wealth-unified.js?v=20260915-2045'));
+      await loadScript(url('wealth-unified.js?v=20260915-2115'));
     }catch(error){
       console.error('Wealth v5 gagal dimuat',error);
     }
