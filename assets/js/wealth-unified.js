@@ -1,11 +1,11 @@
-/* Analisaku Wealth v4 — connected one-form engine */
+/* Analisaku Wealth v5 — connected one-form engine with equity-forward allocation */
 (function(){
   const $=id=>document.getElementById(id);
   const qs=(sel,root=document)=>root.querySelector(sel);
   const qsa=(sel,root=document)=>[...root.querySelectorAll(sel)];
   const rupiah=v=>'Rp '+Math.round(Number(v)||0).toLocaleString('id-ID');
   const pct=v=>`${Math.max(0,Number(v)||0).toLocaleString('id-ID',{maximumFractionDigits:1})}%`;
-  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 
   let selectedGoal='Pendidikan';
   let latestPlan=null;
@@ -24,24 +24,38 @@
     1:'Fokus utama menjaga nilai dana dan likuiditas.',
     2:'Mengutamakan stabilitas dengan ruang pertumbuhan terbatas.',
     3:'Menyeimbangkan stabilitas dan pertumbuhan.',
-    4:'Berorientasi pertumbuhan dan siap menghadapi fluktuasi lebih besar.',
-    5:'Berorientasi pertumbuhan jangka panjang dengan toleransi volatilitas tinggi.'
+    4:'Berorientasi pertumbuhan dengan porsi ekuitas dominan dan siap menghadapi fluktuasi besar.',
+    5:'Berorientasi pertumbuhan jangka panjang dengan porsi ekuitas sangat tinggi dan toleransi volatilitas tinggi.'
   };
-  const allocations={
-    1:[['Likuid / RDPU',55],['Pendapatan Tetap',40],['Campuran',5],['Saham',0]],
-    2:[['Likuid / RDPU',35],['Pendapatan Tetap',45],['Campuran',15],['Saham',5]],
-    3:[['Likuid / RDPU',20],['Pendapatan Tetap',35],['Campuran',25],['Saham',20]],
-    4:[['Likuid / RDPU',10],['Pendapatan Tetap',25],['Campuran',25],['Saham',40]],
-    5:[['Likuid / RDPU',5],['Pendapatan Tetap',15],['Campuran',20],['Saham',60]]
+
+  /*
+    Equity-forward model.
+    Maximum strategic equity exposure is 90% for the highest-risk profile,
+    leaving a 10% stabilizer. The actual equity weight is still capped by
+    time horizon and liquidity need.
+  */
+  const baseAllocations={
+    1:[['Likuid / RDPU',55],['Obligasi / RDPT',40],['Campuran',5],['Ekuitas (Saham / RD Saham)',0]],
+    2:[['Likuid / RDPU',35],['Obligasi / RDPT',45],['Campuran',15],['Ekuitas (Saham / RD Saham)',5]],
+    3:[['Likuid / RDPU',20],['Obligasi / RDPT',35],['Campuran',25],['Ekuitas (Saham / RD Saham)',20]],
+    4:[['Likuid / RDPU',10],['Obligasi / RDPT',15],['Campuran',5],['Ekuitas (Saham / RD Saham)',70]],
+    5:[['Likuid / RDPU',5],['Obligasi / RDPT',5],['Campuran',0],['Ekuitas (Saham / RD Saham)',90]]
   };
-  const assumedReturn={1:4,2:5,3:6,4:7,5:8};
+
+  const assetReturnAssumptions={
+    'Likuid / RDPU':5,
+    'Obligasi / RDPT':6.5,
+    'Campuran':8,
+    'Ekuitas (Saham / RD Saham)':10
+  };
+
   const products=[
     {name:'Reksa Dana Pasar Uang',risk:1,minH:1,liq:4,goals:['preserve','income','balanced'],desc:'Likuiditas tinggi dan fluktuasi relatif rendah.'},
     {name:'SBN / Obligasi Berkualitas',risk:2,minH:2,liq:2,goals:['preserve','income','balanced'],desc:'Pendapatan relatif stabil, tetap memiliki risiko harga dan likuiditas.'},
     {name:'Reksa Dana Pendapatan Tetap',risk:2,minH:2,liq:3,goals:['income','balanced'],desc:'Eksposur utama pada surat utang untuk horizon menengah.'},
     {name:'Reksa Dana Campuran',risk:3,minH:3,liq:3,goals:['balanced','growth'],desc:'Kombinasi beberapa kelas aset dengan risiko menengah.'},
     {name:'Reksa Dana Saham',risk:4,minH:4,liq:3,goals:['growth'],desc:'Pertumbuhan jangka panjang dengan volatilitas tinggi.'},
-    {name:'Saham',risk:5,minH:4,liq:3,goals:['growth'],desc:'Risiko tinggi dan membutuhkan diversifikasi serta disiplin.'}
+    {name:'Saham Langsung',risk:4,minH:4,liq:3,goals:['growth'],desc:'Eksposur saham melalui rekening brokerage; membutuhkan diversifikasi, disiplin risiko, dan review berkala.'}
   ];
 
   function answer(name){
@@ -60,6 +74,37 @@
     return 4;
   }
   function liquidityNeedFromAnswer(v){return Number(v)||1;}
+  function horizonEquityCap(years){
+    if(years<1)return 0;
+    if(years<=3)return 10;
+    if(years<=5)return 35;
+    if(years<=10)return 70;
+    return 90;
+  }
+  function liquidityEquityCap(liq){
+    if(liq<=1)return 10;
+    if(liq===2)return 35;
+    if(liq===3)return 70;
+    return 90;
+  }
+  function buildAllocation(level,years,liq){
+    const allocation=(baseAllocations[level]||baseAllocations[1]).map(([name,val])=>[name,val]);
+    const equityIndex=allocation.findIndex(([name])=>name.startsWith('Ekuitas'));
+    if(equityIndex<0)return allocation;
+    const strategic=allocation[equityIndex][1];
+    const cap=Math.min(strategic,horizonEquityCap(years),liquidityEquityCap(liq));
+    const reduction=Math.max(0,strategic-cap);
+    allocation[equityIndex][1]=cap;
+    if(reduction>0){
+      const fixedIndex=allocation.findIndex(([name])=>name==='Obligasi / RDPT');
+      if(fixedIndex>=0)allocation[fixedIndex][1]+=reduction;
+    }
+    return allocation;
+  }
+  function expectedPortfolioReturn(allocation){
+    const weighted=allocation.reduce((sum,[name,val])=>sum+((assetReturnAssumptions[name]||0)*val/100),0);
+    return Math.round(weighted*10)/10;
+  }
   function requiredMonthly(target,initial,annualRate,months){
     const r=Math.pow(1+annualRate/100,1/12)-1;
     const growth=Math.pow(1+r,months);
@@ -108,7 +153,9 @@
     const comfortable=lensLevel([answer('qDrawdown'),answer('qExperience')]);
     const riskLimit=Math.min(when,able,comfortable);
     const styleLevel=Math.max(1,Math.min(5,Math.round((when+able+comfortable)/3)));
-    const returnRate=assumedReturn[riskLimit];
+    const liq=liquidityNeedFromAnswer(answer('qLiquidity'));
+    const allocation=buildAllocation(riskLimit,years,liq);
+    const returnRate=expectedPortfolioReturn(allocation);
     const months=Math.max(1,Math.round(years*12));
     const futureTarget=targetToday*Math.pow(1+inflation/100,years);
     const projected=futureValue(initial,monthly,returnRate,months);
@@ -116,7 +163,6 @@
     const fundingRatio=Math.min(999,(projected/futureTarget)*100);
     const goal=selectedGoalData();
     const hBucket=horizonBucket(years);
-    const liq=liquidityNeedFromAnswer(answer('qLiquidity'));
 
     const ranked=products.map(p=>{
       let score=0;
@@ -127,6 +173,7 @@
       if(horizonFit)score+=3;else score-=4;
       if(liquidityFit)score+=2;else score-=3;
       if(p.goals.includes(goal.goal))score+=2;
+      if(p.name==='Saham Langsung'&&riskLimit>=4&&goal.goal==='growth')score+=1;
       return {...p,score,riskFit,horizonFit,liquidityFit,fit:riskFit&&horizonFit&&liquidityFit};
     }).sort((a,b)=>b.score-a.score);
     const fitProducts=ranked.filter(p=>p.fit).slice(0,4);
@@ -139,15 +186,17 @@
     if(comfortable===min)lows.push('kenyamanan terhadap risiko');
     if(lows.length)limiter=lows.join(' dan ');
 
+    const equityWeight=allocation.find(([name])=>name.startsWith('Ekuitas'))?.[1]||0;
     let nextAction='Rencana sudah cukup sehat. Pertahankan disiplin setoran dan review berkala.';
     if(fundingRatio<80)nextAction=`Target belum penuh. Kebutuhan setoran indikatif sekitar ${rupiah(required)} per bulan.`;
     else if(fundingRatio<100)nextAction=`Target hampir tercapai. Naikkan setoran menuju sekitar ${rupiah(required)} per bulan atau tambah horizon.`;
     else if(riskLimit<=2)nextAction='Target terdanai, tetapi batas risiko rendah. Utamakan produk yang sesuai level risiko dan kebutuhan likuiditas.';
+    else if(equityWeight>=70)nextAction=`Porsi ekuitas ${equityWeight}% sesuai batas model untuk profil dan horizon ini. Gunakan diversifikasi saham, rebalancing, dan disiplin risiko.`;
 
     return {
       goal,years,targetToday,initial,monthly,inflation,principle,
       when,able,comfortable,riskLimit,styleLevel,returnRate,futureTarget,projected,required,fundingRatio,
-      fitProducts,ranked,limiter,nextAction,allocation:allocations[riskLimit]
+      fitProducts,ranked,limiter,nextAction,allocation,equityWeight
     };
   }
 
@@ -172,7 +221,7 @@
     $('resultProjected').textContent=rupiah(plan.projected);
     $('resultRequired').textContent=rupiah(plan.required);
     $('resultFunding').textContent=pct(plan.fundingRatio);
-    $('resultAssumption').textContent=`Return ilustratif ${plan.returnRate}%/tahun • inflasi ${plan.inflation}%/tahun`;
+    $('resultAssumption').textContent=`Return ilustratif portofolio ${plan.returnRate}%/tahun • ekuitas ${plan.equityWeight}% • inflasi ${plan.inflation}%/tahun`;
     $('resultProducts').innerHTML=plan.fitProducts.length?plan.fitProducts.map(productHtml).join(''):'<p>Belum ada kelas produk yang lolos seluruh batas. Prioritaskan likuiditas atau tambah horizon.</p>';
     $('resultAllocation').innerHTML=plan.allocation.map(([name,val])=>`<div><span>${esc(name)}</span><b>${val}%</b></div>`).join('');
     $('resultNext').textContent=plan.nextAction;
@@ -222,8 +271,9 @@
     y+=48;
 
     doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('MODEL ALOKASI EDUKATIF',M,y);y+=6;
-    plan.allocation.forEach(([name,val],i)=>{const x=M+i*(C/4);doc.setTextColor(95,105,120);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(name,x,y);doc.setTextColor(30,40,55);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(`${val}%`,x,y+6);});
-    y+=15;
+    const colCount=plan.allocation.length;
+    plan.allocation.forEach(([name,val],i)=>{const x=M+i*(C/colCount);doc.setTextColor(95,105,120);doc.setFontSize(6.3);doc.setFont('helvetica','normal');doc.text(name,x,y,{maxWidth:(C/colCount)-2});doc.setTextColor(30,40,55);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(`${val}%`,x,y+8);});
+    y+=17;
     doc.setFillColor(252,248,238);doc.roundedRect(M,y,C,20,3,3,'F');doc.setTextColor(173,121,28);doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('NEXT ACTION',M+5,y+6);doc.setTextColor(60,60,60);doc.setFont('helvetica','normal');doc.setFontSize(8);addPdfText(doc,plan.nextAction,M+5,y+12,C-10,4.3);
     y+=27;
     doc.setTextColor(120,125,135);doc.setFontSize(6.5);doc.setFont('helvetica','normal');addPdfText(doc,'Disclaimer: hasil bersifat ilustratif dan edukatif, bukan rekomendasi personal. Profil risiko resmi, KYC, suitability, dokumen produk, biaya, pajak, dan kondisi aktual tetap perlu dipertimbangkan sebelum transaksi.',M,y,C,3.5);
