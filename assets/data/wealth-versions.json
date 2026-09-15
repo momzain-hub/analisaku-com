@@ -37,8 +37,8 @@
     },
     "1.5": {
       "feature_commit": "96f67099fcdb06cf9c9ad1c4fbd3870539e90320",
-      "copy_layer_commit": "09160de74ab90a3dc8eedfb5ec50584b7c137e15",
-      "loader_commit": "76a0424d9d1af4c15a49580a130deb99db2ea383",
+      "copy_layer_commit": "80015b005cac16822f8398ab50d3b8d302da2f02",
+      "loader_commit": "137057f3babd1b9804d6f40ab9dace4022c2ed74",
       "rollback_to": "1.4",
       "label": "Customer-facing Wealth language",
       "notes": "Rewrites the Wealth journey for client-facing use. Removes internal implementation language such as 'tidak perlu mengisi profil risiko', Product Fit jargon, machine/engine wording, and technical workflow language from prominent customer-facing sections. Uses clearer Indonesian labels for profile, product choices, portfolio composition, projections, equity sleeve, and disclaimers while preserving the v1.4 calculation logic."
