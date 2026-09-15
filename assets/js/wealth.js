@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.7 bootstrap */
+/* Analisaku Wealth Management v1.8 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -31,7 +31,7 @@
     try{
       await loadScript(url('wealth-route-init.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
-      await loadScript(url('wealth-mode-navigation.js?v=1.7-20260915-2320'));
+      await loadScript(url('wealth-mode-navigation.js?v=1.8-20260915-2350'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.4-20260915-2245'));
       await loadScript(url('wealth-questionnaire-required.js?v=1.4-20260915-2250'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
@@ -43,9 +43,9 @@
       setTimeout(()=>{
         window.ANALISAKU_WEALTH_COPY?.apply?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.7';
+        if(badge)badge.textContent='WEALTH v1.8';
       },70);
-    }catch(error){console.error('Wealth Management v1.7 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.8 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
