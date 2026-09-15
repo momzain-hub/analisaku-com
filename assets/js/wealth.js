@@ -1,14 +1,14 @@
-/* Analisaku Wealth v2 bootstrap */
+/* Analisaku Wealth v3 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
 
-  function loadCss(){
-    if(document.querySelector('link[data-wealth-v2]'))return;
+  function loadCss(href,key){
+    if(document.querySelector(`link[data-${key}]`))return;
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href=url('../css/wealth-v2.css?v=20260915-1430');
-    link.dataset.wealthV2='true';
+    link.href=href;
+    link.dataset[key]='true';
     document.head.appendChild(link);
   }
 
@@ -16,7 +16,7 @@
     return new Promise((resolve,reject)=>{
       const existing=[...document.scripts].find(s=>s.src===src);
       if(existing){
-        if(existing.dataset.loaded==='true')return resolve(existing);
+        if(existing.dataset.loaded==='true'||existing.readyState==='complete')return resolve(existing);
         existing.addEventListener('load',()=>resolve(existing),{once:true});
         existing.addEventListener('error',reject,{once:true});
         return;
@@ -31,23 +31,15 @@
   }
 
   async function init(){
-    loadCss();
-
-    const pdfPromise=loadScript(
-      'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-      {
-        integrity:'sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==',
-        crossorigin:'anonymous',
-        referrerpolicy:'no-referrer'
-      }
-    ).catch(error=>console.warn('PDF library belum termuat',error));
+    loadCss(url('../css/wealth-v2.css?v=20260915-1430'),'wealthV2');
+    loadCss(url('../css/wealth-v3.css?v=20260915-1805'),'wealthV3');
 
     try{
-      await loadScript(url('wealth-engine.js?v=20260915-1430'));
-      await loadScript(url('wealth-report.js?v=20260915-1430'));
-      await pdfPromise;
+      await loadScript(url('wealth-engine.js?v=20260915-1805'));
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',{crossorigin:'anonymous',referrerpolicy:'no-referrer'});
+      await loadScript(url('wealth-report.js?v=20260915-1805'));
     }catch(error){
-      console.error('Wealth v2 gagal dimuat',error);
+      console.error('Wealth v3 gagal dimuat',error);
     }
   }
 
