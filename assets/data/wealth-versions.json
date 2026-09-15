@@ -1,5 +1,5 @@
 {
-  "current": "1.5",
+  "current": "1.6",
   "versions": {
     "1.0": {
       "baseline_commit": "2d8877882ed67c525b72dd57873e8667987dfb11",
@@ -42,6 +42,17 @@
       "rollback_to": "1.4",
       "label": "Customer-facing Wealth language",
       "notes": "Rewrites the Wealth journey for client-facing use. Removes internal implementation language such as 'tidak perlu mengisi profil risiko', Product Fit jargon, machine/engine wording, and technical workflow language from prominent customer-facing sections. Uses clearer Indonesian labels for profile, product choices, portfolio composition, projections, equity sleeve, and disclaimers while preserving the v1.4 calculation logic."
+    },
+    "1.6": {
+      "route_init_commit": "a043357f2a7f8795476fd332c9dd1f3b568057ca",
+      "navigation_commit": "12c10b5080298278321b85a0c4d908c3f418a9e0",
+      "buffer_logic_commit": "38d351852faa989fbce368cac4a4be415b06bcfa",
+      "buffer_style_commit": "3fcd55c67362f58a72d7aa96ae810010fe4fb1a9",
+      "loader_commit": "753c98c470c7ec7e9cd55fd56e5a11d1fa201334",
+      "entry_commit": "ebd36f1b0d850b4e680e746364d576671dd905d2",
+      "rollback_to": "1.5",
+      "label": "Separated Wealth planners with dedicated Cash Buffer logic",
+      "notes": "Separates Kejar Target, Dana Sudah Ada, and Investor-Trader Cash Buffer into dedicated planner tabs/URLs. Goal mode retains monthly accumulation logic, Capital mode defaults to lump-sum logic, and Buffer mode no longer shows generic mixed-asset or monthly-contribution yearly projections. Cash Buffer is calculated separately using RDPU and RDPT according to liquidity needs, while active investment/trading capital remains separate and is not assigned an automatic fixed return. Buffer PDF output is also dedicated to the buffer structure."
     }
   }
 }
