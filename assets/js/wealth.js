@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.3 bootstrap */
+/* Analisaku Wealth Management v1.4 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -37,6 +37,7 @@
     loadCss(url('../css/wealth-yearly-breakdown.css?v=1.1-20260915-2155'),'wealthYearlyBreakdown');
     loadCss(url('../css/wealth-equity-sleeve.css?v=1.2-20260915-2205'),'wealthEquitySleeve');
     loadCss(url('../css/wealth-planning-mode.css?v=1.3-20260915-2225'),'wealthPlanningMode');
+    loadCss(url('../css/wealth-mode-questionnaire.css?v=1.4-20260915-2245'),'wealthModeQuestionnaire');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -51,14 +52,19 @@
     }
 
     try{
-      // Planning mode dimuat sebelum core agar dapat menyiapkan input sesuai mode sebelum kalkulasi berjalan.
+      // Mode dipilih lebih dulu, lalu questionnaire v1.4 menyesuaikan pertanyaan sebelum core kalkulasi dimuat.
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
+      await loadScript(url('wealth-mode-questionnaire.js?v=1.4-20260915-2245'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
+      window.ANALISAKU_WEALTH_QUESTIONNAIRE && setTimeout(()=>{
+        const badge=document.querySelector('.wm-version-badge');
+        if(badge)badge.textContent='ENGINE v1.4';
+      },40);
     }catch(error){
-      console.error('Wealth Management v1.3 gagal dimuat',error);
+      console.error('Wealth Management v1.4 gagal dimuat',error);
     }
   }
 
