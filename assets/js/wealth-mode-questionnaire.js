@@ -1,68 +1,74 @@
-/* Wealth Management v1.4 — mode-specific questionnaires */
+/* Wealth Management v1.9 — brokerage-oriented, mode-specific questionnaires */
 (function(){
-  const VERSION='1.4';
+  const VERSION='1.9';
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
   const CONFIG={
     goal:{
-      label:'MODE 1 • KEJAR TARGET',
-      progress:['01 Tujuan','02 Deadline','03 Kemampuan','04 Risiko','05 Rencana'],
+      label:'KEJAR TARGET',
+      intro:'Fokus pada kapan dana harus tersedia, kemampuan menjaga investasi berkala, kebutuhan likuiditas, pengalaman, dan kenyamanan menghadapi fluktuasi.',
+      chips:['Tujuan','Deadline','Likuiditas','Kapasitas','Pengalaman','Risiko'],
+      progress:['01 Tujuan','02 Waktu','03 Kapasitas','04 Preferensi Risiko','05 Rencana'],
       steps:{
-        2:{small:'MODE 1 • DEADLINE',title:'Kapan target harus tercapai?',copy:'Untuk goal-based planning, yang paling penting bukan hanya return—tetapi kapan uang wajib tersedia dan seberapa fleksibel tanggal targetnya.'},
-        3:{small:'MODE 1 • KEMAMPUAN MENABUNG',title:'Seberapa kuat rencana pendanaannya?',copy:'Sistem melihat dana darurat, kestabilan setoran bulanan, dan seberapa besar tujuan ini terhadap kekayaan finansial Anda.'},
-        4:{small:'MODE 1 • RISIKO MENUJU TARGET',title:'Apa yang Anda lakukan bila pasar turun?',copy:'Toleransi risiko dinilai dalam konteks tujuan. Semakin dekat target, kemampuan menanggung penurunan biasanya semakin kecil.'}
+        2:{small:'02 • WAKTU & KEPASTIAN TARGET',title:'Kapan dana harus tersedia?',copy:'Jangka waktu dan fleksibilitas target menjadi batas utama. Semakin dekat dan semakin tidak fleksibel targetnya, semakin penting menjaga kestabilan nilai.'},
+        3:{small:'03 • KAPASITAS FINANSIAL',title:'Seberapa kuat target ini dibiayai?',copy:'Rencana yang sehat mempertimbangkan dana darurat, kestabilan arus kas, dan seberapa besar target ini dibanding aset finansial yang Anda miliki.'},
+        4:{small:'04 • PREFERENSI & PENGALAMAN',title:'Bagaimana Anda menghadapi perubahan nilai?',copy:'Kenyamanan terhadap risiko dinilai bersama pengalaman investasi. Untuk tujuan yang mendekati jatuh tempo, kemampuan menanggung penurunan biasanya ikut mengecil.'}
       },
       groups:[
-        {step:2,name:'qWhen',eyebrow:'DEADLINE',title:'Berapa lama lagi dana target harus tersedia?',copy:'Ini menjadi batas horizon utama untuk pemilihan produk.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
-        {step:2,name:'qLiquidity',eyebrow:'FLEKSIBILITAS TARGET',title:'Jika kondisi pasar belum ideal, seberapa fleksibel waktu target?',copy:'Target yang tidak boleh mundur membutuhkan alokasi yang lebih defensif.',choices:[[1,'Tidak fleksibel — harus tersedia tepat waktu'],[2,'Bisa mundur kurang dari 6 bulan'],[3,'Bisa mundur 6–18 bulan'],[4,'Sangat fleksibel — bisa mundur lebih dari 18 bulan']]},
-        {step:3,name:'qEmergency',eyebrow:'DANA DARURAT',title:'Di luar dana untuk tujuan ini, bagaimana dana darurat Anda?',copy:'Dana darurat yang terpisah mengurangi risiko terpaksa menjual investasi.',choices:[[1,'Belum tersedia'],[2,'Kurang dari 3 bulan pengeluaran'],[3,'Sekitar 3–6 bulan pengeluaran'],[4,'Lebih dari 6 bulan pengeluaran']]},
-        {step:3,name:'qIncome',eyebrow:'KONSISTENSI SETORAN',title:'Seberapa konsisten kemampuan investasi bulanan sampai target?',copy:'Goal-based plan sangat bergantung pada kemampuan menjaga setoran rutin.',choices:[[1,'Tidak pasti / sering terhenti'],[2,'Cukup stabil tetapi kadang terhenti'],[3,'Stabil dan realistis dijaga'],[4,'Sangat stabil dan masih bisa dinaikkan']]},
-        {step:3,name:'qExposure',eyebrow:'BESAR TUJUAN',title:'Seberapa besar kebutuhan tujuan ini dibanding aset finansial keluarga?',copy:'Semakin dominan tujuan ini terhadap kekayaan, semakin penting menjaga modal.',choices:[[4,'Kurang dari 20%'],[3,'20%–40%'],[2,'Lebih dari 40%–70%'],[1,'Lebih dari 70%']]},
-        {step:4,name:'qDrawdown',eyebrow:'MENDEKATI TARGET',title:'Jika 1–2 tahun sebelum target portofolio turun sekitar 15%, apa yang Anda lakukan?',copy:'Jawaban dinilai sebagai toleransi nyata terhadap risiko goal.',choices:[[1,'Cairkan agar target tidak semakin terancam'],[2,'Kurangi aset berisiko secara signifikan'],[3,'Tahan sambil evaluasi dan rebalancing'],[4,'Tambah bertahap bila kondisi finansial masih memungkinkan']]},
-        {step:4,name:'qExperience',eyebrow:'PENGALAMAN',title:'Instrumen apa yang sudah pernah Anda gunakan dan pahami?',copy:'Pengalaman membantu menilai kesiapan menghadapi volatilitas.',choices:[[1,'Belum pernah / tabungan-deposito'],[2,'RDPU / instrumen konservatif'],[3,'Obligasi / RDPT / RD Campuran'],[4,'Saham / RD Saham dan memahami volatilitas tinggi']]}
+        {step:2,name:'qWhen',eyebrow:'JANGKA WAKTU',title:'Berapa lama lagi dana target harus tersedia?',copy:'Digunakan sebagai horizon utama dalam menentukan kelas aset.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
+        {step:2,name:'qLiquidity',eyebrow:'FLEKSIBILITAS TARGET',title:'Jika kondisi pasar belum ideal, seberapa fleksibel waktu target?',copy:'Target yang wajib tersedia pada tanggal tertentu membutuhkan pendekatan yang lebih defensif.',choices:[[1,'Tidak fleksibel — harus tersedia tepat waktu'],[2,'Bisa mundur kurang dari 6 bulan'],[3,'Bisa mundur sekitar 6–18 bulan'],[4,'Sangat fleksibel — dapat mundur lebih dari 18 bulan']]},
+        {step:3,name:'qEmergency',eyebrow:'DANA DARURAT',title:'Di luar dana untuk target ini, bagaimana dana darurat Anda?',copy:'Dana darurat yang terpisah membantu menghindari penjualan investasi karena kebutuhan mendadak.',choices:[[1,'Belum tersedia'],[2,'Kurang dari 3 bulan pengeluaran'],[3,'Sekitar 3–6 bulan pengeluaran'],[4,'Lebih dari 6 bulan pengeluaran']]},
+        {step:3,name:'qIncome',eyebrow:'KONSISTENSI INVESTASI',title:'Seberapa konsisten Anda dapat menjaga investasi bulanan sampai target?',copy:'Kemampuan menjaga arus investasi lebih penting daripada mengejar asumsi return yang terlalu tinggi.',choices:[[1,'Tidak pasti / sering berpotensi terhenti'],[2,'Cukup stabil tetapi masih dapat terhenti'],[3,'Stabil dan realistis untuk dijaga'],[4,'Sangat stabil dan masih memiliki ruang untuk dinaikkan']]},
+        {step:3,name:'qExposure',eyebrow:'MATERIALITAS TARGET',title:'Seberapa besar kebutuhan target ini dibanding aset finansial likuid Anda?',copy:'Semakin besar porsinya, semakin besar dampak jika nilai investasi turun saat dana dibutuhkan.',choices:[[4,'Kurang dari 20%'],[3,'20%–40%'],[2,'Lebih dari 40%–70%'],[1,'Lebih dari 70%']]},
+        {step:4,name:'qDrawdown',eyebrow:'SAAT PASAR TURUN',title:'Jika 1–2 tahun sebelum target nilai portofolio turun sekitar 15%, apa yang paling mungkin Anda lakukan?',copy:'Skenario ini membantu mengukur kenyamanan risiko dalam konteks target yang semakin dekat.',choices:[[1,'Mengamankan sebagian besar dana agar target tidak terancam'],[2,'Mengurangi aset berisiko secara signifikan'],[3,'Menahan sambil mengevaluasi dan melakukan rebalancing'],[4,'Menambah bertahap bila target dan kondisi finansial masih aman']]},
+        {step:4,name:'qExperience',eyebrow:'PENGALAMAN PRODUK',title:'Instrumen mana yang sudah pernah Anda gunakan dan benar-benar pahami?',copy:'Pengalaman produk membantu menilai kesiapan menghadapi karakter risiko yang berbeda.',choices:[[1,'Belum pernah / hanya tabungan atau deposito'],[2,'Reksa Dana Pasar Uang / instrumen defensif'],[3,'Obligasi, RD Pendapatan Tetap, RD Campuran, atau ETF'],[4,'Saham langsung / RD Saham dan memahami volatilitas, diversifikasi, serta eksekusi transaksi']]}
       ]
     },
     lump:{
-      label:'MODE 2 • DANA SUDAH ADA',
-      progress:['01 Modal','02 Likuiditas','03 Ketahanan','04 Toleransi','05 Alokasi'],
+      label:'DANA SUDAH ADA',
+      intro:'Fokus pada kualitas dana yang akan diinvestasikan, horizon, kebutuhan pencairan, konsentrasi kekayaan, pengalaman pasar, dan kemampuan menanggung penurunan sejak awal.',
+      chips:['Modal','Likuiditas','Sumber Dana','Konsentrasi','Pengalaman','Risiko'],
+      progress:['01 Modal','02 Likuiditas','03 Ketahanan Modal','04 Preferensi Risiko','05 Alokasi'],
       steps:{
-        2:{small:'MODE 2 • HORIZON & LIKUIDITAS',title:'Berapa lama modal ini benar-benar bisa bekerja?',copy:'Karena dana sudah tersedia di awal, fokus utama adalah horizon investasi dan berapa bagian modal yang mungkin perlu dicairkan.'},
-        3:{small:'MODE 2 • KETAHANAN MODAL',title:'Seberapa aman dana ini dari kebutuhan lain?',copy:'Mesin menilai apakah modal investasi benar-benar surplus, terpisah dari kebutuhan hidup, dan tidak terlalu terkonsentrasi.'},
-        4:{small:'MODE 2 • TOLERANSI NILAI TURUN',title:'Seberapa besar penurunan yang masih dapat Anda tahan?',copy:'Lump sum memberi exposure pasar sejak awal, sehingga kapasitas menanggung drawdown perlu dinilai lebih spesifik.'}
+        2:{small:'02 • HORIZON & LIKUIDITAS',title:'Berapa lama modal ini dapat bekerja?',copy:'Karena dana tersedia sejak awal, seluruh modal dapat langsung terpapar pergerakan pasar. Horizon dan kebutuhan pencairan perlu dinilai terlebih dahulu.'},
+        3:{small:'03 • KETAHANAN MODAL',title:'Apakah dana ini benar-benar siap diinvestasikan?',copy:'Penilaian mempertimbangkan apakah dana berasal dari surplus, apakah kebutuhan darurat sudah terpisah, dan seberapa besar modal ini dibanding aset finansial Anda.'},
+        4:{small:'04 • PREFERENSI & PENGALAMAN',title:'Seberapa besar fluktuasi yang dapat Anda terima?',copy:'Dana sekaligus dapat mengalami perubahan nilai penuh sejak awal. Respons terhadap penurunan dan pengalaman produk perlu dibaca bersama.'}
       },
       groups:[
-        {step:2,name:'qWhen',eyebrow:'HORIZON MODAL',title:'Berapa lama dana ini dapat dibiarkan bekerja tanpa digunakan?',copy:'Semakin panjang horizon, semakin besar ruang untuk aset yang berfluktuasi.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
-        {step:2,name:'qLiquidity',eyebrow:'KEBUTUHAN PENCAIRAN',title:'Berapa porsi modal ini yang mungkin dibutuhkan dalam 12 bulan?',copy:'Kebutuhan pencairan yang besar menurunkan kapasitas mengambil risiko.',choices:[[1,'Lebih dari 50%'],[2,'25%–50%'],[3,'10%–25%'],[4,'Kurang dari 10% / hampir tidak perlu']]},
-        {step:3,name:'qEmergency',eyebrow:'DANA DARURAT TERPISAH',title:'Apakah dana darurat sudah terpisah dari modal investasi ini?',copy:'Modal investasi sebaiknya bukan satu-satunya sumber likuiditas keluarga.',choices:[[1,'Belum — dana ini juga untuk kebutuhan darurat'],[2,'Ada sebagian, tetapi belum cukup'],[3,'Ya, sekitar 3–6 bulan pengeluaran'],[4,'Ya, lebih dari 6 bulan pengeluaran']]},
-        {step:3,name:'qIncome',eyebrow:'KETERGANTUNGAN CASH FLOW',title:'Seberapa besar kebutuhan hidup Anda bergantung pada modal ini?',copy:'Jika kebutuhan hidup bergantung pada modal, risiko investasi sebaiknya lebih rendah.',choices:[[1,'Sangat bergantung'],[2,'Cukup bergantung'],[3,'Hanya sebagian kecil'],[4,'Tidak bergantung sama sekali']]},
-        {step:3,name:'qExposure',eyebrow:'KONSENTRASI KEKAYAAN',title:'Modal ini setara dengan berapa porsi aset finansial likuid Anda?',copy:'Semakin terkonsentrasi, semakin besar dampak penurunan terhadap kondisi keuangan.',choices:[[4,'Kurang dari 20%'],[3,'20%–40%'],[2,'Lebih dari 40%–70%'],[1,'Lebih dari 70%']]},
-        {step:4,name:'qDrawdown',eyebrow:'DRAWDOWN LUMP SUM',title:'Jika nilai modal turun 15%–20% setelah diinvestasikan, apa respons Anda?',copy:'Lump sum dapat mengalami fluktuasi penuh sejak awal penempatan.',choices:[[1,'Jual seluruhnya untuk menghentikan kerugian'],[2,'Kurangi sebagian besar posisi'],[3,'Tahan dan evaluasi sesuai rencana'],[4,'Tambah secara bertahap bila fundamental/rencana masih sesuai']]},
-        {step:4,name:'qExperience',eyebrow:'PENGALAMAN MENGELOLA MODAL',title:'Seberapa familiar Anda mengelola portofolio dengan nilai yang material?',copy:'Bukan sekadar pernah transaksi, tetapi memahami risiko instrumen yang digunakan.',choices:[[1,'Belum pernah mengelola investasi'],[2,'Pernah RDPU / deposito / instrumen defensif'],[3,'Pernah obligasi / RDPT / campuran'],[4,'Aktif di saham / RD saham dan memahami drawdown']]}
+        {step:2,name:'qWhen',eyebrow:'HORIZON INVESTASI',title:'Berapa lama dana ini dapat dibiarkan bekerja tanpa digunakan?',copy:'Horizon yang lebih panjang memberi ruang lebih besar untuk aset yang berfluktuasi.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
+        {step:2,name:'qLiquidity',eyebrow:'KEBUTUHAN PENCAIRAN',title:'Berapa porsi dana ini yang mungkin dibutuhkan dalam 12 bulan?',copy:'Semakin besar kebutuhan pencairan, semakin penting menjaga likuiditas dan kestabilan.',choices:[[1,'Lebih dari 50%'],[2,'25%–50%'],[3,'10%–25%'],[4,'Kurang dari 10% / hampir tidak diperlukan']]},
+        {step:3,name:'qEmergency',eyebrow:'KESIAPAN DANA',title:'Mana yang paling menggambarkan sumber dan kesiapan dana ini?',copy:'Dana investasi idealnya berasal dari dana sendiri yang tidak dibutuhkan untuk kewajiban jangka pendek.',choices:[[1,'Sebagian berasal dari pinjaman / dana yang akan segera dibutuhkan'],[2,'Dana sendiri, tetapi masih bercampur dengan kebutuhan darurat'],[3,'Dana sendiri dan dana darurat sekitar 3–6 bulan sudah terpisah'],[4,'Dana surplus; dana darurat lebih dari 6 bulan dan kewajiban jangka pendek sudah terpisah']]},
+        {step:3,name:'qIncome',eyebrow:'KETERGANTUNGAN PENGHASILAN',title:'Seberapa besar kebutuhan hidup rutin bergantung pada hasil dari modal ini?',copy:'Jika kebutuhan hidup bergantung pada hasil investasi, kapasitas mengambil risiko menjadi lebih terbatas.',choices:[[1,'Sangat bergantung'],[2,'Cukup bergantung'],[3,'Hanya sebagian kecil'],[4,'Tidak bergantung sama sekali']]},
+        {step:3,name:'qExposure',eyebrow:'KONSENTRASI KEKAYAAN',title:'Modal ini setara dengan berapa porsi aset finansial likuid Anda?',copy:'Semakin terkonsentrasi, semakin besar dampak penurunan terhadap kondisi finansial keseluruhan.',choices:[[4,'Kurang dari 20%'],[3,'20%–40%'],[2,'Lebih dari 40%–70%'],[1,'Lebih dari 70%']]},
+        {step:4,name:'qDrawdown',eyebrow:'SKENARIO PENURUNAN',title:'Jika nilai modal turun 15%–20% setelah diinvestasikan, apa respons yang paling mungkin?',copy:'Tidak ada jawaban benar atau salah; pilih respons yang paling mencerminkan perilaku Anda.',choices:[[1,'Mengamankan mayoritas dana untuk menghentikan penurunan'],[2,'Mengurangi sebagian besar aset berisiko'],[3,'Menahan dan mengevaluasi sesuai rencana'],[4,'Menambah bertahap bila kondisi finansial dan tesis investasi masih mendukung']]},
+        {step:4,name:'qExperience',eyebrow:'PENGALAMAN PASAR',title:'Seberapa familiar Anda mengelola portofolio dengan nilai yang material?',copy:'Yang dinilai bukan sekadar pernah membeli, tetapi pemahaman terhadap risiko dan proses pengambilan keputusan.',choices:[[1,'Belum pernah mengelola investasi'],[2,'Terbiasa dengan RDPU / deposito / instrumen defensif'],[3,'Terbiasa dengan obligasi, ETF, RDPT, atau RD Campuran'],[4,'Terbiasa dengan saham langsung / RD Saham dan memahami volatilitas, diversifikasi, serta eksekusi transaksi']]}
       ]
     },
     buffer:{
-      label:'MODE 3 • INVESTOR / TRADER + CASH BUFFER',
-      progress:['01 Modal & Buffer','02 Horizon Core','03 Ketahanan','04 Drawdown','05 Strategi'],
+      label:'INVESTOR / TRADER + CASH BUFFER',
+      intro:'Fokus pada pemisahan likuiditas dan modal aktif, ketergantungan pada profit pasar, konsentrasi modal, batas kerugian, serta pengalaman menggunakan fasilitas brokerage.',
+      chips:['Buffer','Modal Aktif','Cash Flow','Konsentrasi','Batas Rugi','Pengalaman'],
+      progress:['01 Modal & Buffer','02 Likuiditas','03 Ketahanan Modal','04 Risiko Trading','05 Strategi'],
       steps:{
-        2:{small:'MODE 3 • HORIZON CORE & BUFFER',title:'Mana dana yang bekerja, mana dana yang harus siap?',copy:'Cash buffer memberi fleksibilitas, tetapi porsi investasi tetap perlu memiliki horizon yang jelas. Mesin memisahkan kebutuhan likuid dan modal yang boleh berfluktuasi.'},
-        3:{small:'MODE 3 • KETAHANAN TRADER/INVESTOR',title:'Apakah trading capital benar-benar terpisah dari kebutuhan hidup?',copy:'Buffer trading bukan pengganti dana darurat. Ketergantungan pada profit trading dan konsentrasi modal menjadi faktor penting.'},
-        4:{small:'MODE 3 • BATAS DRAWDOWN',title:'Seberapa besar kerugian portofolio yang masih dapat diterima?',copy:'Untuk investor/trader, respons terhadap drawdown dan pengalaman mengelola posisi lebih relevan daripada sekadar label agresif.'}
+        2:{small:'02 • LIKUIDITAS & MODAL AKTIF',title:'Mana dana yang harus selalu siap?',copy:'Cash buffer berfungsi menjaga fleksibilitas. Modal aktif di luar buffer baru dapat mengambil risiko pasar sesuai horizon dan kondisi finansial Anda.'},
+        3:{small:'03 • KETAHANAN INVESTOR / TRADER',title:'Apakah modal aktif benar-benar terpisah dari kebutuhan hidup?',copy:'Trading buffer bukan pengganti dana darurat. Ketergantungan pada profit pasar dan konsentrasi modal menjadi pembatas penting.'},
+        4:{small:'04 • RISIKO & PENGALAMAN BROKERAGE',title:'Seberapa besar risiko yang dapat dikelola secara disiplin?',copy:'Untuk investor/trader aktif, batas kerugian, pengalaman eksekusi, diversifikasi, dan pemahaman fasilitas leverage lebih relevan daripada sekadar label agresif.'}
       },
       groups:[
-        {step:2,name:'qWhen',eyebrow:'HORIZON CORE PORTFOLIO',title:'Untuk porsi di luar cash buffer, berapa lama modal core bisa dibiarkan bekerja?',copy:'Horizon ini digunakan untuk membatasi total exposure ekuitas.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
-        {step:2,name:'qLiquidity',eyebrow:'FREKUENSI PAKAI BUFFER',title:'Seberapa sering cash buffer diperkirakan akan digunakan?',copy:'Semakin sering buffer terpakai, semakin penting menjaga porsi investasi tetap likuid.',choices:[[1,'Sering — hampir setiap bulan'],[2,'Beberapa kali dalam setahun'],[3,'Sesekali saat ada peluang / kebutuhan'],[4,'Jarang — hanya untuk kondisi khusus']]},
-        {step:3,name:'qEmergency',eyebrow:'DANA DARURAT DI LUAR BUFFER',title:'Apakah dana darurat rumah tangga terpisah dari cash buffer trading?',copy:'Cash buffer untuk peluang pasar sebaiknya tidak merangkap seluruh dana darurat.',choices:[[1,'Tidak — buffer juga menjadi dana darurat'],[2,'Sebagian sudah terpisah'],[3,'Ya, dana darurat 3–6 bulan tersedia'],[4,'Ya, dana darurat lebih dari 6 bulan tersedia']]},
-        {step:3,name:'qIncome',eyebrow:'KETERGANTUNGAN PADA PROFIT',title:'Seberapa bergantung pengeluaran rutin pada profit trading/investasi?',copy:'Ketergantungan tinggi terhadap profit pasar menurunkan kapasitas risiko.',choices:[[1,'Profit trading adalah sumber utama kebutuhan hidup'],[2,'Profit trading cukup penting untuk cash flow'],[3,'Hanya sebagai pendapatan tambahan'],[4,'Tidak bergantung pada profit trading']]},
-        {step:3,name:'qExposure',eyebrow:'BESAR TRADING CAPITAL',title:'Total modal investasi/trading ini berapa porsi aset finansial Anda?',copy:'Modal yang terlalu dominan terhadap kekayaan meningkatkan risiko konsentrasi.',choices:[[4,'Kurang dari 10%'],[3,'10%–30%'],[2,'Lebih dari 30%–60%'],[1,'Lebih dari 60%']]},
-        {step:4,name:'qDrawdown',eyebrow:'MAX DRAWDOWN',title:'Berapa penurunan portofolio yang masih dapat Anda toleransi sebelum wajib mengurangi risiko?',copy:'Ini bukan target rugi, tetapi batas psikologis dan finansial untuk mengukur kapasitas volatilitas.',choices:[[1,'Kurang dari 5%'],[2,'Sekitar 5%–10%'],[3,'Lebih dari 10%–15%'],[4,'Lebih dari 15% dan memahami konsekuensinya']]},
-        {step:4,name:'qExperience',eyebrow:'PENGALAMAN PASAR',title:'Seberapa berpengalaman Anda mengelola investasi/trading aktif?',copy:'Pengalaman mencakup position sizing, cut loss, diversifikasi, dan evaluasi portofolio.',choices:[[1,'Baru mulai / belum memahami manajemen risiko'],[2,'Pernah investasi tetapi jarang trading'],[3,'Cukup aktif dan memahami position sizing / stop loss'],[4,'Berpengalaman mengelola saham aktif dan portofolio jangka panjang']]}
+        {step:2,name:'qWhen',eyebrow:'HORIZON MODAL AKTIF',title:'Untuk porsi di luar cash buffer, berapa lama modal utama dapat dibiarkan bekerja?',copy:'Horizon ini membatasi seberapa besar porsi aset berfluktuasi dapat digunakan.',choices:[[1,'Kurang dari 1 tahun'],[2,'1–3 tahun'],[3,'Lebih dari 3–5 tahun'],[4,'Lebih dari 5 tahun']]},
+        {step:2,name:'qLiquidity',eyebrow:'FUNGSI CASH BUFFER',title:'Seberapa sering cash buffer kemungkinan digunakan?',copy:'Semakin sering digunakan, semakin besar kebutuhan instrumen yang cepat dicairkan dan stabil.',choices:[[1,'Sering — untuk kebutuhan bulanan / sangat dekat'],[2,'Beberapa kali dalam setahun'],[3,'Sesekali untuk peluang pasar atau kebutuhan tak terduga'],[4,'Jarang — hanya untuk kondisi khusus / dry powder']]},
+        {step:3,name:'qEmergency',eyebrow:'DANA DARURAT TERPISAH',title:'Apakah dana darurat rumah tangga sudah terpisah dari cash buffer investasi/trading?',copy:'Cash buffer pasar sebaiknya tidak menjadi satu-satunya sumber dana darurat pribadi.',choices:[[1,'Belum — buffer juga menjadi dana darurat utama'],[2,'Sebagian sudah terpisah, tetapi belum memadai'],[3,'Ya, sekitar 3–6 bulan pengeluaran sudah terpisah'],[4,'Ya, lebih dari 6 bulan pengeluaran sudah terpisah']]},
+        {step:3,name:'qIncome',eyebrow:'KETERGANTUNGAN PADA PROFIT',title:'Seberapa besar pengeluaran rutin bergantung pada profit trading/investasi?',copy:'Ketergantungan tinggi terhadap profit pasar menurunkan kapasitas mengambil risiko.',choices:[[1,'Profit pasar adalah sumber utama kebutuhan hidup'],[2,'Profit pasar cukup penting untuk cash flow rutin'],[3,'Profit pasar hanya pendapatan tambahan'],[4,'Tidak bergantung pada profit pasar']]},
+        {step:3,name:'qExposure',eyebrow:'KONSENTRASI MODAL',title:'Total modal investasi/trading ini berapa porsi aset finansial likuid Anda?',copy:'Porsi yang terlalu dominan meningkatkan dampak kerugian terhadap kondisi keuangan keseluruhan.',choices:[[4,'Kurang dari 10%'],[3,'10%–30%'],[2,'Lebih dari 30%–60%'],[1,'Lebih dari 60%']]},
+        {step:4,name:'qDrawdown',eyebrow:'BATAS PENURUNAN',title:'Pada penurunan portofolio berapa Anda akan mulai mengurangi risiko secara disiplin?',copy:'Ini bukan target rugi. Pertanyaan ini mengukur batas finansial dan psikologis sebelum posisi perlu dikurangi.',choices:[[1,'Sebelum mencapai 5%'],[2,'Sekitar 5%–10%'],[3,'Lebih dari 10%–15%'],[4,'Lebih dari 15% dan memahami konsekuensi volatilitasnya']]},
+        {step:4,name:'qExperience',eyebrow:'PENGALAMAN BROKERAGE',title:'Mana yang paling menggambarkan pengalaman Anda di pasar modal?',copy:'Pengalaman mencakup pemahaman order, ukuran posisi, diversifikasi, batas risiko, dan bila relevan risiko leverage.',choices:[[1,'Baru mulai / belum terbiasa dengan transaksi saham'],[2,'Pernah membeli saham secara tunai tetapi masih pasif'],[3,'Aktif di saham/ETF dan memahami order, ukuran posisi, diversifikasi, serta batas risiko'],[4,'Berpengalaman mengelola portofolio aktif dan memahami risiko margin/leverage atau produk berisiko tinggi meski tidak selalu menggunakannya']]}
       ]
     }
   };
 
   function mode(){
-    return window.ANALISAKU_WEALTH_MODE_API?.getState?.().mode || window.ANALISAKU_WEALTH_MODE?.mode || 'goal';
+    return window.ANALISAKU_WEALTH_ROUTE?.mode || window.ANALISAKU_WEALTH_MODE_API?.getState?.().mode || window.ANALISAKU_WEALTH_MODE?.mode || 'goal';
   }
 
   function updateBadge(){
@@ -72,7 +78,7 @@
       if(!kicker)return;
       badge=document.createElement('span');badge.className='wm-version-badge';kicker.appendChild(badge);
     }
-    badge.textContent=`ENGINE v${VERSION}`;
+    badge.textContent=`WEALTH v${VERSION}`;
   }
 
   function updateProgress(cfg){
@@ -94,7 +100,7 @@
     return `<article class="wm-mode-q-card">
       <div class="wm-mode-q-no">${String(index+1).padStart(2,'0')}</div>
       <div class="wm-mode-q-body"><small>${esc(q.eyebrow)}</small><h3>${esc(q.title)}</h3><p>${esc(q.copy)}</p>
-      <div class="wm-mode-q-options">${q.choices.map(([value,label],i)=>`<label><input type="radio" name="${esc(q.name)}" value="${value}" ${i===2?'checked':''}><span>${esc(label)}</span></label>`).join('')}</div></div>
+      <div class="wm-mode-q-options">${q.choices.map(([value,label])=>`<label><input type="radio" name="${esc(q.name)}" value="${value}"><span>${esc(label)}</span></label>`).join('')}</div></div>
     </article>`;
   }
 
@@ -107,7 +113,7 @@
     let panel=body.querySelector('.wm-mode-questionnaire');
     if(!panel){panel=document.createElement('section');panel.className='wm-mode-questionnaire';body.insertBefore(panel,body.firstChild);}
     const groups=cfg.groups.filter(q=>q.step===stepNo);
-    panel.innerHTML=`<div class="wm-mode-q-intro"><span>${esc(cfg.label)}</span><strong>Pertanyaan khusus untuk mode ini</strong><p>Jawaban langsung dipakai oleh mesin KAPAN → MAMPU → NYAMAN. Tidak ada pertanyaan generik yang dipakai ulang dari mode lain.</p></div><div class="wm-mode-q-grid">${groups.map(questionHtml).join('')}</div>`;
+    panel.innerHTML=`<div class="wm-mode-q-intro"><span>${esc(cfg.label)}</span><strong>Kenali kondisi Anda sebelum menentukan komposisi investasi.</strong><p>${esc(cfg.intro)}</p><div class="wm-q-pillars">${cfg.chips.map(c=>`<em>${esc(c)}</em>`).join('')}</div></div><div class="wm-mode-q-grid">${groups.map(questionHtml).join('')}</div>`;
   }
 
   function render(){
@@ -117,14 +123,12 @@
     [2,3,4].forEach(n=>{updateHead(n,cfg);renderStep(n,cfg);});
     updateBadge();
     document.body.dataset.wealthMode=mode();
-    window.ANALISAKU_WEALTH_QUESTIONNAIRE={version:VERSION,mode:mode()};
+    window.ANALISAKU_WEALTH_QUESTIONNAIRE={version:VERSION,mode:mode(),basis:'brokerage-suitability'};
   }
 
   function bind(){
     render();
-    document.addEventListener('click',event=>{
-      if(event.target.closest('[data-plan-mode]'))setTimeout(render,20);
-    });
+    document.addEventListener('click',event=>{if(event.target.closest('[data-plan-mode]'))setTimeout(render,20);});
     $('wmBuildPlan')?.addEventListener('click',()=>setTimeout(updateBadge,180));
   }
 
