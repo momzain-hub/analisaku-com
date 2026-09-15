@@ -1,5 +1,5 @@
 {
-  "current": "1.7",
+  "current": "1.8",
   "versions": {
     "1.0": {
       "baseline_commit": "2d8877882ed67c525b72dd57873e8667987dfb11",
@@ -60,6 +60,13 @@
       "rollback_to": "1.6",
       "label": "Single-page mode selection without repeated navigation",
       "notes": "Removes the popup/new-tab behavior that made users select a Wealth mode twice. Users now choose Kejar Target, Dana Sudah Ada, or Cash Buffer once and immediately continue on the same page. The selected mode remains active for the questionnaire and result logic; Cash Buffer keeps its dedicated RDPU/RDPT result methodology."
+    },
+    "1.8": {
+      "navigation_commit": "9d61c941e172fe43f180d8d180a2254a51f5d380",
+      "loader_commit": "924a4f2421820f3b5ca93e408f6d1ba9f72b3002",
+      "rollback_to": "1.7",
+      "label": "Landing-only mode selection with dedicated selected-mode tabs",
+      "notes": "The main Wealth page now stops at step 1 and only asks the client to choose Kejar Target, Dana Sudah Ada, or Investor/Trader Cash Buffer. Clicking a mode opens a new tab directly at wealth.html?mode=<selected>, with that mode already active. The dedicated planner hides the three-mode selector, keeps only the selected-mode summary, and continues with mode-specific inputs, questionnaire, calculations, and results."
     }
   }
 }
