@@ -6,6 +6,13 @@
 .wm-methodology:before{content:"KAPAN  •  MAMPU  •  NYAMAN";display:inline-flex;margin-bottom:16px;padding:8px 11px;border-radius:999px;border:1px solid color-mix(in srgb,var(--wm3-teal) 32%,var(--line));background:color-mix(in srgb,var(--wm3-teal) 5%,var(--surface));color:var(--wm3-teal);font-size:9px;font-weight:950;letter-spacing:.7px}
 .method-grid{grid-template-columns:repeat(3,1fr)!important}
 .method-grid article:nth-child(4){grid-column:1/-1;background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 5%,var(--surface3)),var(--surface3))}
+.risk-method-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px}
+.risk-method-strip article{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:16px;padding:13px;background:linear-gradient(145deg,color-mix(in srgb,var(--surface3) 58%,transparent),var(--surface))}
+.risk-method-strip article>span{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--wm3-teal) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--wm3-teal) 30%,var(--line));color:var(--wm3-teal);font-size:8px;font-weight:950}
+.risk-method-strip article b{display:block;color:var(--wm3-teal);font-size:8px;font-weight:950;letter-spacing:.8px}
+.risk-method-strip article strong{display:block;font-size:12px;margin-top:3px}.risk-method-strip article p{font-size:8.5px;line-height:1.45;color:var(--muted);margin:5px 0 0}
+.risk-method-rule{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:8px;border:1px solid color-mix(in srgb,var(--gold) 32%,var(--line));border-radius:12px;padding:9px 12px;background:color-mix(in srgb,var(--gold) 5%,var(--surface))}
+.risk-method-rule b{font-size:7px;color:var(--gold);letter-spacing:.7px}.risk-method-rule span{font-size:9px;color:var(--text);font-weight:750}
 
 /* Risk result */
 .risk-score-v3{align-items:flex-start!important}
@@ -63,6 +70,8 @@
 .wm-download{min-width:190px}
 
 @media(max-width:900px){
+  .risk-method-strip{grid-template-columns:1fr}
+  .risk-method-rule{grid-column:auto;justify-content:flex-start}
   .risk-lens-grid{grid-template-columns:1fr}
   .method-grid{grid-template-columns:1fr!important}
   .method-grid article:nth-child(4){grid-column:auto}
@@ -72,6 +81,7 @@
 @media(max-width:640px){
   .risk-score-v3{flex-direction:column!important}.risk-limit-badge{text-align:left!important;width:100%}
   .allocation-head{align-items:flex-start;flex-direction:column}
+  .risk-method-rule{align-items:flex-start;flex-direction:column}
   .plan-glance{grid-template-columns:1fr;padding:14px 14px 0}
   .plan-glance .plan-next{grid-column:auto}
 }
