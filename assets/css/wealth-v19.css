@@ -1,4 +1,4 @@
-/* Wealth v1.9 — polished landing, questionnaire, and mode transition */
+/* Wealth v1.9.2 — polished landing, questionnaire, and mode transition */
 :root{--wm19-accent:#f3c95c;--wm19-teal:#42c7c9;--wm19-green:#6fcf9d}
 
 /* Landing: visually stop at Step 1 */
@@ -73,6 +73,7 @@ body[data-wealth-standalone] .wm-progress{position:sticky;top:70px;z-index:14;ba
 .wm-q-pillars em{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:color-mix(in srgb,var(--surface) 80%,transparent);font-size:7px;font-weight:800;color:var(--muted2)}
 .wm-mode-q-grid{gap:14px}
 .wm-mode-q-card{border-radius:18px;padding:16px;grid-template-columns:38px 1fr;gap:13px;background:linear-gradient(155deg,var(--surface3),color-mix(in srgb,var(--surface) 75%,transparent));box-shadow:0 10px 26px rgba(0,0,0,.06)}
+.wm-mode-q-card.wm-q-missing{border-color:color-mix(in srgb,#ff8b66 70%,var(--line));box-shadow:0 0 0 2px color-mix(in srgb,#ff8b66 14%,transparent),0 14px 34px rgba(0,0,0,.08)}
 .wm-mode-q-no{width:38px;height:38px;border-radius:12px;font-size:9px}
 .wm-mode-q-body>small{font-size:7.3px;letter-spacing:.7px}
 .wm-mode-q-body h3{font-size:14px;letter-spacing:-.15px;margin-top:5px}
@@ -82,6 +83,12 @@ body[data-wealth-standalone] .wm-progress{position:sticky;top:70px;z-index:14;ba
 .wm-mode-q-options label:has(input:checked){box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 26%,transparent)}
 .wm-mode-q-options input{width:15px;height:15px;margin-top:0}
 .wm-mode-q-options span{font-size:8.7px;line-height:1.42}
+.wm-answer-status{display:flex;justify-content:space-between;gap:14px;align-items:center;margin:0 0 12px;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--surface3) 72%,transparent)}
+.wm-answer-status small{display:block;font-size:6.8px;font-weight:900;letter-spacing:.7px;color:var(--muted2)}
+.wm-answer-status strong{display:block;margin-top:3px;font-size:10px;color:var(--text)}
+.wm-answer-status>span{font-size:8px;color:var(--muted);text-align:right}
+.wm-answer-status.is-complete{border-color:color-mix(in srgb,var(--wm19-green) 42%,var(--line));background:color-mix(in srgb,var(--wm19-green) 5%,var(--surface3))}
+.wm-answer-status.is-complete>span{color:var(--wm19-green);font-weight:800}
 
 /* Transition feedback before opening new tab */
 .wm-mode-transition{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(5,13,22,.54);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .18s ease}
@@ -109,4 +116,5 @@ body[data-wealth-standalone] .wm-progress{position:sticky;top:70px;z-index:14;ba
   .wm-mode-q-card{grid-template-columns:1fr;padding:13px}
   .wm-mode-q-no{width:30px;height:30px}
   .wm-mode-open{padding:12px 14px;font-size:9.3px}
+  .wm-answer-status{align-items:flex-start;flex-direction:column}.wm-answer-status>span{text-align:left}
 }
