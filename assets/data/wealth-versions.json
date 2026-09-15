@@ -1,5 +1,5 @@
 {
-  "current": "1.1",
+  "current": "1.2",
   "versions": {
     "1.0": {
       "baseline_commit": "2d8877882ed67c525b72dd57873e8667987dfb11",
@@ -8,8 +8,16 @@
     },
     "1.1": {
       "feature_commit": "64c71b3eb3653f4fd9eba3cb7e351f112034c870",
+      "rollback_state_commit": "d0203d2ad9e3d5d3013c7aa175857b79e11b64d9",
       "label": "Monthly-contribution effective return percentages",
       "notes": "Adds effective cumulative return percentages against contributed capital for total portfolio and each asset, while retaining monthly contribution compounding. Adds visible ENGINE v1.1 badge."
+    },
+    "1.2": {
+      "feature_commit": "35119488aab1c9e35eaa80e1532c1edb8a19e8e0",
+      "equity_engine_commit": "efeed4e3a8f2055a657d7e82c99425716522ede8",
+      "rollback_to": "1.1",
+      "label": "Equity Sleeve stock-style allocation",
+      "notes": "Adds stock-style selection inside the system-defined equity allocation: Stabil, Balanced, Growth, Agresif, and Custom. Splits the equity sleeve into Core/Blue Chip, Dividend/Income, Growth/Second Liner, and Tactical/Trading while keeping total portfolio equity exposure unchanged. Custom allocation must total 100%."
     }
   }
 }
