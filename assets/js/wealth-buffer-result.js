@@ -27,7 +27,7 @@
 
   function calc(){
     const s=state();
-    const total=Number(s.totalCapital)||n('wmTarget',0)+0;
+    const total=Number(s.totalCapital)||n('wmTarget',0);
     const bufferPct=Math.max(0,Math.min(80,Number(s.bufferPct)||n('wmBufferPct',20)));
     const buffer=Number(s.bufferCash)||total*bufferPct/100;
     const active=Number(s.investedInitial)||Math.max(0,total-buffer);
@@ -128,10 +128,9 @@
 
   function bind(){
     if(!isBuffer())return;
-    $('wmBuildPlan')?.addEventListener('click',()=>setTimeout(render,180));
+    $('wmBuildPlan')?.addEventListener('click',()=>setTimeout(render,220));
     document.addEventListener('click',event=>{if(event.target.closest('#wmDownloadPdf'))downloadPdf(event);},true);
-    const observer=new MutationObserver(()=>{if(document.body.classList.contains('wealth-result-ready'))render();});
-    observer.observe(document.body,{childList:true,subtree:true});
+    if(document.body.classList.contains('wealth-result-ready'))setTimeout(render,80);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
