@@ -7,6 +7,10 @@
     const el=root.querySelector(selector);
     if(el&&el.textContent!==value)el.textContent=value;
   }
+  function html(selector,value,root=document){
+    const el=root.querySelector(selector);
+    if(el&&el.innerHTML!==value)el.innerHTML=value;
+  }
 
   function replaceText(root=document){
     if(!root)return;
@@ -29,7 +33,6 @@
       ['Trading capital','Modal investasi/trading'],
       ['position sizing','pengaturan ukuran posisi'],
       ['Position sizing','Pengaturan ukuran posisi'],
-      ['stop loss','batas risiko / stop loss'],
       ['suitability','kesesuaian'],
       ['weighted average return','rata-rata return portofolio'],
       ['Weighted average return','Rata-rata return portofolio']
@@ -48,7 +51,7 @@
   function patchHero(){
     text('.wealth-hero .kicker','WEALTH MANAGEMENT');
     const badge=document.querySelector('.wm-version-badge');
-    if(badge)badge.textContent=`ENGINE v${VERSION}`;
+    if(badge&&badge.textContent!==`ENGINE v${VERSION}`)badge.textContent=`ENGINE v${VERSION}`;
   }
 
   function patchProductIntro(){
@@ -56,11 +59,10 @@
     if(!section)return;
     text('.wm-products-head .kicker','KENALI PILIHAN INVESTASI',section);
     text('.wm-products-head h2','Pahami karakter setiap instrumen sebelum menyusun rencana.',section);
-    const headP=section.querySelector('.wm-products-head p');
-    if(headP)headP.innerHTML='Mirae Asset Sekuritas menyediakan berbagai instrumen investasi. Dalam Wealth Plan ini, fokus utama berada pada <b>Reksa Dana, Obligasi, dan Saham</b> agar Anda dapat melihat perbedaan potensi hasil, risiko, dan jangka waktunya.';
+    html('.wm-products-head p','Mirae Asset Sekuritas menyediakan berbagai instrumen investasi. Dalam Wealth Plan ini, fokus utama berada pada <b>Reksa Dana, Obligasi, dan Saham</b> agar Anda dapat melihat perbedaan potensi hasil, risiko, dan jangka waktunya.',section);
     text('.wm-risk-return-map .wm-map-copy small','PETA RISIKO & POTENSI HASIL',section);
     text('.wm-risk-return-map .wm-map-copy strong','Semakin tinggi potensi hasil, semakin besar pula risiko pergerakan nilainya.',section);
-    text('.wm-risk-return-map .wm-map-copy p','Pilih investasi berdasarkan tujuan, jangka waktu, kebutuhan dana, kondisi keuangan, dan kenyamanan Anda terhadap risiko—not hanya angka return.',section);
+    text('.wm-risk-return-map .wm-map-copy p','Pilih investasi berdasarkan tujuan, jangka waktu, kebutuhan dana, kondisi keuangan, dan kenyamanan Anda terhadap risiko, bukan hanya angka return.',section);
     const note=section.querySelectorAll('.wm-return-note')[1];
     if(note){
       text('small','PORSI SAHAM DALAM PORTOFOLIO',note);
@@ -79,13 +81,12 @@
     text('.wm-plan-mode-head strong','Pilih kondisi yang paling sesuai dengan dana Anda saat ini.',panel);
     text('.wm-plan-mode-head p','Setiap orang memiliki kondisi awal yang berbeda. Pilihan ini akan menyesuaikan pertanyaan dan perhitungan agar rencana lebih relevan untuk Anda.',panel);
 
-    const buttons=[...panel.querySelectorAll('[data-plan-mode]')];
     const copies={
       goal:{title:'Kejar Target',copy:'Untuk tujuan seperti pendidikan, rumah, atau pensiun dengan dana awal dan investasi berkala.'},
       lump:{title:'Dana Sudah Ada',copy:'Untuk dana yang sudah tersedia dan ingin langsung dialokasikan ke beberapa instrumen investasi.'},
       buffer:{title:'Investor / Trader dengan Cash Buffer',copy:'Untuk Anda yang ingin menjaga sebagian modal tetap likuid dan menginvestasikan sisanya.'}
     };
-    buttons.forEach(btn=>{
+    panel.querySelectorAll('[data-plan-mode]').forEach(btn=>{
       const c=copies[btn.dataset.planMode];
       if(!c)return;
       text('strong',c.title,btn);text('small',c.copy,btn);
@@ -94,9 +95,12 @@
     const buffer=document.getElementById('wmBufferSetting');
     if(buffer){
       const info=buffer.firstElementChild;
-      if(info){text('small','CASH BUFFER',info);text('strong','Sisihkan dana likuid untuk fleksibilitas.',info);text('p','Bagian ini tetap tersedia sebagai kas. Dana di luar buffer akan digunakan sebagai dasar penyusunan komposisi investasi.',info);}
-      const label=buffer.querySelector('label>span');
-      if(label)label.textContent='Porsi cash buffer dari total modal';
+      if(info){
+        text('small','CASH BUFFER',info);
+        text('strong','Sisihkan dana likuid untuk fleksibilitas.',info);
+        text('p','Bagian ini tetap tersedia sebagai kas. Dana di luar buffer akan digunakan sebagai dasar penyusunan komposisi investasi.',info);
+      }
+      text('label>span','Porsi cash buffer dari total modal',buffer);
     }
   }
 
@@ -107,11 +111,12 @@
     });
 
     document.querySelectorAll('#step-2 .wm-step-head p,#step-3 .wm-step-head p,#step-4 .wm-step-head p').forEach(p=>{
-      p.textContent=p.textContent
+      const next=p.textContent
         .replace('Mesin menilai','Jawaban Anda membantu menilai')
         .replace('Mesin memisahkan','Rencana ini memisahkan')
         .replace('menjadi faktor penting','ikut dipertimbangkan dalam rencana')
         .replace('perlu dinilai lebih spesifik','perlu dipahami dengan lebih jelas');
+      if(next!==p.textContent)p.textContent=next;
     });
   }
 
@@ -121,8 +126,7 @@
     text('.wm-return-head small','ASUMSI RETURN',box);
     text('.wm-return-head strong','Gunakan asumsi standar atau sesuaikan dengan perkiraan Anda.',box);
     text('.wm-return-head p','Asumsi return digunakan untuk menghitung proyeksi nilai investasi, pertumbuhan tiap instrumen, dan kebutuhan investasi berkala.',box);
-    const foot=box.querySelector('.wm-return-foot span');
-    if(foot)foot.textContent='Angka return merupakan asumsi simulasi dan bukan jaminan hasil investasi.';
+    text('.wm-return-foot span','Angka return merupakan asumsi simulasi dan bukan jaminan hasil investasi.',box);
     text('.wm-return-reset','Kembalikan ke asumsi standar',box);
   }
 
@@ -136,8 +140,7 @@
     const cards=[...result.querySelectorAll('.wm-result-card')];
     if(cards[1]){
       text('small','PROFIL INVESTASI',cards[1]);
-      const level=cards[1].querySelector('.wm-level span');
-      if(level)level.textContent='/ 5 tingkat risiko yang sesuai';
+      text('.wm-level span','/ 5 tingkat risiko yang sesuai',cards[1]);
     }
     if(cards[2]){
       text('small','PILIHAN PRODUK',cards[2]);
@@ -152,8 +155,7 @@
     if(profileCopy&&profileCopy.textContent.startsWith('Batas risiko mengikuti faktor paling rendah:')){
       profileCopy.textContent=profileCopy.textContent.replace('Batas risiko mengikuti faktor paling rendah:','Profil ini mempertimbangkan seluruh jawaban Anda. Faktor yang paling membatasi saat ini:');
     }
-    const disclaimer=result.querySelector('.wm-disclaimer:not(#wmFormError)');
-    if(disclaimer)disclaimer.textContent='Simulasi ini merupakan panduan awal dan bukan jaminan hasil investasi. Sebelum bertransaksi, pastikan produk sesuai dengan profil risiko resmi Anda dan pelajari prospektus atau fund fact sheet, biaya, pajak, serta risiko masing-masing produk.';
+    text('.wm-disclaimer:not(#wmFormError)','Simulasi ini merupakan panduan awal dan bukan jaminan hasil investasi. Sebelum bertransaksi, pastikan produk sesuai dengan profil risiko resmi Anda dan pelajari prospektus atau fund fact sheet, biaya, pajak, serta risiko masing-masing produk.',result);
     text('#wmDownloadPdf','Unduh Ringkasan PDF',result);
     text('.wm-next small','LANGKAH BERIKUTNYA',result);
   }
@@ -163,13 +165,13 @@
     if(!panel)return;
     text('.wm-equity-head small',`PENGATURAN PORSI SAHAM • v${VERSION}`,panel);
     text('.wm-equity-head h3','Bagaimana Anda ingin membagi porsi saham?',panel);
-    const p=panel.querySelector('.wm-equity-head p');
-    if(p)p.innerHTML='Porsi saham mengikuti hasil rencana Anda. Di bagian ini, Anda dapat memilih bagaimana porsi tersebut dibagi antara <b>Blue Chip, Dividend, Growth/Second Liner, dan Trading</b>.';
+    html('.wm-equity-head p','Porsi saham mengikuti hasil rencana Anda. Di bagian ini, Anda dapat memilih bagaimana porsi tersebut dibagi antara <b>Blue Chip, Dividend, Growth/Second Liner, dan Trading</b>.',panel);
     text('.wm-equity-cap small','PORSI SAHAM DALAM RENCANA',panel);
     const guard=panel.querySelector('.wm-equity-guardrail');
     if(guard){
       const weight=(panel.querySelector('.wm-equity-cap b')?.textContent||'').trim();
-      guard.innerHTML=`<b>Catatan:</b> porsi saham ${weight||'yang telah ditetapkan'} tetap sama. Pilihan di atas hanya mengatur pembagian di dalam porsi saham. Untuk pilihan Custom, total pembagian harus 100%.`;
+      const value=`<b>Catatan:</b> porsi saham ${weight||'yang telah ditetapkan'} tetap sama. Pilihan di atas hanya mengatur pembagian di dalam porsi saham. Untuk pilihan Custom, total pembagian harus 100%.`;
+      if(guard.innerHTML!==value)guard.innerHTML=value;
     }
   }
 
@@ -178,17 +180,10 @@
     if(!panel)return;
     text('.wm-fv-head small','PROYEKSI PER INSTRUMEN',panel);
     text('.wm-fv-head h3','Lihat perkembangan setiap bagian portofolio.',panel);
-    const p=panel.querySelector('.wm-fv-head p');
-    if(p)p.textContent='Setiap instrumen dihitung berdasarkan dana yang ditempatkan, investasi bulanan, dan asumsi return masing-masing. Nilai akhir menunjukkan proyeksi, bukan harga pasar yang dijamin.';
+    text('.wm-fv-head p','Setiap instrumen dihitung berdasarkan dana yang ditempatkan, investasi bulanan, dan asumsi return masing-masing. Nilai akhir menunjukkan proyeksi, bukan harga pasar yang dijamin.',panel);
     text('.wm-yearly-head small','PROYEKSI TAHUNAN',panel);
     text('.wm-yearly-head h3','Perkembangan dari tahun pertama hingga akhir.',panel);
-    const yp=panel.querySelector('.wm-yearly-head p');
-    if(yp)yp.textContent='Lihat perkembangan dana yang sudah ditempatkan, estimasi hasil, dan proyeksi nilai portofolio pada setiap tahun.';
-  }
-
-  function patchFooter(){
-    const note=document.querySelector('.footer-note');
-    if(note&&!note.textContent.includes('©'))return;
+    text('.wm-yearly-head p','Lihat perkembangan dana yang sudah ditempatkan, estimasi hasil, dan proyeksi nilai portofolio pada setiap tahun.',panel);
   }
 
   function apply(){
