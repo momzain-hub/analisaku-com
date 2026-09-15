@@ -52,9 +52,10 @@
     }
 
     try{
-      // Mode dipilih lebih dulu, lalu questionnaire v1.4 menyesuaikan pertanyaan sebelum core kalkulasi dimuat.
+      // Mode dipilih lebih dulu, questionnaire v1.4 menyesuaikan pertanyaan, lalu user wajib menjawab eksplisit sebelum core menghitung.
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.4-20260915-2245'));
+      await loadScript(url('wealth-questionnaire-required.js?v=1.4-20260915-2250'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
