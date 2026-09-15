@@ -33,7 +33,8 @@
   async function init(){
     loadCss(url('../css/wealth-v4.css?v=20260915-1815'),'wealthV4');
     loadCss(url('../css/wealth-products.css?v=20260915-2045'),'wealthProducts');
-    loadCss(url('../css/wealth-future-value.css?v=20260915-2205'),'wealthFutureValue');
+    loadCss(url('../css/wealth-future-value.css?v=20260915-2215'),'wealthFutureValue');
+    loadCss(url('../css/wealth-yearly-breakdown.css?v=20260915-2215'),'wealthYearlyBreakdown');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -49,7 +50,7 @@
 
     try{
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
-      await loadScript(url('wealth-yearly-breakdown.js?v=20260915-2205'));
+      await loadScript(url('wealth-yearly-breakdown.js?v=20260915-2215'));
     }catch(error){
       console.error('Wealth v7 gagal dimuat',error);
     }
