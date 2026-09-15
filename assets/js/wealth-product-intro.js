@@ -80,6 +80,12 @@
           </div>
         </div>
 
+        <div class="wm-return-note" style="margin-top:18px">
+          <small>MODEL ALOKASI EKUITAS</small>
+          <strong>Maksimum 90% ekuitas untuk profil Agresif dengan horizon panjang dan kebutuhan likuiditas rendah.</strong>
+          <span>Model tidak otomatis memaksakan porsi saham tinggi. Batas aktual tetap mengikuti profil risiko, horizon tujuan, dan kebutuhan akses dana. Untuk profil Growth, porsi ekuitas dapat mencapai sekitar 70% bila kondisi mendukung.</span>
+        </div>
+
         <div class="wm-products-source">
           <span>Produk: mengacu pada informasi resmi Mirae Asset Sekuritas. Mirae juga menyediakan ETF dan Structured Warrant; fitur Wealth ini difokuskan pada tiga kelas aset utama di atas.</span>
           <span>Estimasi return: asumsi ilustratif Analisaku untuk perencanaan jangka menengah/panjang, bukan target, bukan jaminan, dan bukan proyeksi resmi Mirae Asset.</span>
