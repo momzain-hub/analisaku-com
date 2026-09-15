@@ -1,5 +1,13 @@
-/* Wealth v7 yearly breakdown — mobile cards */
+/* Wealth Management v1.1 — yearly breakdown + effective return % */
+.wm-version-badge{display:inline-flex;align-items:center;margin-left:8px;padding:3px 7px;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,transparent);color:var(--gold);font-size:7px;font-weight:950;letter-spacing:.6px;vertical-align:middle}
 .wm-yearly-cards{display:none}
+.wm-yearly-explainer{margin:0 0 12px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--gold) 25%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--gold) 5%,var(--surface3));font-size:8px;line-height:1.55;color:var(--muted2)}
+.wm-yearly-explainer b{color:var(--text)}
+.wm-fv-asset-metrics em,.wm-year-card-summary em{display:block;margin-top:3px;font-size:7px;font-style:normal;font-weight:850}
+.wm-yearly-table td small{display:block;margin-top:3px;font-size:6.3px;color:var(--muted)}
+.wm-yearly-table td.positive small{color:inherit}
+.wm-yearly-table td.negative small{color:inherit}
+
 @media(max-width:760px){
   .wm-yearly-table-wrap{display:none}
   .wm-yearly-cards{display:grid;gap:10px}
@@ -19,7 +27,10 @@
   .wm-year-assets>div{border-top:1px solid var(--line);padding-top:7px;min-width:0}
   .wm-year-assets span{display:block;font-size:6.5px;color:var(--muted2);white-space:normal}
   .wm-year-assets b{display:block;margin-top:3px;font-size:8.5px;color:var(--text)}
-  .wm-year-assets small{display:block;margin-top:2px;font-size:6.2px;color:var(--muted)}
+  .wm-year-assets small{display:block;margin-top:2px;font-size:6.2px;color:var(--muted);line-height:1.35}
+  .wm-year-assets small strong{display:inline;color:inherit;font-size:inherit}
+  .wm-year-assets .positive{color:var(--wm3-green,#58c99a)!important}
+  .wm-year-assets .negative{color:var(--wm3-red,#ef7c7c)!important}
 }
 @media(max-width:430px){
   .wm-year-card-summary{grid-template-columns:1fr}
