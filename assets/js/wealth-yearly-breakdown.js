@@ -94,7 +94,7 @@
     return points;
   }
 
-  function assetCardHtml(asset,totalReturn){
+  function assetCardHtml(asset){
     const share=asset.growthShare===null?'—':pct(asset.growthShare);
     const growthClass=asset.estimatedReturn>=0?'positive':'negative';
     return `<article class="wm-fv-asset-card">
@@ -113,6 +113,19 @@
         <span>Kontribusi ke pertumbuhan rupiah <b>${share}</b></span>
       </div>
     </article>`;
+  }
+
+  function yearlyMobileCardsHtml(timeline){
+    return `<div class="wm-yearly-cards">${timeline.map(point=>`
+      <article class="wm-year-card ${point.final?'final':''}">
+        <div class="wm-year-card-head"><div><small>${point.final?'PERIODE AKHIR':'PROYEKSI TAHUNAN'}</small><strong>${esc(point.label)}</strong></div><b>${rupiah(point.totalMarket)}</b></div>
+        <div class="wm-year-card-summary">
+          <div><small>DANA DISETOR</small><b>${rupiah(point.totalInvested)}</b></div>
+          <div><small>EST. RETURN</small><b class="${point.totalReturn>=0?'positive':'negative'}">${signedRp(point.totalReturn)}</b></div>
+          <div><small>NILAI PASAR</small><b>${rupiah(point.totalMarket)}</b></div>
+        </div>
+        <div class="wm-year-assets">${point.assets.map(a=>`<div><span>${esc(shortName[a.name]||a.name)}</span><b>${rupiah(a.marketValue)}</b><small>${signedRp(a.estimatedReturn)} return</small></div>`).join('')}</div>
+      </article>`).join('')}</div>`;
   }
 
   function yearlyTableHtml(timeline,assets){
@@ -137,6 +150,7 @@
           <tbody>${rows}</tbody>
         </table>
       </div>
+      ${yearlyMobileCardsHtml(timeline)}
       <div class="wm-fv-note"><b>Catatan:</b> angka “Nilai Pasar” adalah nilai proyeksi berdasarkan asumsi return yang dipilih, bukan harga pasar aktual atau jaminan hasil investasi.</div>
     </section>`;
   }
@@ -166,7 +180,7 @@
         <div><small>NILAI PASAR PROYEKSI</small><b>${rupiah(final.totalMarket)}</b><span>Akhir ${years.toLocaleString('id-ID',{maximumFractionDigits:1})} tahun</span></div>
         <div><small>WEIGHTED AVG RETURN</small><b>${pct(final.weightedReturn)}</b><span>Σ bobot × return aset</span></div>
       </div>
-      <div class="wm-fv-assets">${final.assets.map(a=>assetCardHtml(a,final.totalReturn)).join('')}</div>
+      <div class="wm-fv-assets">${final.assets.map(assetCardHtml).join('')}</div>
       <div class="wm-fv-note"><b>Cara baca:</b> “Estimasi Return” adalah keuntungan/kerugian rupiah dari instrumen tersebut. “Nilai Pasar Proyeksi” = dana yang telah disetor + estimasi return. Kontribusi return menunjukkan dampak asumsi return aset terhadap expected return portofolio.</div>
       ${yearlyTableHtml(timeline,final.assets)}`;
   }
