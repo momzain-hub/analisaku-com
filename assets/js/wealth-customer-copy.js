@@ -25,7 +25,8 @@
 
   function patchHero(){
     text('.wealth-hero .kicker','WEALTH MANAGEMENT');
-    const badge=document.querySelector('.wm-version-badge');if(badge)badge.textContent=`WEALTH v${VERSION}`;
+    const badge=document.querySelector('.wm-version-badge');
+    if(badge&&badge.textContent!==`WEALTH v${VERSION}`)badge.textContent=`WEALTH v${VERSION}`;
   }
 
   function patchProductIntro(){
@@ -74,7 +75,11 @@
     html('.wm-equity-head p','Total porsi saham sudah ditentukan oleh hasil rencana. Di bagian ini Anda hanya memilih bagaimana porsi tersebut dibagi antara <b>Core/Blue Chip, Dividend/Income, Growth/Second Liner, dan Tactical/Trading</b>.',panel);
     text('.wm-equity-cap small','TOTAL PORSI SAHAM DALAM RENCANA',panel);
     const guard=panel.querySelector('.wm-equity-guardrail');
-    if(guard){const weight=(panel.querySelector('.wm-equity-cap b')?.textContent||'').trim();guard.innerHTML=`<b>Catatan:</b> total porsi saham ${weight||'yang telah ditetapkan'} tidak berubah. Pilihan ini hanya mengatur pembagian di dalam porsi saham. Untuk Custom, total pembagian harus 100%.`;}
+    if(guard){
+      const weight=(panel.querySelector('.wm-equity-cap b')?.textContent||'').trim();
+      const value=`<b>Catatan:</b> total porsi saham ${weight||'yang telah ditetapkan'} tidak berubah. Pilihan ini hanya mengatur pembagian di dalam porsi saham. Untuk Custom, total pembagian harus 100%.`;
+      if(guard.innerHTML!==value)guard.innerHTML=value;
+    }
   }
 
   function patchProjection(){
