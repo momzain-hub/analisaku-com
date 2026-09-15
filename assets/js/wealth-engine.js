@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management Engine */
+/* Analisaku Wealth Management Engine v3 — KAPAN • MAMPU • NYAMAN */
 (function(){
   const $=id=>document.getElementById(id);
   const rupiah=value=>'Rp '+Math.round(Number(value)||0).toLocaleString('id-ID');
@@ -6,28 +6,28 @@
   let selectedGoal='Pendidikan';
   let riskState=null;
 
-  const riskProfiles=[
-    {min:9,max:15,key:'conservative',name:'Konservatif',level:1,copy:'Prioritas utama adalah menjaga nilai dana, likuiditas, dan membatasi fluktuasi.'},
-    {min:16,max:21,key:'mod-conservative',name:'Moderat Konservatif',level:2,copy:'Masih mengutamakan stabilitas, tetapi dapat menerima fluktuasi terbatas untuk peluang hasil lebih tinggi.'},
-    {min:22,max:27,key:'moderate',name:'Moderat',level:3,copy:'Menerima kombinasi stabilitas dan pertumbuhan dengan volatilitas menengah.'},
-    {min:28,max:32,key:'growth',name:'Growth',level:4,copy:'Berorientasi pertumbuhan dan mampu menerima fluktuasi yang lebih besar selama horizon memadai.'},
-    {min:33,max:36,key:'aggressive',name:'Agresif',level:5,copy:'Memiliki toleransi dan kapasitas risiko tinggi untuk tujuan jangka panjang, dengan kesiapan menghadapi drawdown besar.'}
-  ];
+  const profiles={
+    1:{key:'conservative',name:'Konservatif',copy:'Fokus utama menjaga nilai dana dan likuiditas. Fluktuasi perlu dibatasi.'},
+    2:{key:'mod-conservative',name:'Moderat Konservatif',copy:'Masih mengutamakan stabilitas, dengan ruang terbatas untuk pertumbuhan.'},
+    3:{key:'moderate',name:'Moderat',copy:'Seimbang antara stabilitas dan pertumbuhan dengan volatilitas menengah.'},
+    4:{key:'mod-aggressive',name:'Moderat Agresif',copy:'Berorientasi pertumbuhan dan siap menghadapi fluktuasi cukup besar selama horizon memadai.'},
+    5:{key:'aggressive',name:'Agresif',copy:'Berorientasi pertumbuhan jangka panjang dan siap menghadapi volatilitas serta drawdown besar.'}
+  };
 
   const allocations={
-    conservative:[['Likuid / RDPU',50],['Pendapatan Tetap',40],['Campuran',10],['Saham',0]],
-    'mod-conservative':[['Likuid / RDPU',30],['Pendapatan Tetap',45],['Campuran',20],['Saham',5]],
-    moderate:[['Likuid / RDPU',15],['Pendapatan Tetap',35],['Campuran',30],['Saham',20]],
-    growth:[['Likuid / RDPU',10],['Pendapatan Tetap',25],['Campuran',25],['Saham',40]],
-    aggressive:[['Likuid / RDPU',5],['Pendapatan Tetap',15],['Campuran',20],['Saham',60]]
+    conservative:[['Likuid / RDPU',60],['SBN / Pendapatan Tetap',35],['Campuran',5],['Saham',0]],
+    'mod-conservative':[['Likuid / RDPU',35],['SBN / Pendapatan Tetap',45],['Campuran',15],['Saham',5]],
+    moderate:[['Likuid / RDPU',20],['SBN / Pendapatan Tetap',40],['Campuran',25],['Saham',15]],
+    'mod-aggressive':[['Likuid / RDPU',10],['SBN / Pendapatan Tetap',25],['Campuran',25],['Saham',40]],
+    aggressive:[['Likuid / RDPU',5],['SBN / Pendapatan Tetap',15],['Campuran',20],['Saham',60]]
   };
 
   const productUniverse=[
-    {name:'Reksa Dana Pasar Uang',risk:1,minH:1,liq:4,goals:['preserve','income','balanced'],desc:'Fokus likuiditas dan volatilitas relatif rendah. Umumnya lebih sesuai untuk horizon pendek atau dana parkir.'},
-    {name:'SBN / Obligasi Berkualitas',risk:2,minH:2,liq:2,goals:['preserve','income','balanced'],desc:'Berorientasi pendapatan dan stabilitas relatif, tetap memiliki risiko harga, suku bunga, dan likuiditas.'},
-    {name:'Reksa Dana Pendapatan Tetap',risk:2,minH:2,liq:3,goals:['income','balanced'],desc:'Eksposur utama pada surat utang. Cocok dipertimbangkan untuk horizon menengah dengan toleransi fluktuasi terbatas.'},
-    {name:'Reksa Dana Campuran',risk:3,minH:3,liq:3,goals:['balanced','growth'],desc:'Menggabungkan beberapa kelas aset. Risiko dan komposisi dapat berbeda antarproduk.'},
-    {name:'Reksa Dana Saham',risk:4,minH:4,liq:3,goals:['growth'],desc:'Berorientasi pertumbuhan jangka panjang dengan volatilitas tinggi dan potensi drawdown yang besar.'},
+    {name:'Reksa Dana Pasar Uang',risk:1,minH:1,liq:4,goals:['preserve','income','balanced'],desc:'Likuiditas tinggi dan volatilitas relatif rendah. Cocok untuk dana jangka pendek atau kebutuhan kas.'},
+    {name:'SBN / Obligasi Berkualitas',risk:2,minH:2,liq:2,goals:['preserve','income','balanced'],desc:'Fokus pendapatan dan stabilitas relatif. Tetap memiliki risiko harga, suku bunga, dan likuiditas.'},
+    {name:'Reksa Dana Pendapatan Tetap',risk:2,minH:2,liq:3,goals:['income','balanced'],desc:'Eksposur utama pada surat utang. Umumnya lebih sesuai untuk horizon menengah.'},
+    {name:'Reksa Dana Campuran',risk:3,minH:3,liq:3,goals:['balanced','growth'],desc:'Menggabungkan beberapa kelas aset untuk keseimbangan pertumbuhan dan stabilitas.'},
+    {name:'Reksa Dana Saham',risk:4,minH:4,liq:3,goals:['growth'],desc:'Berorientasi pertumbuhan jangka panjang dengan volatilitas dan potensi drawdown tinggi.'},
     {name:'Saham',risk:5,minH:4,liq:3,goals:['growth'],desc:'Risiko tinggi dan membutuhkan pemahaman emiten, diversifikasi, serta disiplin pengelolaan risiko.'}
   ];
 
@@ -42,63 +42,103 @@
     });
   });
 
-  function profileFor(score){
-    return riskProfiles.find(p=>score>=p.min&&score<=p.max)||riskProfiles[0];
+  const average=values=>values.reduce((sum,v)=>sum+Number(v||0),0)/values.length;
+  function levelFromAverage(value){
+    if(value<1.5)return 1;
+    if(value<2.2)return 2;
+    if(value<2.9)return 3;
+    if(value<3.5)return 4;
+    return 5;
+  }
+  function levelTone(level){return level<=2?'LOW':level===3?'BALANCED':'HIGH'}
+  function levelCopy(level){
+    return ({1:'Sangat terbatas',2:'Terbatas',3:'Seimbang',4:'Cukup tinggi',5:'Tinggi'})[level]||'—';
   }
 
-  function dimensionLabel(score,max){
-    const ratio=score/max;
-    if(ratio>=.8)return'Tinggi';
-    if(ratio>=.6)return'Menengah-Tinggi';
-    if(ratio>=.4)return'Menengah';
-    return'Rendah';
+  function assessRisk(answers){
+    const rawScore=Object.values(answers).reduce((sum,v)=>sum+Number(v||0),0);
+    const horizonAvg=average([answers.q1,answers.q4,answers.q9]);
+    const capacityAvg=average([answers.q5,answers.q6,answers.q7,answers.q9]);
+    const toleranceAvg=average([answers.q2,answers.q3,answers.q8]);
+    const horizonLevel=levelFromAverage(horizonAvg);
+    const capacityLevel=levelFromAverage(capacityAvg);
+    const toleranceLevel=levelFromAverage(toleranceAvg);
+    const finalLevel=Math.min(horizonLevel,capacityLevel,toleranceLevel);
+    const limits=[];
+    if(horizonLevel===finalLevel)limits.push('KAPAN');
+    if(capacityLevel===finalLevel)limits.push('MAMPU');
+    if(toleranceLevel===finalLevel)limits.push('NYAMAN');
+    return {
+      rawScore,
+      finalLevel,
+      profile:profiles[finalLevel],
+      answers,
+      lenses:{
+        horizon:{key:'KAPAN',title:'Waktu & Likuiditas',level:horizonLevel,avg:horizonAvg,copy:'Kapan dana dipakai dan seberapa cepat harus bisa dicairkan.'},
+        capacity:{key:'MAMPU',title:'Kemampuan Finansial',level:capacityLevel,avg:capacityAvg,copy:'Dana darurat, kestabilan arus kas, dan porsi aset yang berisiko.'},
+        tolerance:{key:'NYAMAN',title:'Kenyamanan Risiko',level:toleranceLevel,avg:toleranceAvg,copy:'Respons terhadap penurunan, tujuan, dan pengalaman investasi.'}
+      },
+      limitingFactors:limits
+    };
   }
 
-  function renderRiskResult(score,answers){
-    const profile=profileFor(score);
-    const tolerance=(Number(answers.q2)+Number(answers.q3)+Number(answers.q8))/12;
-    const capacity=(Number(answers.q5)+Number(answers.q6)+Number(answers.q7)+Number(answers.q9))/16;
-    const horizon=(Number(answers.q1)+Number(answers.q4))/8;
-    riskState={score,profile,answers,tolerance,capacity,horizon};
-
+  function renderRiskResult(answers){
+    riskState=assessRisk(answers);
+    const {profile,finalLevel,rawScore,lenses,limitingFactors}=riskState;
     const allocation=(allocations[profile.key]||[]).map(([name,value])=>`
       <div class="allocation-card"><small>${name}</small><b>${value}%</b><div class="allocation-bar"><span style="width:${value}%"></span></div></div>`).join('');
 
+    const lensCards=Object.values(lenses).map(lens=>`
+      <div class="risk-lens-card" data-lens="${lens.key}" data-tone="${levelTone(lens.level)}">
+        <div class="risk-lens-top"><span>${lens.key}</span><b>Level ${lens.level}/5</b></div>
+        <strong>${lens.title}</strong>
+        <small>${levelCopy(lens.level)}</small>
+        <p>${lens.copy}</p>
+      </div>`).join('');
+
+    const aligned=lenses.horizon.level===lenses.capacity.level&&lenses.capacity.level===lenses.tolerance.level;
+    const quick=aligned
+      ?`Ketiga sisi relatif selaras. Batas risiko produk indikatif Anda berada di Level ${finalLevel}/5.`
+      :`Batas risiko mengikuti sisi yang paling membatasi: ${limitingFactors.join(' + ')}. Karena itu produk di atas Level ${finalLevel}/5 perlu dievaluasi lebih hati-hati.`;
+
     $('riskResult').innerHTML=`
-      <div class="risk-score"><div><small>PROFIL RISIKO INDIKATIF</small><h3>${profile.name}</h3></div><div><b>${score}</b><span>/ 36</span></div></div>
-      <p>${profile.copy}</p>
-      <div class="risk-dimensions">
-        <div><small>Risk Tolerance</small><b>${dimensionLabel(tolerance,1)}</b></div>
-        <div><small>Capacity for Loss</small><b>${dimensionLabel(capacity,1)}</b></div>
-        <div><small>Horizon / Liquidity</small><b>${dimensionLabel(horizon,1)}</b></div>
-        <div><small>Product Risk Limit</small><b>Level ${profile.level} / 5</b></div>
+      <div class="risk-score risk-score-v3">
+        <div><small>HASIL SEKILAS</small><h3>${profile.name}</h3><p>${profile.copy}</p></div>
+        <div class="risk-limit-badge"><small>BATAS PRODUK</small><b>Level ${finalLevel}</b><span>/ 5</span></div>
       </div>
-      <small>MODEL ALOKASI EDUKATIF</small>
-      <div class="allocation-grid">${allocation}</div>
-      <p style="margin-top:12px">Model alokasi bukan rekomendasi personal dan tidak mempertimbangkan seluruh kondisi keuangan, pajak, kewajiban, atau portofolio yang sudah dimiliki.</p>`;
+      <div class="risk-one-line"><b>${quick}</b><span>Skor jawaban ${rawScore}/36 digunakan sebagai informasi pendukung, bukan satu-satunya penentu.</span></div>
+      <div class="risk-lens-grid">${lensCards}</div>
+      <div class="risk-dimensions" hidden>
+        <div><small>KAPAN</small><b>Level ${lenses.horizon.level}/5</b></div>
+        <div><small>MAMPU</small><b>Level ${lenses.capacity.level}/5</b></div>
+        <div><small>NYAMAN</small><b>Level ${lenses.tolerance.level}/5</b></div>
+        <div><small>Batas Risiko Produk</small><b>Level ${finalLevel}/5</b></div>
+      </div>
+      <div class="allocation-head"><div><small>MODEL ALOKASI EDUKATIF</small><strong>Contoh komposisi untuk profil ${profile.name}</strong></div><span>Bukan rekomendasi personal</span></div>
+      <div class="allocation-grid">${allocation}</div>`;
+
+    window.dispatchEvent(new CustomEvent('analisaku:wealth-risk',{detail:riskState}));
   }
 
   $('riskForm')?.addEventListener('submit',event=>{
     event.preventDefault();
     const answers={};
-    let score=0;
     for(let i=1;i<=9;i++){
       const checked=document.querySelector(`input[name="q${i}"]:checked`);
       if(!checked){
-        $('riskResult').innerHTML='<small>HASIL ANALISIS</small><h3>Belum lengkap</h3><p>Mohon jawab seluruh 9 pertanyaan agar hasil tidak bias.</p>';
+        $('riskResult').innerHTML='<small>HASIL ANALISIS</small><h3>Belum lengkap</h3><p>Jawab seluruh 9 pertanyaan agar KAPAN, MAMPU, dan NYAMAN dapat dibandingkan dengan benar.</p>';
         document.querySelector(`[data-q="${i}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});
         return;
       }
       answers[`q${i}`]=Number(checked.value);
-      score+=Number(checked.value);
     }
-    renderRiskResult(score,answers);
+    renderRiskResult(answers);
     if($('fitHorizon'))$('fitHorizon').value=String(answers.q1);
     if($('fitLiquidity'))$('fitLiquidity').value=String(answers.q4);
   });
 
   function renderProductFit(){
-    const riskLevel=riskState?.profile?.level||2;
+    const riskLevel=riskState?.finalLevel||2;
     const horizon=Number($('fitHorizon')?.value||1);
     const liquidity=Number($('fitLiquidity')?.value||1);
     const goal=$('fitGoal')?.value||'preserve';
@@ -109,23 +149,30 @@
       const riskFit=product.risk<=riskLevel;
       const horizonFit=horizon>=product.minH;
       const liquidityFit=liquidity<=2?product.liq>=3:true;
-      if(riskFit)score+=3;else score-=4;
-      if(horizonFit)score+=3;else score-=3;
-      if(liquidityFit)score+=2;else score-=2;
-      if(product.goals.includes(goal))score+=2;
-      return {...product,score,riskFit,horizonFit,liquidityFit};
+      const goalFit=product.goals.includes(goal);
+      if(riskFit)score+=4;else score-=6;
+      if(horizonFit)score+=3;else score-=4;
+      if(liquidityFit)score+=2;else score-=3;
+      if(goalFit)score+=2;
+      return {...product,score,riskFit,horizonFit,liquidityFit,goalFit};
     }).sort((a,b)=>b.score-a.score);
 
-    $('fitResults').innerHTML=ranked.map(p=>{
-      const fit=p.riskFit&&p.horizonFit&&p.liquidityFit;
-      const status=fit?'LAYAK DIPERTIMBANGKAN':'PERLU EVALUASI';
-      let reason=[];
-      if(!p.riskFit)reason.push('risiko produk di atas profil indikatif');
-      if(!p.horizonFit)reason.push('horizon terlalu pendek');
-      if(!p.liquidityFit)reason.push('likuiditas kurang sesuai');
-      if(principle==='syariah')reason.push('pilih varian Syariah bila tersedia');
-      return `<article class="product-card ${fit?'is-fit':'is-limit'}"><div><small>RISK LEVEL ${p.risk}/5</small><strong>${p.name}</strong><p>${p.desc}${reason.length?' Catatan: '+reason.join(', ')+'.':''}</p></div><span class="fit-badge">${status}</span></article>`;
-    }).join('');
+    const fits=ranked.filter(p=>p.riskFit&&p.horizonFit&&p.liquidityFit);
+    const quick=fits.slice(0,3).map(p=>p.name).join(' • ')||'Belum ada kelas produk yang lolos seluruh filter.';
+    $('fitResults').innerHTML=`
+      <div class="fit-quick-summary"><small>RINGKASAN SEKILAS</small><strong>${fits.length} kelas produk lolos filter</strong><p>${quick}</p><span>Batas risiko saat ini: Level ${riskLevel}/5</span></div>
+      ${ranked.map((p,index)=>{
+        const fit=p.riskFit&&p.horizonFit&&p.liquidityFit;
+        const status=fit?'COCOK':'EVALUASI DULU';
+        const reason=[];
+        if(!p.riskFit)reason.push('risiko produk melewati batas profil');
+        if(!p.horizonFit)reason.push('horizon terlalu pendek');
+        if(!p.liquidityFit)reason.push('kebutuhan likuiditas belum cocok');
+        if(!p.goalFit)reason.push('bukan prioritas utama untuk tujuan ini');
+        if(principle==='syariah')reason.push('gunakan varian Syariah bila tersedia');
+        return `<article class="product-card ${fit?'is-fit':'is-limit'}"><div class="product-rank">${String(index+1).padStart(2,'0')}</div><div><small>RISK LEVEL ${p.risk}/5</small><strong>${p.name}</strong><p>${p.desc}${reason.length?' Catatan: '+reason.join(', ')+'.':''}</p></div><span class="fit-badge">${status}</span></article>`;
+      }).join('')}`;
+    window.dispatchEvent(new CustomEvent('analisaku:wealth-fit'));
   }
 
   $('fitButton')?.addEventListener('click',renderProductFit);
@@ -203,12 +250,18 @@
 
     const gap=futureTarget-series.final;
     $('fpNote').textContent=gap<=0
-      ?`Dengan asumsi yang dipilih, proyeksi melewati target sekitar ${rupiah(Math.abs(gap))}. Tetap gunakan asumsi return konservatif.`
-      :`Masih ada gap sekitar ${rupiah(gap)}. Untuk mengejar target dengan asumsi yang sama, kebutuhan setoran bulanan diperkirakan ${rupiah(required)}.`;
+      ?`TARGET ON TRACK — proyeksi melewati target sekitar ${rupiah(Math.abs(gap))}. Tetap gunakan asumsi return konservatif.`
+      :`MASIH ADA GAP — sekitar ${rupiah(gap)}. Dengan asumsi yang sama, kebutuhan setoran bulanan diperkirakan ${rupiah(required)}.`;
     drawChart(series.values,futureTarget);
+    window.dispatchEvent(new CustomEvent('analisaku:wealth-finance'));
   }
 
   $('fpCalculate')?.addEventListener('click',calculateFinancialPlan);
   window.addEventListener('resize',()=>{if($('fpProjected')?.textContent!=='—')calculateFinancialPlan();});
   calculateFinancialPlan();
+
+  window.AnalisakuWealth={
+    getRiskState:()=>riskState,
+    calculateFinancialPlan
+  };
 })();
