@@ -1,4 +1,4 @@
-/* Analisaku Wealth v4 bootstrap */
+/* Analisaku Wealth v5 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -32,15 +32,24 @@
 
   async function init(){
     loadCss(url('../css/wealth-v4.css?v=20260915-1815'),'wealthV4');
+    loadCss(url('../css/wealth-products.css?v=20260915-2045'),'wealthProducts');
+
+    try{
+      await loadScript(url('wealth-product-intro.js?v=20260915-2045'));
+    }catch(error){
+      console.warn('Product overview Wealth belum termuat',error);
+    }
+
     try{
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',{crossorigin:'anonymous',referrerpolicy:'no-referrer'});
     }catch(error){
       console.warn('jsPDF belum termuat',error);
     }
+
     try{
-      await loadScript(url('wealth-unified.js?v=20260915-1815'));
+      await loadScript(url('wealth-unified.js?v=20260915-2045'));
     }catch(error){
-      console.error('Wealth v4 gagal dimuat',error);
+      console.error('Wealth v5 gagal dimuat',error);
     }
   }
 
