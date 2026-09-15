@@ -1,0 +1,27 @@
+/* Wealth v7 yearly breakdown — mobile cards */
+.wm-yearly-cards{display:none}
+@media(max-width:760px){
+  .wm-yearly-table-wrap{display:none}
+  .wm-yearly-cards{display:grid;gap:10px}
+  .wm-year-card{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface3)}
+  .wm-year-card.final{border-color:color-mix(in srgb,var(--gold) 35%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 5%,var(--surface3)),var(--surface3))}
+  .wm-year-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+  .wm-year-card-head small{display:block;font-size:6.5px;font-weight:900;letter-spacing:.5px;color:var(--muted2)}
+  .wm-year-card-head strong{display:block;margin-top:3px;font-size:12px;color:var(--text)}
+  .wm-year-card-head>b{font-size:12px;color:var(--gold);white-space:nowrap}
+  .wm-year-card-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+  .wm-year-card-summary>div{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface)}
+  .wm-year-card-summary small{display:block;font-size:6px;font-weight:850;color:var(--muted2)}
+  .wm-year-card-summary b{display:block;margin-top:4px;font-size:8.5px;color:var(--text)}
+  .wm-year-card-summary .positive{color:var(--wm3-green,#58c99a)!important}
+  .wm-year-card-summary .negative{color:var(--wm3-red,#ef7c7c)!important}
+  .wm-year-assets{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+  .wm-year-assets>div{border-top:1px solid var(--line);padding-top:7px;min-width:0}
+  .wm-year-assets span{display:block;font-size:6.5px;color:var(--muted2);white-space:normal}
+  .wm-year-assets b{display:block;margin-top:3px;font-size:8.5px;color:var(--text)}
+  .wm-year-assets small{display:block;margin-top:2px;font-size:6.2px;color:var(--muted)}
+}
+@media(max-width:430px){
+  .wm-year-card-summary{grid-template-columns:1fr}
+  .wm-year-assets{grid-template-columns:1fr}
+}
