@@ -1,0 +1,67 @@
+/* Analisaku Wealth v2 — richer visual system + PDF/report preview */
+.wealth-page{--wm-accent:var(--gold);--wm-teal:#30c7c9;--wm-green:#5fd3a1;--wm-blue:#6f9cff}
+.wealth-page .section{position:relative}
+.wealth-hero{position:relative;isolation:isolate;padding-top:96px!important}
+.wealth-hero:before{content:"";position:absolute;inset:-160px -20vw auto 35%;height:560px;z-index:-2;background:radial-gradient(circle at center,color-mix(in srgb,var(--wm-teal) 16%,transparent),transparent 68%);pointer-events:none}
+.wealth-hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--gold) 42%,transparent),transparent)}
+.wealth-hero-grid{gap:36px!important;align-items:center!important}
+.wealth-hero h1{max-width:760px}
+.wealth-hero h1 span{background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--wm-teal) 74%,var(--gold)));-webkit-background-clip:text;background-clip:text;color:transparent!important}
+.wealth-hero p{line-height:1.7}
+.wealth-flow{margin-top:28px!important;gap:10px!important}
+.wealth-flow span{position:relative;padding:10px 13px 10px 36px!important;background:color-mix(in srgb,var(--surface2) 86%,transparent)!important;border-color:color-mix(in srgb,var(--gold) 24%,var(--line))!important}
+.wealth-flow span:before{content:attr(data-step);position:absolute;left:8px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#17120a;font-size:8px;font-weight:950}
+.wealth-hero-card{position:relative;overflow:hidden;padding:28px!important;border-color:color-mix(in srgb,var(--wm-teal) 25%,var(--line-strong))!important;background:linear-gradient(150deg,color-mix(in srgb,var(--wm-teal) 7%,var(--surface2)),var(--surface))!important}
+.wealth-hero-card:after{content:"";position:absolute;right:-80px;top:-80px;width:180px;height:180px;border-radius:50%;border:1px solid color-mix(in srgb,var(--wm-teal) 24%,transparent)}
+.wealth-hero-card strong{font-size:28px!important;line-height:1.15}
+.wm-engine-points{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px}
+.wm-engine-points div{border:1px solid var(--line);border-radius:13px;padding:11px;background:color-mix(in srgb,var(--surface3) 55%,transparent)}
+.wm-engine-points b{display:block;font-size:12px;color:var(--text)}.wm-engine-points span{display:block;font-size:8px;color:var(--muted2);margin-top:3px}
+
+.wealth-jump{top:0!important;box-shadow:0 8px 28px color-mix(in srgb,#000 10%,transparent)}
+.wealth-jump-inner{align-items:center}.wealth-jump a{transition:.18s ease}.wealth-jump a:hover{transform:translateY(-1px)}
+.wealth-jump .wealth-download-mini{margin-left:auto;background:var(--gold);color:#17120a;border-color:var(--gold);font-weight:900}
+
+.wm-section-head .kicker{display:inline-flex;align-items:center;gap:7px}.wm-section-head .kicker:before{content:"";width:16px;height:1px;background:var(--gold)}
+.goal-grid{gap:12px!important}
+.goal-card{position:relative;overflow:hidden;padding:17px!important;min-height:148px!important;background:linear-gradient(155deg,var(--surface),color-mix(in srgb,var(--surface2) 84%,transparent))!important}
+.goal-card:after{content:"";position:absolute;right:-26px;bottom:-28px;width:78px;height:78px;border-radius:50%;border:1px solid color-mix(in srgb,var(--gold) 20%,transparent);transition:.2s ease}
+.goal-card:hover:after,.goal-card.active:after{transform:scale(1.18);border-color:color-mix(in srgb,var(--gold) 55%,transparent)}
+.goal-card span{font-size:8px!important;letter-spacing:.8px}.goal-card strong{font-size:14px!important;line-height:1.25}.goal-card small{line-height:1.4}
+.goal-card.active{box-shadow:0 16px 42px color-mix(in srgb,var(--gold) 10%,transparent)!important}
+
+.risk-question{transition:.18s ease}.risk-question:hover{border-color:color-mix(in srgb,var(--gold) 24%,var(--line));transform:translateY(-1px)}
+.risk-question h3{line-height:1.5}.risk-question label{transition:.16s ease}.risk-question label:hover{color:var(--text);background:color-mix(in srgb,var(--surface3) 72%,transparent)}
+.risk-result{overflow:hidden;box-shadow:0 22px 55px color-mix(in srgb,#000 12%,transparent)}
+.risk-result:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--gold),var(--wm-teal))}
+.risk-score b{background:linear-gradient(90deg,var(--gold),var(--wm-teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.allocation-bar span{background:linear-gradient(90deg,var(--gold),var(--wm-teal))!important}
+.wm-primary{box-shadow:0 10px 24px color-mix(in srgb,var(--gold) 16%,transparent);transition:.18s ease}.wm-primary:hover{transform:translateY(-1px);filter:brightness(1.04)}
+
+.fit-inputs,.fit-results,.finance-form,.finance-result{box-shadow:0 18px 45px color-mix(in srgb,#000 7%,transparent)}
+.product-card{transition:.18s ease}.product-card:hover{transform:translateY(-1px)}
+.product-card.is-fit{background:linear-gradient(145deg,color-mix(in srgb,var(--wm-green) 5%,var(--surface3)),color-mix(in srgb,var(--surface3) 60%,transparent))!important}
+.is-fit .fit-badge{color:var(--wm-green)!important;border-color:color-mix(in srgb,var(--wm-green) 46%,var(--line))!important}
+.finance-result{position:relative;overflow:hidden}.finance-result:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--wm-teal),var(--gold))}
+.finance-kpis div{transition:.18s ease}.finance-kpis div:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--gold) 28%,var(--line))}
+.finance-bar span{background:linear-gradient(90deg,var(--wm-teal),var(--gold))!important}
+
+/* Consolidated Wealth Plan */
+.wealth-plan-shell{border:1px solid color-mix(in srgb,var(--gold) 28%,var(--line-strong));border-radius:26px;background:linear-gradient(155deg,color-mix(in srgb,var(--gold) 4%,var(--surface2)),var(--surface));box-shadow:0 28px 70px color-mix(in srgb,#000 10%,transparent);overflow:hidden}
+.wealth-plan-top{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;padding:24px 26px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 5%,transparent),transparent)}
+.wealth-plan-top h3{font-size:27px;line-height:1.1;margin-top:6px}.wealth-plan-top p{font-size:11px;color:var(--muted);max-width:620px;line-height:1.55;margin-top:8px}
+.wealth-plan-status{border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:9px;font-weight:900;white-space:nowrap;color:var(--muted2)}.wealth-plan-status.is-ready{color:var(--wm-green);border-color:color-mix(in srgb,var(--wm-green) 42%,var(--line));background:color-mix(in srgb,var(--wm-green) 5%,var(--surface))}
+.wealth-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px}
+.plan-panel{border:1px solid var(--line);border-radius:16px;padding:15px;background:color-mix(in srgb,var(--surface3) 50%,transparent)}
+.plan-panel>small{display:block;font-size:8px;font-weight:900;letter-spacing:.8px;color:var(--muted2)}.plan-panel>strong{display:block;font-size:17px;margin-top:7px}.plan-panel>p{font-size:10px;color:var(--muted);line-height:1.5;margin-top:5px}
+.plan-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}.plan-mini-grid div{border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--surface)}.plan-mini-grid span{display:block;font-size:7px;color:var(--muted2)}.plan-mini-grid b{display:block;font-size:10px;margin-top:4px}
+.plan-product-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.plan-product-list span{border:1px solid color-mix(in srgb,var(--wm-green) 38%,var(--line));border-radius:999px;padding:6px 8px;font-size:8px;color:var(--wm-green);background:color-mix(in srgb,var(--wm-green) 4%,var(--surface))}
+.wealth-plan-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px 18px}.wealth-plan-actions p{font-size:9px;color:var(--muted2);max-width:650px;line-height:1.5;margin:0}
+.wm-download{border:0;border-radius:12px;background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--wm-teal) 60%,var(--gold)));color:#111;padding:12px 17px;font-size:10px;font-weight:950;cursor:pointer;white-space:nowrap;box-shadow:0 12px 26px color-mix(in srgb,var(--gold) 18%,transparent);transition:.18s ease}.wm-download:hover{transform:translateY(-1px)}.wm-download:disabled{opacity:.55;cursor:wait;transform:none}
+
+/* PDF document, rendered off-screen by html2pdf */
+.wealth-pdf-report{position:fixed;left:-10000px;top:0;width:760px;background:#fff;color:#172033;font-family:Arial,Helvetica,sans-serif;padding:34px;box-sizing:border-box;z-index:-1}
+.wealth-pdf-report *{box-sizing:border-box}.pdf-brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #d7a94b;padding-bottom:15px;margin-bottom:18px}.pdf-brand h1{font-size:24px;margin:0;color:#111827}.pdf-brand h1 span{color:#b67f17}.pdf-brand p{font-size:10px;color:#6b7280;margin:5px 0 0}.pdf-date{text-align:right;font-size:9px;color:#6b7280}.pdf-hero{background:#111b2a;color:#fff;border-radius:16px;padding:18px;margin-bottom:15px}.pdf-hero small{color:#e7bd67;font-size:8px;letter-spacing:1px}.pdf-hero h2{font-size:22px;margin:5px 0}.pdf-hero p{font-size:10px;line-height:1.5;color:#cbd5e1;margin:0}.pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.pdf-card{border:1px solid #dfe3e8;border-radius:12px;padding:13px;break-inside:avoid;page-break-inside:avoid}.pdf-card small{display:block;font-size:7px;color:#6b7280;letter-spacing:.8px;font-weight:700}.pdf-card strong{display:block;font-size:14px;margin-top:5px;color:#172033}.pdf-card p{font-size:9px;line-height:1.5;color:#667085;margin:5px 0 0}.pdf-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.pdf-kpis div{background:#f6f8fa;border-radius:8px;padding:8px}.pdf-kpis span{display:block;font-size:7px;color:#6b7280}.pdf-kpis b{display:block;font-size:10px;margin-top:3px}.pdf-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.pdf-chips span{border:1px solid #bfe7d6;background:#f2fbf7;color:#157a55;border-radius:999px;padding:5px 7px;font-size:7px}.pdf-section-title{font-size:11px;margin:18px 0 8px;color:#172033}.pdf-allocation{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.pdf-allocation div{border:1px solid #e2e6eb;border-radius:9px;padding:8px;text-align:center}.pdf-allocation span{display:block;font-size:7px;color:#6b7280}.pdf-allocation b{display:block;font-size:12px;margin-top:3px}.pdf-chart{margin-top:10px;border:1px solid #e2e6eb;border-radius:10px;padding:7px}.pdf-chart img{display:block;width:100%;height:auto}.pdf-disclaimer{font-size:7.5px;line-height:1.45;color:#7a8492;border-top:1px solid #e5e7eb;margin-top:18px;padding-top:9px}
+
+@media(max-width:900px){.wealth-plan-grid{grid-template-columns:1fr}.wealth-plan-top,.wealth-plan-actions{align-items:flex-start}.wealth-plan-actions{flex-direction:column}.wm-download{width:100%}}
+@media(max-width:640px){.wm-engine-points{grid-template-columns:1fr}.wealth-jump .wealth-download-mini{margin-left:0}.wealth-plan-top{flex-direction:column}.plan-mini-grid{grid-template-columns:1fr}.wealth-plan-top,.wealth-plan-grid,.wealth-plan-actions{padding-left:14px;padding-right:14px}}
