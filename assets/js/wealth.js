@@ -32,9 +32,9 @@
     try{
       await loadScript(url('wealth-route-init.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
-      await loadScript(url('wealth-mode-navigation.js?v=1.9-20260916-0015'));
+      await loadScript(url('wealth-mode-navigation.js?v=1.9-20260916-0018'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.9-20260916-0015'));
-      await loadScript(url('wealth-questionnaire-required.js?v=1.4-20260915-2250'));
+      await loadScript(url('wealth-questionnaire-required.js?v=1.9-20260916-0018'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
