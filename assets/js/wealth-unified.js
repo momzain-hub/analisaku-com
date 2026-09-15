@@ -1,10 +1,11 @@
-/* Analisaku Wealth v5 — connected one-form engine with equity-forward allocation */
+/* Analisaku Wealth v6 — equity-forward allocation + per-asset future value */
 (function(){
   const $=id=>document.getElementById(id);
   const qs=(sel,root=document)=>root.querySelector(sel);
   const qsa=(sel,root=document)=>[...root.querySelectorAll(sel)];
   const rupiah=v=>'Rp '+Math.round(Number(v)||0).toLocaleString('id-ID');
-  const pct=v=>`${Math.max(0,Number(v)||0).toLocaleString('id-ID',{maximumFractionDigits:1})}%`;
+  const pct=v=>`${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1})}%`;
+  const signedPct=v=>`${Number(v)>=0?'+':''}${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2})} pp`;
   const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 
   let selectedGoal='Pendidikan';
@@ -28,12 +29,6 @@
     5:'Berorientasi pertumbuhan jangka panjang dengan porsi ekuitas sangat tinggi dan toleransi volatilitas tinggi.'
   };
 
-  /*
-    Equity-forward model.
-    Maximum strategic equity exposure is 90% for the highest-risk profile,
-    leaving a 10% stabilizer. The actual equity weight is still capped by
-    time horizon and liquidity need.
-  */
   const baseAllocations={
     1:[['Likuid / RDPU',55],['Obligasi / RDPT',40],['Campuran',5],['Ekuitas (Saham / RD Saham)',0]],
     2:[['Likuid / RDPU',35],['Obligasi / RDPT',45],['Campuran',15],['Ekuitas (Saham / RD Saham)',5]],
@@ -42,11 +37,18 @@
     5:[['Likuid / RDPU',5],['Obligasi / RDPT',5],['Campuran',0],['Ekuitas (Saham / RD Saham)',90]]
   };
 
-  const assetReturnAssumptions={
+  const defaultAssetReturns={
     'Likuid / RDPU':5,
     'Obligasi / RDPT':6.5,
     'Campuran':8,
     'Ekuitas (Saham / RD Saham)':10
+  };
+
+  const returnInputIds={
+    'Likuid / RDPU':'wmReturnCash',
+    'Obligasi / RDPT':'wmReturnBond',
+    'Campuran':'wmReturnBalanced',
+    'Ekuitas (Saham / RD Saham)':'wmReturnEquity'
   };
 
   const products=[
@@ -101,24 +103,92 @@
     }
     return allocation;
   }
-  function expectedPortfolioReturn(allocation){
-    const weighted=allocation.reduce((sum,[name,val])=>sum+((assetReturnAssumptions[name]||0)*val/100),0);
-    return Math.round(weighted*10)/10;
+
+  function ensureReturnControls(){
+    if($('wmReturnAssumptions'))return;
+    const stepBody=qs('#step-1 .wm-step-body');
+    if(!stepBody)return;
+    const box=document.createElement('section');
+    box.className='wm-return-assumptions';
+    box.id='wmReturnAssumptions';
+    box.innerHTML=`
+      <div class="wm-return-head">
+        <div>
+          <small>ASUMSI RETURN</small>
+          <strong>Pilih asumsi standar atau masukkan return sendiri.</strong>
+          <p>Asumsi ini dipakai untuk menghitung weighted average return, future value per instrumen, dan kebutuhan setoran bulanan.</p>
+        </div>
+        <label class="wm-return-toggle"><input id="wmUseCustomReturns" type="checkbox"> Gunakan return custom</label>
+      </div>
+      <div class="wm-return-grid">
+        <div class="wm-return-item"><label>Likuid / RDPU</label><div class="wm-return-input"><input id="wmReturnCash" type="number" step="0.1" value="5" disabled><b>%</b></div><small>Default planning 5%/tahun</small></div>
+        <div class="wm-return-item"><label>Obligasi / RDPT</label><div class="wm-return-input"><input id="wmReturnBond" type="number" step="0.1" value="6.5" disabled><b>%</b></div><small>Default planning 6,5%/tahun</small></div>
+        <div class="wm-return-item"><label>Reksa Dana Campuran</label><div class="wm-return-input"><input id="wmReturnBalanced" type="number" step="0.1" value="8" disabled><b>%</b></div><small>Default planning 8%/tahun</small></div>
+        <div class="wm-return-item"><label>Ekuitas / Saham</label><div class="wm-return-input"><input id="wmReturnEquity" type="number" step="0.1" value="10" disabled><b>%</b></div><small>Default planning 10%/tahun</small></div>
+      </div>
+      <div class="wm-return-foot"><span>Return adalah asumsi ilustratif, bukan jaminan hasil. Custom return dibatasi di atas -99% agar perhitungan bunga majemuk tetap valid.</span><button type="button" class="wm-return-reset" id="wmReturnReset">Reset default</button></div>`;
+    stepBody.appendChild(box);
+
+    const toggle=$('wmUseCustomReturns');
+    const inputs=Object.values(returnInputIds).map(id=>$(id)).filter(Boolean);
+    const sync=()=>inputs.forEach(el=>{el.disabled=!toggle.checked;});
+    toggle.addEventListener('change',sync);
+    $('wmReturnReset')?.addEventListener('click',()=>{
+      Object.entries(defaultAssetReturns).forEach(([name,val])=>{const el=$(returnInputIds[name]);if(el)el.value=val;});
+    });
+    sync();
   }
-  function requiredMonthly(target,initial,annualRate,months){
-    const r=Math.pow(1+annualRate/100,1/12)-1;
-    const growth=Math.pow(1+r,months);
-    const fvInitial=initial*growth;
-    if(fvInitial>=target)return 0;
-    if(Math.abs(r)<1e-12)return Math.max(0,(target-initial)/months);
-    const factor=(growth-1)/r;
-    return Math.max(0,(target-fvInitial)/factor);
+
+  function getReturnAssumptions(){
+    const custom=Boolean($('wmUseCustomReturns')?.checked);
+    const values={};
+    Object.entries(defaultAssetReturns).forEach(([name,def])=>{
+      const el=$(returnInputIds[name]);
+      const n=Number(el?.value);
+      values[name]=custom&&Number.isFinite(n)?n:def;
+    });
+    return {custom,values};
   }
+
   function futureValue(initial,monthly,annualRate,months){
-    const r=Math.pow(1+annualRate/100,1/12)-1;
+    const safeRate=Math.max(-99.9,Number(annualRate)||0);
+    const r=Math.pow(1+safeRate/100,1/12)-1;
     const growth=Math.pow(1+r,months);
     if(Math.abs(r)<1e-12)return initial+monthly*months;
     return initial*growth+monthly*((growth-1)/r);
+  }
+
+  function buildAssetProjection(allocation,returns,initial,monthly,months){
+    const rows=allocation.filter(([,weight])=>weight>0).map(([name,weight])=>{
+      const rate=Number(returns[name]??0);
+      const assetInitial=initial*weight/100;
+      const assetMonthly=monthly*weight/100;
+      const invested=assetInitial+(assetMonthly*months);
+      const future=futureValue(assetInitial,assetMonthly,rate,months);
+      const growth=future-invested;
+      const returnContribution=(weight/100)*rate;
+      return {name,weight,rate,assetInitial,assetMonthly,invested,future,growth,returnContribution};
+    });
+    const totalInvested=initial+(monthly*months);
+    const totalFuture=rows.reduce((sum,row)=>sum+row.future,0);
+    const totalGrowth=rows.reduce((sum,row)=>sum+row.growth,0);
+    const weightedReturn=rows.reduce((sum,row)=>sum+row.returnContribution,0);
+    rows.forEach(row=>{row.growthShare=totalGrowth>0?(row.growth/totalGrowth*100):null;});
+    return {rows,totalInvested,totalFuture,totalGrowth,weightedReturn};
+  }
+
+  function requiredMonthlyForMix(target,initial,allocation,returns,months){
+    const futureInitial=allocation.reduce((sum,[name,weight])=>{
+      if(weight<=0)return sum;
+      return sum+futureValue(initial*weight/100,0,returns[name]??0,months);
+    },0);
+    if(futureInitial>=target)return 0;
+    const factor=allocation.reduce((sum,[name,weight])=>{
+      if(weight<=0)return sum;
+      return sum+futureValue(0,weight/100,returns[name]??0,months);
+    },0);
+    if(factor<=0)return 0;
+    return Math.max(0,(target-futureInitial)/factor);
   }
 
   function selectedGoalData(){return goalMeta[selectedGoal]||goalMeta.Custom;}
@@ -133,6 +203,12 @@
     }
     const target=Number($('wmTarget')?.value||0),initial=Number($('wmInitial')?.value||0),years=Number($('wmYears')?.value||0),monthly=Number($('wmMonthly')?.value||0);
     if(!(target>0&&initial>=0&&years>0&&monthly>=0))return 'Lengkapi target dana, dana awal, horizon, dan setoran bulanan dengan benar.';
+    if($('wmUseCustomReturns')?.checked){
+      for(const [name,id] of Object.entries(returnInputIds)){
+        const v=Number($(id)?.value);
+        if(!Number.isFinite(v)||v<=-99||v>100)return `Return custom ${name} harus lebih besar dari -99% dan maksimal 100%.`;
+      }
+    }
     return '';
   }
 
@@ -155,11 +231,13 @@
     const styleLevel=Math.max(1,Math.min(5,Math.round((when+able+comfortable)/3)));
     const liq=liquidityNeedFromAnswer(answer('qLiquidity'));
     const allocation=buildAllocation(riskLimit,years,liq);
-    const returnRate=expectedPortfolioReturn(allocation);
+    const returnSet=getReturnAssumptions();
     const months=Math.max(1,Math.round(years*12));
+    const projection=buildAssetProjection(allocation,returnSet.values,initial,monthly,months);
+    const returnRate=Math.round(projection.weightedReturn*100)/100;
     const futureTarget=targetToday*Math.pow(1+inflation/100,years);
-    const projected=futureValue(initial,monthly,returnRate,months);
-    const required=requiredMonthly(futureTarget,initial,returnRate,months);
+    const projected=projection.totalFuture;
+    const required=requiredMonthlyForMix(futureTarget,initial,allocation,returnSet.values,months);
     const fundingRatio=Math.min(999,(projected/futureTarget)*100);
     const goal=selectedGoalData();
     const hBucket=horizonBucket(years);
@@ -196,13 +274,57 @@
     return {
       goal,years,targetToday,initial,monthly,inflation,principle,
       when,able,comfortable,riskLimit,styleLevel,returnRate,futureTarget,projected,required,fundingRatio,
-      fitProducts,ranked,limiter,nextAction,allocation,equityWeight
+      fitProducts,ranked,limiter,nextAction,allocation,equityWeight,
+      returnMode:returnSet.custom?'CUSTOM':'STANDARD',assetReturns:returnSet.values,projection
     };
   }
 
   function productHtml(p,i){
     const principleNote=latestPlan?.principle==='syariah'?' • pilih varian Syariah bila tersedia':'';
     return `<div class="wm-product"><div class="rank">${i+1}</div><div><strong>${esc(p.name)}</strong><p>${esc(p.desc)}${esc(principleNote)}</p></div><span class="fit">SESUAI</span></div>`;
+  }
+
+  function ensureFutureValuePanel(){
+    if($('wmFutureValue'))return $('wmFutureValue');
+    const anchor=$('resultAllocation')?.closest('.wm-result-card');
+    if(!anchor)return null;
+    const panel=document.createElement('article');
+    panel.className='wm-fv-panel';
+    panel.id='wmFutureValue';
+    anchor.insertAdjacentElement('afterend',panel);
+    return panel;
+  }
+
+  function futureValueHtml(plan){
+    const rows=plan.projection.rows.map(row=>{
+      const growthClass=row.growth>=0?'positive':'negative';
+      const share=row.growthShare===null?'—':pct(row.growthShare);
+      return `<div class="wm-fv-row">
+        <div class="asset-name"><strong>${esc(row.name)}</strong><span>${rupiah(row.assetMonthly)}/bulan</span></div>
+        <div><b>${row.weight}%</b></div>
+        <div><b>${pct(row.rate)}</b></div>
+        <div class="${row.returnContribution>=0?'positive':'negative'}">${signedPct(row.returnContribution)}</div>
+        <div>${rupiah(row.invested)}</div>
+        <div><b>${rupiah(row.future)}</b></div>
+        <div class="${growthClass}">${share}</div>
+      </div>`;
+    }).join('');
+    const mode=plan.returnMode==='CUSTOM'?'RETURN CUSTOM':'ASUMSI STANDAR';
+    return `<div class="wm-fv-head">
+      <div><small>FUTURE VALUE PER INSTRUMEN</small><h3>Lihat siapa yang paling besar menyumbang pertumbuhan.</h3><p>Setiap aset dihitung terpisah menggunakan bobot, setoran bulanan, dan return masing-masing. Future value portofolio adalah penjumlahan future value seluruh aset.</p></div>
+      <span class="wm-fv-mode">${mode}</span>
+    </div>
+    <div class="wm-fv-summary">
+      <div><small>TOTAL DANA DISETOR</small><b>${rupiah(plan.projection.totalInvested)}</b><span>Modal awal + setoran bulanan</span></div>
+      <div><small>FUTURE VALUE TOTAL</small><b>${rupiah(plan.projection.totalFuture)}</b><span>${plan.years} tahun</span></div>
+      <div><small>ESTIMASI PERTUMBUHAN</small><b>${rupiah(plan.projection.totalGrowth)}</b><span>FV dikurangi dana disetor</span></div>
+      <div><small>WEIGHTED AVG RETURN</small><b>${pct(plan.returnRate)}</b><span>Σ bobot × return aset</span></div>
+    </div>
+    <div class="wm-fv-table">
+      <div class="wm-fv-row head"><div>INSTRUMEN</div><div>BOBOT</div><div>RETURN</div><div>KONTRIBUSI RETURN</div><div>DANA DISETOR</div><div>FUTURE VALUE</div><div>KONTRIBUSI GROWTH</div></div>
+      ${rows}
+    </div>
+    <div class="wm-fv-note"><b>Cara baca:</b> bila bobot saham 70% dan asumsi return saham 10%, kontribusinya ke expected return portofolio adalah <b>+7,0 percentage points</b>. Kolom “Kontribusi Growth” menunjukkan porsi pertumbuhan rupiah yang berasal dari masing-masing aset.</div>`;
   }
 
   function render(plan){
@@ -221,9 +343,11 @@
     $('resultProjected').textContent=rupiah(plan.projected);
     $('resultRequired').textContent=rupiah(plan.required);
     $('resultFunding').textContent=pct(plan.fundingRatio);
-    $('resultAssumption').textContent=`Return ilustratif portofolio ${plan.returnRate}%/tahun • ekuitas ${plan.equityWeight}% • inflasi ${plan.inflation}%/tahun`;
+    $('resultAssumption').textContent=`Return ${plan.returnMode==='CUSTOM'?'custom':'ilustratif'} portofolio ${pct(plan.returnRate)}/tahun • ekuitas ${plan.equityWeight}% • inflasi ${plan.inflation}%/tahun`;
     $('resultProducts').innerHTML=plan.fitProducts.length?plan.fitProducts.map(productHtml).join(''):'<p>Belum ada kelas produk yang lolos seluruh batas. Prioritaskan likuiditas atau tambah horizon.</p>';
     $('resultAllocation').innerHTML=plan.allocation.map(([name,val])=>`<div><span>${esc(name)}</span><b>${val}%</b></div>`).join('');
+    const fvPanel=ensureFutureValuePanel();
+    if(fvPanel)fvPanel.innerHTML=futureValueHtml(plan);
     $('resultNext').textContent=plan.nextAction;
     $('wealth-result').scrollIntoView({behavior:'smooth',block:'start'});
   }
@@ -250,8 +374,7 @@
     doc.setTextColor(95,105,120);doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}),W-M-7,y+9,{align:'right'});
     y+=38;
 
-    doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('RINGKASAN SEKALI LIHAT',M,y);
-    y+=6;
+    doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('RINGKASAN SEKALI LIHAT',M,y);y+=6;
     const cards=[['Tujuan',`${plan.goal.label} • ${plan.years} th`],['Batas Risiko',`${profileNames[plan.riskLimit]} • L${plan.riskLimit}/5`],['Funding',pct(plan.fundingRatio)],['Kebutuhan/Bulan',rupiah(plan.required)]];
     cards.forEach((c,i)=>{const x=M+(i%2)*(C/2+2),yy=y+Math.floor(i/2)*19,w=C/2-2;doc.setFillColor(246,248,250);doc.roundedRect(x,yy,w,15,2,2,'F');doc.setTextColor(110,120,132);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(c[0],x+4,yy+5);doc.setTextColor(30,40,55);doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text(String(c[1]),x+4,yy+11);});
     y+=42;
@@ -266,17 +389,33 @@
     y+=2;
 
     doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('FINANCIAL PLAN',M,y);y+=6;
-    const fin=[['Target masa depan',rupiah(plan.futureTarget)],['Proyeksi dana',rupiah(plan.projected)],['Funding ratio',pct(plan.fundingRatio)],['Setoran saat ini',rupiah(plan.monthly)],['Kebutuhan / bulan',rupiah(plan.required)],['Asumsi',`${plan.returnRate}% return • ${plan.inflation}% inflasi`]];
+    const fin=[['Target masa depan',rupiah(plan.futureTarget)],['Proyeksi dana',rupiah(plan.projected)],['Funding ratio',pct(plan.fundingRatio)],['Setoran saat ini',rupiah(plan.monthly)],['Kebutuhan / bulan',rupiah(plan.required)],['Weighted return',pct(plan.returnRate)]];
     fin.forEach((f,i)=>{const x=M+(i%2)*(C/2+2),yy=y+Math.floor(i/2)*15,w=C/2-2;doc.setDrawColor(225,229,235);doc.roundedRect(x,yy,w,12,2,2,'S');doc.setTextColor(110,120,132);doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.text(f[0],x+3,yy+4);doc.setTextColor(30,40,55);doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(String(f[1]),x+3,yy+9);});
     y+=48;
 
     doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('MODEL ALOKASI EDUKATIF',M,y);y+=6;
     const colCount=plan.allocation.length;
     plan.allocation.forEach(([name,val],i)=>{const x=M+i*(C/colCount);doc.setTextColor(95,105,120);doc.setFontSize(6.3);doc.setFont('helvetica','normal');doc.text(name,x,y,{maxWidth:(C/colCount)-2});doc.setTextColor(30,40,55);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(`${val}%`,x,y+8);});
-    y+=17;
-    doc.setFillColor(252,248,238);doc.roundedRect(M,y,C,20,3,3,'F');doc.setTextColor(173,121,28);doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('NEXT ACTION',M+5,y+6);doc.setTextColor(60,60,60);doc.setFont('helvetica','normal');doc.setFontSize(8);addPdfText(doc,plan.nextAction,M+5,y+12,C-10,4.3);
-    y+=27;
-    doc.setTextColor(120,125,135);doc.setFontSize(6.5);doc.setFont('helvetica','normal');addPdfText(doc,'Disclaimer: hasil bersifat ilustratif dan edukatif, bukan rekomendasi personal. Profil risiko resmi, KYC, suitability, dokumen produk, biaya, pajak, dan kondisi aktual tetap perlu dipertimbangkan sebelum transaksi.',M,y,C,3.5);
+
+    doc.addPage();y=16;
+    doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('FUTURE VALUE PER INSTRUMEN',M,y);y+=5;
+    doc.setFont('helvetica','normal');doc.setTextColor(95,105,120);doc.setFontSize(7.5);doc.text(`${plan.returnMode==='CUSTOM'?'Return custom':'Asumsi standar'} • Weighted average ${pct(plan.returnRate)} • Horizon ${plan.years} tahun`,M,y);y+=8;
+    const summary=[['Dana disetor',rupiah(plan.projection.totalInvested)],['Future value',rupiah(plan.projection.totalFuture)],['Pertumbuhan',rupiah(plan.projection.totalGrowth)]];
+    summary.forEach((s,i)=>{const x=M+i*(C/3+1),w=C/3-2;doc.setFillColor(246,248,250);doc.roundedRect(x,y,w,14,2,2,'F');doc.setTextColor(110,120,132);doc.setFontSize(6);doc.text(s[0],x+3,y+4);doc.setTextColor(30,40,55);doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text(s[1],x+3,y+10);doc.setFont('helvetica','normal');});
+    y+=20;
+    const cols=[M,M+60,M+80,M+102,M+132,M+163];
+    doc.setFillColor(240,243,247);doc.rect(M,y,C,8,'F');doc.setTextColor(90,100,112);doc.setFontSize(6);doc.setFont('helvetica','bold');
+    ['Instrumen','Bobot','Return','Kontrib.','FV','Growth'].forEach((t,i)=>doc.text(t,cols[i],y+5));y+=8;
+    plan.projection.rows.forEach(row=>{
+      doc.setDrawColor(230,233,238);doc.line(M,y+C*0,y+0,W-M,y+0);
+      doc.setFont('helvetica','normal');doc.setTextColor(50,60,72);doc.setFontSize(6.8);doc.text(row.name,cols[0],y+5,{maxWidth:56});
+      doc.text(`${row.weight}%`,cols[1],y+5);doc.text(pct(row.rate),cols[2],y+5);doc.text(signedPct(row.returnContribution),cols[3],y+5);doc.text(rupiah(row.future),cols[4],y+5,{maxWidth:28});doc.text(row.growthShare===null?'—':pct(row.growthShare),cols[5],y+5);
+      y+=10;
+    });
+    y+=4;
+    doc.setTextColor(95,105,120);doc.setFontSize(6.7);y=addPdfText(doc,'Kontribusi return = bobot aset × asumsi return. Kontribusi growth = porsi pertumbuhan rupiah yang berasal dari masing-masing aset.',M,y,C,3.6)+4;
+    doc.setFillColor(252,248,238);doc.roundedRect(M,y,C,20,3,3,'F');doc.setTextColor(173,121,28);doc.setFontSize(7);doc.setFont('helvetica','bold');doc.text('NEXT ACTION',M+5,y+6);doc.setTextColor(60,60,60);doc.setFont('helvetica','normal');doc.setFontSize(8);addPdfText(doc,plan.nextAction,M+5,y+12,C-10,4.3);y+=27;
+    doc.setTextColor(120,125,135);doc.setFontSize(6.5);doc.setFont('helvetica','normal');addPdfText(doc,'Disclaimer: hasil bersifat ilustratif dan edukatif, bukan rekomendasi personal. Return custom maupun standar bukan jaminan hasil. Profil risiko resmi, KYC, suitability, dokumen produk, biaya, pajak, dan kondisi aktual tetap perlu dipertimbangkan sebelum transaksi.',M,y,C,3.5);
     doc.save(`Analisaku-Wealth-Plan-${selectedGoal.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`);
   }
 
@@ -300,6 +439,7 @@
   }
 
   function bind(){
+    ensureReturnControls();
     bindGoal();
     $('wmBuildPlan')?.addEventListener('click',()=>{const plan=buildPlan();if(plan)render(plan);});
     $('wmDownloadPdf')?.addEventListener('click',downloadPdf);
