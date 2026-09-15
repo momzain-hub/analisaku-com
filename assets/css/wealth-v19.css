@@ -1,0 +1,91 @@
+/* Wealth v1.9 — polished landing, questionnaire, and mode transition */
+:root{--wm19-accent:#f3c95c;--wm19-teal:#42c7c9;--wm19-green:#6fcf9d}
+
+/* Landing: visually stop at Step 1 */
+body[data-wealth-landing="true"] .wealth-hero .wm-flowline span:not(:first-child),
+body[data-wealth-landing="true"] .wm-progress,
+body[data-wealth-landing="true"] #step-2,
+body[data-wealth-landing="true"] #step-3,
+body[data-wealth-landing="true"] #step-4,
+body[data-wealth-landing="true"] #wealth-result{display:none!important}
+body[data-wealth-landing="true"] #step-1{margin-top:0}
+body[data-wealth-landing="true"] #step-1>.wm-step-head{padding-bottom:18px}
+body[data-wealth-landing="true"] #goalChoices,
+body[data-wealth-landing="true"] #step-1 .wm-fields,
+body[data-wealth-landing="true"] #wmReturnAssumptions{display:none!important}
+
+/* Main mode selector */
+body[data-wealth-landing="true"] .wm-plan-mode{padding:22px;border-radius:24px;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 5%,var(--surface2)),var(--surface));box-shadow:0 24px 70px rgba(0,0,0,.16)}
+body[data-wealth-landing="true"] .wm-plan-mode-head{max-width:820px;margin-bottom:4px}
+body[data-wealth-landing="true"] .wm-plan-mode-head small{font-size:9px;letter-spacing:1.2px}
+body[data-wealth-landing="true"] .wm-plan-mode-head strong{font-size:clamp(22px,3vw,34px);letter-spacing:-.8px;margin-top:8px}
+body[data-wealth-landing="true"] .wm-plan-mode-head p{font-size:11px;line-height:1.7;margin-top:8px}
+body[data-wealth-landing="true"] .wm-plan-mode-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button{position:relative;overflow:hidden;min-height:215px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;border-radius:20px;padding:18px;background:linear-gradient(160deg,var(--surface3),color-mix(in srgb,var(--surface) 84%,transparent));transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.75}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:nth-child(2)::before{background:linear-gradient(90deg,var(--wm19-teal),transparent)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:nth-child(3)::before{background:linear-gradient(90deg,var(--wm19-green),transparent)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.18);border-color:color-mix(in srgb,var(--gold) 48%,var(--line))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button.is-opening{transform:translateY(-2px) scale(.995);border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 32%,transparent),0 16px 36px rgba(0,0,0,.18)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button>span{width:38px;height:38px;border-radius:12px;font-size:10px}
+.wm-mode-card-copy{display:grid;gap:8px;flex:1}
+.wm-mode-card-copy strong{font-size:18px!important;line-height:1.2!important;letter-spacing:-.35px}
+.wm-mode-card-copy small{font-size:9.5px!important;line-height:1.55!important;color:var(--muted)!important}
+.wm-mode-benefits{display:grid;gap:5px;margin-top:4px}
+.wm-mode-benefits em{font-style:normal;font-size:8.4px;line-height:1.4;color:var(--muted2);padding-left:14px;position:relative}
+.wm-mode-benefits em::before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:900}
+.wm-mode-open{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:8.8px;font-weight:900;color:var(--text)}
+.wm-mode-open b{font-size:13px;color:var(--gold)}
+
+/* Dedicated planner */
+body[data-wealth-standalone] .wm-plan-mode{border-radius:18px;padding:15px 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 4%,var(--surface2)),var(--surface))}
+body[data-wealth-standalone] .wm-plan-mode-head strong{font-size:18px;margin-top:5px}
+body[data-wealth-standalone] .wm-plan-mode-head p{font-size:9.5px;line-height:1.55}
+body[data-wealth-standalone] .wm-mode-back{font-size:8px;padding:8px 11px!important}
+body[data-wealth-standalone] .wm-progress{position:sticky;top:70px;z-index:14;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);box-shadow:0 9px 25px rgba(0,0,0,.08)}
+
+/* Questionnaire */
+.wm-mode-q-intro{padding:18px;border-radius:19px}
+.wm-mode-q-intro>span{font-size:7.5px;letter-spacing:.8px;padding:6px 9px}
+.wm-mode-q-intro strong{font-size:17px;margin-top:9px;letter-spacing:-.25px}
+.wm-mode-q-intro p{font-size:9.3px;line-height:1.6;max-width:900px}
+.wm-q-pillars{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.wm-q-pillars em{font-style:normal;border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:color-mix(in srgb,var(--surface) 80%,transparent);font-size:7px;font-weight:800;color:var(--muted2)}
+.wm-mode-q-grid{gap:14px}
+.wm-mode-q-card{border-radius:18px;padding:16px;grid-template-columns:38px 1fr;gap:13px;background:linear-gradient(155deg,var(--surface3),color-mix(in srgb,var(--surface) 75%,transparent));box-shadow:0 10px 26px rgba(0,0,0,.06)}
+.wm-mode-q-no{width:38px;height:38px;border-radius:12px;font-size:9px}
+.wm-mode-q-body>small{font-size:7.3px;letter-spacing:.7px}
+.wm-mode-q-body h3{font-size:14px;letter-spacing:-.15px;margin-top:5px}
+.wm-mode-q-body p{font-size:8.6px;line-height:1.55;margin:6px 0 12px}
+.wm-mode-q-options{grid-template-columns:1fr 1fr;gap:8px}
+.wm-mode-q-options label{min-height:48px;align-items:center;border-radius:12px;padding:10px 11px;background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.wm-mode-q-options label:has(input:checked){box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 26%,transparent)}
+.wm-mode-q-options input{width:15px;height:15px;margin-top:0}
+.wm-mode-q-options span{font-size:8.7px;line-height:1.42}
+
+/* Transition feedback before opening new tab */
+.wm-mode-transition{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(5,13,22,.54);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .18s ease}
+.wm-mode-transition.show{opacity:1;pointer-events:auto}
+.wm-mode-transition-card{width:min(420px,calc(100vw - 36px));border:1px solid color-mix(in srgb,var(--gold) 36%,var(--line));border-radius:20px;padding:22px;background:var(--surface2);box-shadow:0 26px 80px rgba(0,0,0,.32);text-align:center}
+.wm-mode-transition-card i{display:block;width:34px;height:34px;margin:0 auto 12px;border:3px solid color-mix(in srgb,var(--gold) 24%,transparent);border-top-color:var(--gold);border-radius:50%;animation:wm19spin .75s linear infinite}
+.wm-mode-transition-card small{display:block;color:var(--gold);font-weight:900;font-size:8px;letter-spacing:.9px}
+.wm-mode-transition-card strong{display:block;margin-top:6px;font-size:18px}
+.wm-mode-transition-card span{display:block;margin-top:6px;font-size:9px;line-height:1.5;color:var(--muted)}
+@keyframes wm19spin{to{transform:rotate(360deg)}}
+
+/* More polished result cards */
+#wealth-result .wm-result-card{box-shadow:0 14px 36px rgba(0,0,0,.07)}
+#wealth-result .wm-next{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 7%,var(--surface3)),var(--surface3))}
+
+@media(max-width:900px){
+  body[data-wealth-landing="true"] .wm-plan-mode-grid{grid-template-columns:1fr}
+  body[data-wealth-landing="true"] .wm-plan-mode-grid button{min-height:auto}
+  .wm-mode-q-options{grid-template-columns:1fr}
+  body[data-wealth-standalone] .wm-progress{top:58px}
+}
+@media(max-width:560px){
+  body[data-wealth-landing="true"] .wm-plan-mode{padding:16px}
+  body[data-wealth-landing="true"] .wm-plan-mode-head strong{font-size:22px}
+  .wm-mode-q-card{grid-template-columns:1fr;padding:13px}
+  .wm-mode-q-no{width:30px;height:30px}
+}
