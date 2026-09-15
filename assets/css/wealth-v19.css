@@ -21,21 +21,41 @@ body[data-wealth-landing="true"] .wm-plan-mode-head small{font-size:9px;letter-s
 body[data-wealth-landing="true"] .wm-plan-mode-head strong{font-size:clamp(22px,3vw,34px);letter-spacing:-.8px;margin-top:8px}
 body[data-wealth-landing="true"] .wm-plan-mode-head p{font-size:11px;line-height:1.7;margin-top:8px}
 body[data-wealth-landing="true"] .wm-plan-mode-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button{position:relative;overflow:hidden;min-height:215px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;border-radius:20px;padding:18px;background:linear-gradient(160deg,var(--surface3),color-mix(in srgb,var(--surface) 84%,transparent));transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.75}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button:nth-child(2)::before{background:linear-gradient(90deg,var(--wm19-teal),transparent)}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button:nth-child(3)::before{background:linear-gradient(90deg,var(--wm19-green),transparent)}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.18);border-color:color-mix(in srgb,var(--gold) 48%,var(--line))}
-body[data-wealth-landing="true"] .wm-plan-mode-grid button.is-opening{transform:translateY(-2px) scale(.995);border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 32%,transparent),0 16px 36px rgba(0,0,0,.18)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button{position:relative;overflow:hidden;min-height:215px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;border-radius:20px;padding:18px;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button::before{content:"";position:absolute;inset:0 0 auto;height:3px;opacity:.9}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="goal"]{background:linear-gradient(155deg,color-mix(in srgb,var(--wm19-accent) 11%,var(--surface3)),color-mix(in srgb,var(--wm19-accent) 3%,var(--surface)));border-color:color-mix(in srgb,var(--wm19-accent) 30%,var(--line))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="goal"]::before{background:linear-gradient(90deg,var(--wm19-accent),color-mix(in srgb,var(--wm19-accent) 25%,transparent),transparent)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="lump"]{background:linear-gradient(155deg,color-mix(in srgb,var(--wm19-teal) 12%,var(--surface3)),color-mix(in srgb,var(--wm19-teal) 3%,var(--surface)));border-color:color-mix(in srgb,var(--wm19-teal) 30%,var(--line))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="lump"]::before{background:linear-gradient(90deg,var(--wm19-teal),color-mix(in srgb,var(--wm19-teal) 25%,transparent),transparent)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="buffer"]{background:linear-gradient(155deg,color-mix(in srgb,var(--wm19-green) 12%,var(--surface3)),color-mix(in srgb,var(--wm19-green) 3%,var(--surface)));border-color:color-mix(in srgb,var(--wm19-green) 30%,var(--line))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="buffer"]::before{background:linear-gradient(90deg,var(--wm19-green),color-mix(in srgb,var(--wm19-green) 25%,transparent),transparent)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.18)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="goal"]:hover{border-color:color-mix(in srgb,var(--wm19-accent) 58%,var(--line));box-shadow:0 18px 44px color-mix(in srgb,var(--wm19-accent) 10%,rgba(0,0,0,.18))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="lump"]:hover{border-color:color-mix(in srgb,var(--wm19-teal) 58%,var(--line));box-shadow:0 18px 44px color-mix(in srgb,var(--wm19-teal) 10%,rgba(0,0,0,.18))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="buffer"]:hover{border-color:color-mix(in srgb,var(--wm19-green) 58%,var(--line));box-shadow:0 18px 44px color-mix(in srgb,var(--wm19-green) 10%,rgba(0,0,0,.18))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button.is-opening{transform:translateY(-2px) scale(.995);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 32%,transparent),0 16px 36px rgba(0,0,0,.18)}
 body[data-wealth-landing="true"] .wm-plan-mode-grid button>span{width:38px;height:38px;border-radius:12px;font-size:10px}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="goal"]>span{color:var(--wm19-accent);border-color:color-mix(in srgb,var(--wm19-accent) 28%,var(--line));background:color-mix(in srgb,var(--wm19-accent) 8%,var(--surface))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="lump"]>span{color:var(--wm19-teal);border-color:color-mix(in srgb,var(--wm19-teal) 28%,var(--line));background:color-mix(in srgb,var(--wm19-teal) 8%,var(--surface))}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button[data-plan-mode="buffer"]>span{color:var(--wm19-green);border-color:color-mix(in srgb,var(--wm19-green) 28%,var(--line));background:color-mix(in srgb,var(--wm19-green) 8%,var(--surface))}
 .wm-mode-card-copy{display:grid;gap:8px;flex:1}
 .wm-mode-card-copy strong{font-size:18px!important;line-height:1.2!important;letter-spacing:-.35px}
 .wm-mode-card-copy small{font-size:9.5px!important;line-height:1.55!important;color:var(--muted)!important}
 .wm-mode-benefits{display:grid;gap:5px;margin-top:4px}
 .wm-mode-benefits em{font-style:normal;font-size:8.4px;line-height:1.4;color:var(--muted2);padding-left:14px;position:relative}
 .wm-mode-benefits em::before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:900}
-.wm-mode-open{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid var(--line);font-size:8.8px;font-weight:900;color:var(--text)}
-.wm-mode-open b{font-size:13px;color:var(--gold)}
+body[data-wealth-landing="true"] button[data-plan-mode="lump"] .wm-mode-benefits em::before{color:var(--wm19-teal)}
+body[data-wealth-landing="true"] button[data-plan-mode="buffer"] .wm-mode-benefits em::before{color:var(--wm19-green)}
+.wm-mode-open{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:auto;border:1px solid transparent;border-radius:12px;padding:11px 14px;font-size:9px;font-weight:950;letter-spacing:.1px;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
+.wm-mode-open b{font-size:13px}
+body[data-wealth-landing="true"] button[data-plan-mode="goal"] .wm-mode-open{background:var(--wm19-accent);color:#17120a;border-color:color-mix(in srgb,var(--wm19-accent) 80%,#fff);box-shadow:0 8px 18px color-mix(in srgb,var(--wm19-accent) 14%,transparent)}
+body[data-wealth-landing="true"] button[data-plan-mode="goal"] .wm-mode-open b{color:#17120a}
+body[data-wealth-landing="true"] button[data-plan-mode="lump"] .wm-mode-open{background:color-mix(in srgb,var(--wm19-teal) 88%,#fff);color:#051719;border-color:color-mix(in srgb,var(--wm19-teal) 72%,#fff);box-shadow:0 8px 18px color-mix(in srgb,var(--wm19-teal) 14%,transparent)}
+body[data-wealth-landing="true"] button[data-plan-mode="lump"] .wm-mode-open b{color:#051719}
+body[data-wealth-landing="true"] button[data-plan-mode="buffer"] .wm-mode-open{background:color-mix(in srgb,var(--wm19-green) 90%,#fff);color:#07170f;border-color:color-mix(in srgb,var(--wm19-green) 72%,#fff);box-shadow:0 8px 18px color-mix(in srgb,var(--wm19-green) 14%,transparent)}
+body[data-wealth-landing="true"] button[data-plan-mode="buffer"] .wm-mode-open b{color:#07170f}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:hover .wm-mode-open{transform:translateY(-1px);filter:brightness(1.04)}
+body[data-wealth-landing="true"] .wm-plan-mode-grid button:active .wm-mode-open{transform:translateY(0) scale(.985)}
 
 /* Dedicated planner */
 body[data-wealth-standalone] .wm-plan-mode{border-radius:18px;padding:15px 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 4%,var(--surface2)),var(--surface))}
@@ -88,4 +108,5 @@ body[data-wealth-standalone] .wm-progress{position:sticky;top:70px;z-index:14;ba
   body[data-wealth-landing="true"] .wm-plan-mode-head strong{font-size:22px}
   .wm-mode-q-card{grid-template-columns:1fr;padding:13px}
   .wm-mode-q-no{width:30px;height:30px}
+  .wm-mode-open{padding:12px 14px;font-size:9.3px}
 }
