@@ -1,72 +1,15 @@
 {
-  "current": "1.8",
+  "current": "1.9",
   "versions": {
-    "1.0": {
-      "baseline_commit": "2d8877882ed67c525b72dd57873e8667987dfb11",
-      "label": "Per-asset future value and yearly market-value breakdown",
-      "notes": "Baseline before effective return percentages were added to yearly projections. Use this commit as the rollback reference for Version 1.0."
-    },
-    "1.1": {
-      "feature_commit": "64c71b3eb3653f4fd9eba3cb7e351f112034c870",
-      "rollback_state_commit": "d0203d2ad9e3d5d3013c7aa175857b79e11b64d9",
-      "label": "Monthly-contribution effective return percentages",
-      "notes": "Adds effective cumulative return percentages against contributed capital for total portfolio and each asset, while retaining monthly contribution compounding. Adds visible ENGINE v1.1 badge."
-    },
-    "1.2": {
-      "feature_commit": "35119488aab1c9e35eaa80e1532c1edb8a19e8e0",
-      "equity_engine_commit": "efeed4e3a8f2055a657d7e82c99425716522ede8",
-      "rollback_to": "1.1",
-      "label": "Equity Sleeve stock-style allocation",
-      "notes": "Adds stock-style selection inside the system-defined equity allocation: Stabil, Balanced, Growth, Agresif, and Custom. Splits the equity sleeve into Core/Blue Chip, Dividend/Income, Growth/Second Liner, and Tactical/Trading while keeping total portfolio equity exposure unchanged. Custom allocation must total 100%."
-    },
-    "1.3": {
-      "feature_commit": "d87d518e1886abf0b73ef214d81c1ca83d97991e",
-      "planning_mode_commit": "3d70fce8f575aed9ef7bf28ae6f20facf10614e4",
-      "rollback_to": "1.2",
-      "label": "Three starting-capital planning modes",
-      "notes": "Adds three connected starting modes: Goal / monthly accumulation, Lump Sum for clients who already have investable cash, and Investor-Trader Cash Buffer where a chosen percentage remains liquid and only the remainder is allocated to investment assets. Also clarifies goal-mode result labels as target, projected value, target gap, and required monthly contribution."
-    },
-    "1.4": {
-      "feature_commit": "b43f3cf3b0b7b5dca6e283f6217cf107c6d22aff",
-      "questionnaire_engine_commit": "18a81a8ba81a15fd86d250287bdb5df1f7562d49",
-      "questionnaire_style_commit": "7b93b4c524a35cef1533ab8e5b3e4033da1b355e",
-      "required_answers_commit": "2c7142d9598b79781d690a889a7a49d078952bed",
-      "rollback_to": "1.3",
-      "label": "Separate mode-specific Wealth questionnaires",
-      "notes": "Each planning mode now has its own KAPAN, MAMPU, and NYAMAN questions instead of reusing one generic questionnaire. Goal mode focuses on deadline flexibility and contribution capacity; Lump Sum focuses on liquidity need, capital dependency, concentration, and lump-sum drawdown; Investor-Trader Buffer focuses on core horizon, buffer usage, separation of emergency funds, dependence on trading profits, capital concentration, maximum drawdown, and active-market experience. Answers must be selected explicitly and still map into the same suitability guardrails so outputs remain connected to the allocation and projection engine."
-    },
-    "1.5": {
-      "feature_commit": "96f67099fcdb06cf9c9ad1c4fbd3870539e90320",
-      "copy_layer_commit": "80015b005cac16822f8398ab50d3b8d302da2f02",
-      "loader_commit": "137057f3babd1b9804d6f40ab9dace4022c2ed74",
-      "rollback_to": "1.4",
-      "label": "Customer-facing Wealth language",
-      "notes": "Rewrites the Wealth journey for client-facing use. Removes internal implementation language such as 'tidak perlu mengisi profil risiko', Product Fit jargon, machine/engine wording, and technical workflow language from prominent customer-facing sections. Uses clearer Indonesian labels for profile, product choices, portfolio composition, projections, equity sleeve, and disclaimers while preserving the v1.4 calculation logic."
-    },
-    "1.6": {
-      "route_init_commit": "a043357f2a7f8795476fd332c9dd1f3b568057ca",
-      "navigation_commit": "12c10b5080298278321b85a0c4d908c3f418a9e0",
-      "buffer_logic_commit": "38d351852faa989fbce368cac4a4be415b06bcfa",
-      "buffer_style_commit": "3fcd55c67362f58a72d7aa96ae810010fe4fb1a9",
-      "loader_commit": "753c98c470c7ec7e9cd55fd56e5a11d1fa201334",
-      "entry_commit": "ebd36f1b0d850b4e680e746364d576671dd905d2",
-      "rollback_to": "1.5",
-      "label": "Separated Wealth planners with dedicated Cash Buffer logic",
-      "notes": "Separates Kejar Target, Dana Sudah Ada, and Investor-Trader Cash Buffer into dedicated planner tabs/URLs. Goal mode retains monthly accumulation logic, Capital mode defaults to lump-sum logic, and Buffer mode no longer shows generic mixed-asset or monthly-contribution yearly projections. Cash Buffer is calculated separately using RDPU and RDPT according to liquidity needs, while active investment/trading capital remains separate and is not assigned an automatic fixed return. Buffer PDF output is also dedicated to the buffer structure."
-    },
-    "1.7": {
-      "navigation_fix_commit": "4f90f8ca2c68a4526415fcf943812d3562935611",
-      "loader_commit": "73ae795143d8011b120dace3f786710f15be2879",
-      "rollback_to": "1.6",
-      "label": "Single-page mode selection without repeated navigation",
-      "notes": "Removes the popup/new-tab behavior that made users select a Wealth mode twice. Users now choose Kejar Target, Dana Sudah Ada, or Cash Buffer once and immediately continue on the same page. The selected mode remains active for the questionnaire and result logic; Cash Buffer keeps its dedicated RDPU/RDPT result methodology."
-    },
-    "1.8": {
-      "navigation_commit": "9d61c941e172fe43f180d8d180a2254a51f5d380",
-      "loader_commit": "924a4f2421820f3b5ca93e408f6d1ba9f72b3002",
-      "rollback_to": "1.7",
-      "label": "Landing-only mode selection with dedicated selected-mode tabs",
-      "notes": "The main Wealth page now stops at step 1 and only asks the client to choose Kejar Target, Dana Sudah Ada, or Investor/Trader Cash Buffer. Clicking a mode opens a new tab directly at wealth.html?mode=<selected>, with that mode already active. The dedicated planner hides the three-mode selector, keeps only the selected-mode summary, and continues with mode-specific inputs, questionnaire, calculations, and results."
-    }
+    "1.0": {"baseline_commit":"2d8877882ed67c525b72dd57873e8667987dfb11","label":"Per-asset future value and yearly market-value breakdown","notes":"Baseline before effective return percentages were added to yearly projections. Use this commit as the rollback reference for Version 1.0."},
+    "1.1": {"feature_commit":"64c71b3eb3653f4fd9eba3cb7e351f112034c870","rollback_state_commit":"d0203d2ad9e3d5d3013c7aa175857b79e11b64d9","label":"Monthly-contribution effective return percentages","notes":"Adds effective cumulative return percentages against contributed capital for total portfolio and each asset, while retaining monthly contribution compounding."},
+    "1.2": {"feature_commit":"35119488aab1c9e35eaa80e1532c1edb8a19e8e0","equity_engine_commit":"efeed4e3a8f2055a657d7e82c99425716522ede8","rollback_to":"1.1","label":"Equity Sleeve stock-style allocation","notes":"Adds stock-style selection inside the system-defined equity allocation while keeping total portfolio equity exposure unchanged."},
+    "1.3": {"feature_commit":"d87d518e1886abf0b73ef214d81c1ca83d97991e","planning_mode_commit":"3d70fce8f575aed9ef7bf28ae6f20facf10614e4","rollback_to":"1.2","label":"Three starting-capital planning modes","notes":"Adds Goal, Lump Sum, and Investor-Trader Cash Buffer starting modes."},
+    "1.4": {"feature_commit":"b43f3cf3b0b7b5dca6e283f6217cf107c6d22aff","questionnaire_engine_commit":"18a81a8ba81a15fd86d250287bdb5df1f7562d49","questionnaire_style_commit":"7b93b4c524a35cef1533ab8e5b3e4033da1b355e","required_answers_commit":"2c7142d9598b79781d690a889a7a49d078952bed","rollback_to":"1.3","label":"Separate mode-specific Wealth questionnaires","notes":"Each planning mode receives its own questionnaire and still maps into the same suitability guardrails."},
+    "1.5": {"feature_commit":"96f67099fcdb06cf9c9ad1c4fbd3870539e90320","copy_layer_commit":"80015b005cac16822f8398ab50d3b8d302da2f02","loader_commit":"137057f3babd1b9804d6f40ab9dace4022c2ed74","rollback_to":"1.4","label":"Customer-facing Wealth language","notes":"Rewrites the Wealth journey for client-facing use."},
+    "1.6": {"route_init_commit":"a043357f2a7f8795476fd332c9dd1f3b568057ca","navigation_commit":"12c10b5080298278321b85a0c4d908c3f418a9e0","buffer_logic_commit":"38d351852faa989fbce368cac4a4be415b06bcfa","buffer_style_commit":"3fcd55c67362f58a72d7aa96ae810010fe4fb1a9","loader_commit":"753c98c470c7ec7e9cd55fd56e5a11d1fa201334","entry_commit":"ebd36f1b0d850b4e680e746364d576671dd905d2","rollback_to":"1.5","label":"Separated Wealth planners with dedicated Cash Buffer logic","notes":"Cash Buffer receives dedicated RDPU/RDPT logic and active capital remains separate."},
+    "1.7": {"navigation_fix_commit":"4f90f8ca2c68a4526415fcf943812d3562935611","loader_commit":"73ae795143d8011b120dace3f786710f15be2879","rollback_to":"1.6","label":"Single-page mode selection without repeated navigation","notes":"Users choose a mode once and continue on the same page."},
+    "1.8": {"navigation_commit":"9d61c941e172fe43f180d8d180a2254a51f5d380","loader_commit":"924a4f2421820f3b5ca93e408f6d1ba9f72b3002","rollback_to":"1.7","label":"Landing-only mode selection with dedicated selected-mode tabs","notes":"The main Wealth page stops at Step 1. Clicking a mode opens a dedicated planner tab with the selected mode already active."},
+    "1.9": {"questionnaire_commit":"828b8f15baf6a426598334b507a5e742022e7f69","ux_style_commit":"b5702060a9aa72b2d720cc9129542f3e197d74e9","navigation_commit":"33890036d05ac5ae561a662af13b672f702f5915","copy_commit":"f419afbbc8f25ef25f69f6819e9c810a98b0894c","loader_commit":"69bb32e340240b8e1c7276b469a8d6147ce96bf0","rollback_to":"1.8","label":"Professional brokerage-oriented Wealth experience","notes":"Refreshes customer-facing language and visual hierarchy, adds richer mode cards and a smoother new-tab loading transition, and updates all three questionnaires around investment objective, time horizon, liquidity, financial capacity, concentration, market experience, and risk tolerance. Investor/Trader mode additionally asks about cash-flow dependence, loss limits, and brokerage/leverage knowledge without automatically recommending leverage products."}
   }
 }
