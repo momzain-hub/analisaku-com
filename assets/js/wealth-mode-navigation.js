@@ -6,7 +6,12 @@
   let selectedThisVisit=Boolean(route);
 
   function currentMode(){
-    return window.ANALISAKU_WEALTH_MODE_API?.getState?.().mode || window.ANALISAKU_WEALTH_MODE?.mode || route || 'goal';
+    return window.ANALISAKU_WEALTH_MODE_API?.getState?.().mode || window.ANALISAKU_WEALTH_MODE?.mode || window.ANALISAKU_WEALTH_ROUTE?.mode || route || 'goal';
+  }
+
+  function setActiveRoute(mode){
+    window.ANALISAKU_WEALTH_ROUTE={version:VERSION,mode,standalone:false,samePage:true};
+    document.documentElement.dataset.wealthRoute=mode;
   }
 
   function patchDynamicFields(mode){
@@ -44,9 +49,7 @@
     if(fields)fields.hidden=!show;
     if(returns)returns.hidden=!show;
     if(progress)progress.hidden=!show;
-    ['step-2','step-3','step-4','wealth-result'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.hidden=!show;
-    });
+    ['step-2','step-3','step-4','wealth-result'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=!show;});
   }
 
   function patchSelector(){
@@ -84,6 +87,7 @@
       return;
     }
 
+    setActiveRoute(mode);
     setPlannerVisibility(true);
     patchDynamicFields(mode);
     buttons.forEach(btn=>btn.classList.toggle('active',btn.dataset.planMode===mode));
@@ -118,8 +122,8 @@
   document.addEventListener('click',event=>{
     const btn=event.target.closest('[data-plan-mode]');
     if(!btn)return;
-    // Handler asli wealth-planning-mode tetap menyimpan pilihan. Kita hanya membuka alurnya di halaman yang sama.
     selectedThisVisit=true;
+    setActiveRoute(btn.dataset.planMode);
     setTimeout(()=>{
       patchSelector();
       const step2=document.getElementById('step-2');
@@ -136,6 +140,7 @@
   observer.observe(document.documentElement,{childList:true,subtree:true});
 
   function init(){
+    if(route)setActiveRoute(route);
     patchSelector();
     window.ANALISAKU_WEALTH_NAV={version:VERSION,mode:currentMode};
   }
