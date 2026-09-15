@@ -1,4 +1,4 @@
-/* Analisaku Wealth v5 bootstrap */
+/* Analisaku Wealth v6 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -33,6 +33,7 @@
   async function init(){
     loadCss(url('../css/wealth-v4.css?v=20260915-1815'),'wealthV4');
     loadCss(url('../css/wealth-products.css?v=20260915-2045'),'wealthProducts');
+    loadCss(url('../css/wealth-future-value.css?v=20260915-2145'),'wealthFutureValue');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -47,9 +48,9 @@
     }
 
     try{
-      await loadScript(url('wealth-unified.js?v=20260915-2115'));
+      await loadScript(url('wealth-unified.js?v=20260915-2145'));
     }catch(error){
-      console.error('Wealth v5 gagal dimuat',error);
+      console.error('Wealth v6 gagal dimuat',error);
     }
   }
 
