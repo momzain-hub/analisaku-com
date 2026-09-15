@@ -35,7 +35,6 @@
       try{child.opener=null;}catch(_){ }
       setTimeout(()=>{try{child.location.replace(target);}catch(_){child.location.href=target;}},140);
     }else{
-      // Fallback bila browser memblokir tab baru.
       location.href=target;
     }
     setTimeout(()=>btn?.classList.remove('is-opening'),700);
@@ -87,7 +86,10 @@
       btn.classList.remove('active');
       btn.title=`Buka ${c.title} di tab baru`;
       btn.setAttribute('aria-label',`${c.title}. Buka planner di tab baru.`);
-      btn.innerHTML=`<span>${c.no}</span><div class="wm-mode-card-copy"><strong>${c.title}</strong><small>${c.desc}</small><div class="wm-mode-benefits">${c.benefits.map(x=>`<em>${x}</em>`).join('')}</div><div class="wm-mode-open">Buka planner khusus <b>↗</b></div></div>`;
+      if(btn.dataset.v19Card!==mode){
+        btn.dataset.v19Card=mode;
+        btn.innerHTML=`<span>${c.no}</span><div class="wm-mode-card-copy"><strong>${c.title}</strong><small>${c.desc}</small><div class="wm-mode-benefits">${c.benefits.map(x=>`<em>${x}</em>`).join('')}</div><div class="wm-mode-open">Buka planner khusus <b>↗</b></div></div>`;
+      }
     });
     const buffer=document.getElementById('wmBufferSetting');if(buffer)buffer.hidden=true;
     const step1=document.getElementById('step-1');
@@ -147,7 +149,6 @@
       if(mode==='buffer'){if(h1)h1.innerHTML='Jaga likuiditas, kelola <span>modal aktif.</span>';if(p)p.textContent='Planner investor/trader yang memisahkan cash buffer dari modal aktif agar fungsi keduanya tidak tercampur.';}
     }
 
-    // Product education cukup dibaca di landing; planner khusus langsung fokus ke proses.
     const products=document.getElementById('wealth-products');if(products)products.hidden=true;
   }
 
