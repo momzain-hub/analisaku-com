@@ -7,6 +7,55 @@
   const esc=value=>clean(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   const rupiahValue=id=>clean($(id)?.textContent)||'—';
 
+  function ensureUi(){
+    qsa('.wealth-flow span').forEach((span,index)=>{
+      span.dataset.step=String(index+1);
+      span.textContent=clean(span.textContent).replace(/^\d+\.\s*/, '');
+    });
+
+    const heroCard=qs('.wealth-hero-card');
+    if(heroCard&&!qs('.wm-engine-points',heroCard)){
+      heroCard.insertAdjacentHTML('beforeend',`
+        <div class="wm-engine-points">
+          <div><b>Goal Based</b><span>Mulai dari tujuan</span></div>
+          <div><b>Suitability</b><span>Risk + horizon + liquidity</span></div>
+          <div><b>PDF Plan</b><span>Ringkasan siap disimpan</span></div>
+        </div>`);
+    }
+
+    const jump=qs('.wealth-jump-inner');
+    if(jump&&!$('downloadWealthPdfMini')){
+      jump.insertAdjacentHTML('beforeend',`<a href="#wealth-plan">Wealth Plan</a><a href="#wealth-plan" class="wealth-download-mini" id="downloadWealthPdfMini">Unduh PDF</a>`);
+    }
+
+    if(!$('wealth-plan')){
+      const methodology=qs('.wm-methodology')?.closest('section');
+      const section=document.createElement('section');
+      section.className='section';
+      section.id='wealth-plan';
+      section.innerHTML=`
+        <div class="container">
+          <div class="wm-section-head">
+            <div><div class="kicker">05 / YOUR WEALTH PLAN</div><h2>Satu ringkasan dari seluruh analisis.</h2></div>
+            <p>Goal, profil risiko, Product Fit, dan proyeksi finansial dirangkum menjadi satu Wealth Plan yang dapat diunduh sebagai PDF.</p>
+          </div>
+          <div class="wealth-plan-shell">
+            <div class="wealth-plan-top">
+              <div><div class="kicker">PERSONAL WEALTH SNAPSHOT</div><h3>Rencana investasi Anda</h3><p>Ringkasan berubah otomatis setiap kali Anda memperbarui goal, profil risiko, Product Fit, atau kalkulator finansial.</p></div>
+              <span class="wealth-plan-status" id="wealthPlanStatus">LENGKAPI ANALISIS</span>
+            </div>
+            <div class="wealth-plan-grid" id="wealthPlanSummary"></div>
+            <div class="wealth-plan-actions">
+              <p>PDF dibuat langsung di browser. Data yang Anda isi pada halaman ini tidak perlu dikirim ke server untuk membuat file.</p>
+              <button type="button" class="wm-download" id="downloadWealthPdf">Unduh Wealth Plan PDF</button>
+            </div>
+          </div>
+        </div>`;
+      if(methodology) methodology.before(section);
+      else qs('main')?.appendChild(section);
+    }
+  }
+
   function activeGoal(){
     const card=qs('.goal-card.active');
     return {
@@ -229,6 +278,7 @@
   }
 
   function bind(){
+    ensureUi();
     qsa('.goal-card').forEach(el=>el.addEventListener('click',()=>setTimeout(renderSummary,30)));
     $('riskForm')?.addEventListener('submit',()=>setTimeout(renderSummary,60));
     $('fitButton')?.addEventListener('click',()=>setTimeout(renderSummary,60));
