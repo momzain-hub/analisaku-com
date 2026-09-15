@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.9.1 bootstrap */
+/* Analisaku Wealth Management v1.9.2 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -24,7 +24,7 @@
     loadCss(url('../css/wealth-planning-mode.css?v=1.3-20260915-2225'),'wealthPlanningMode');
     loadCss(url('../css/wealth-mode-questionnaire.css?v=1.4-20260915-2245'),'wealthModeQuestionnaire');
     loadCss(url('../css/wealth-buffer-result.css?v=1.6-20260915-2315'),'wealthBufferResult');
-    loadCss(url('../css/wealth-v19.css?v=1.9.1-20260916-0055'),'wealthV19');
+    loadCss(url('../css/wealth-v19.css?v=1.9.2-20260916-0110'),'wealthV19');
 
     try{await loadScript(url('wealth-product-intro.js?v=20260915-2115'));}catch(error){console.warn('Informasi produk Wealth belum termuat',error);}
     try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',{crossorigin:'anonymous',referrerpolicy:'no-referrer'});}catch(error){console.warn('Generator PDF belum termuat',error);}
@@ -34,7 +34,7 @@
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
       await loadScript(url('wealth-mode-navigation.js?v=1.9-20260916-0022'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.9-20260916-0015'));
-      await loadScript(url('wealth-questionnaire-required.js?v=1.9-20260916-0018'));
+      await loadScript(url('wealth-questionnaire-required.js?v=1.9.2-20260916-0110'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
@@ -42,11 +42,12 @@
       await loadScript(url('wealth-customer-copy.js?v=1.9-20260916-0022'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
       setTimeout(()=>{
+        window.ANALISAKU_WEALTH_ANSWER_STATE?.restore?.();
         window.ANALISAKU_WEALTH_COPY?.apply?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.9.1';
+        if(badge)badge.textContent='WEALTH v1.9.2';
       },80);
-    }catch(error){console.error('Wealth Management v1.9.1 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.9.2 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
