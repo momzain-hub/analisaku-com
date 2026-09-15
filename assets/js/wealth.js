@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.1 bootstrap */
+/* Analisaku Wealth Management v1.2 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -35,6 +35,7 @@
     loadCss(url('../css/wealth-products.css?v=20260915-2045'),'wealthProducts');
     loadCss(url('../css/wealth-future-value.css?v=20260915-2145'),'wealthFutureValue');
     loadCss(url('../css/wealth-yearly-breakdown.css?v=1.1-20260915-2155'),'wealthYearlyBreakdown');
+    loadCss(url('../css/wealth-equity-sleeve.css?v=1.2-20260915-2205'),'wealthEquitySleeve');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -51,8 +52,9 @@
     try{
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
+      await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
     }catch(error){
-      console.error('Wealth Management v1.1 gagal dimuat',error);
+      console.error('Wealth Management v1.2 gagal dimuat',error);
     }
   }
 
