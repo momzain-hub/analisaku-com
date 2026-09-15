@@ -58,7 +58,7 @@
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
-      await loadScript(url('wealth-customer-copy.js?v=1.5-20260915-2257'));
+      await loadScript(url('wealth-customer-copy.js?v=1.5-20260915-2300'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
       setTimeout(()=>window.ANALISAKU_WEALTH_COPY?.apply?.(),40);
     }catch(error){
