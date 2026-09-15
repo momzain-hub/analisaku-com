@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Wealth Management Analisaku: financial goal planner, profil risiko, product fit, model allocation, dan kalkulator finansial dalam satu alur.">
+  <meta name="theme-color" content="#07111b">
+  <title>Wealth Management | Analisaku.com</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/wealth.css?v=20260915-1345">
+</head>
+<body class="wealth-page">
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">analisaku<span>.com</span></a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html#weekly">Market</a>
+      <a href="technical.html">Technical</a>
+      <a class="active" href="wealth.html">Wealth</a>
+      <a href="tools.html">Tools</a>
+      <a href="edukasi.html">Edukasi</a>
+      <a href="artikel.html">Artikel</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button class="menu-btn" id="menuBtn" aria-label="Buka menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <section class="wealth-hero">
+    <div class="container wealth-hero-grid">
+      <div>
+        <div class="kicker">WEALTH MANAGEMENT</div>
+        <h1>Dari tujuan ke <span>rencana investasi.</span></h1>
+        <p>Susun rencana dengan alur yang lebih lengkap: tentukan tujuan, ukur profil risiko, cek kesesuaian kelas produk, lalu hitung kebutuhan dana dan setoran berkala.</p>
+        <div class="wealth-flow"><span>1. Goal</span><b>→</b><span>2. Risk Profile</span><b>→</b><span>3. Product Fit</span><b>→</b><span>4. Financial Plan</span></div>
+      </div>
+      <aside class="wealth-hero-card">
+        <small>ANALISAKU WEALTH ENGINE</small>
+        <strong>Goal-based planning + suitability</strong>
+        <p>Hasil bersifat edukasi dan indikatif. Tidak menggantikan profil risiko resmi, KYC, suitability assessment, prospektus, atau nasihat dari pihak berizin.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="wealth-jump">
+    <div class="container wealth-jump-inner">
+      <a href="#goal-planner">Goal Planner</a>
+      <a href="#risk-profile">Profil Risiko</a>
+      <a href="#product-fit">Product Fit</a>
+      <a href="#financial-calculator">Financial Calculator</a>
+    </div>
+  </section>
+
+  <section class="section" id="goal-planner">
+    <div class="container">
+      <div class="wm-section-head">
+        <div><div class="kicker">01 / FINANCIAL GOAL</div><h2>Pilih tujuan yang ingin dicapai.</h2></div>
+        <p>Gunakan tujuan sebagai anchor. Horizon, kebutuhan likuiditas, dan nominal target akan ikut menentukan produk yang layak dipertimbangkan.</p>
+      </div>
+
+      <div class="goal-grid" id="goalChoices">
+        <button type="button" class="goal-card active" data-goal="Pendidikan" data-default-years="5"><span>01</span><strong>Dana Pendidikan</strong><small>Sekolah / kuliah anak</small></button>
+        <button type="button" class="goal-card" data-goal="Rumah" data-default-years="7"><span>02</span><strong>DP Rumah / Hunian</strong><small>Rumah pertama / upgrade</small></button>
+        <button type="button" class="goal-card" data-goal="Kendaraan" data-default-years="3"><span>03</span><strong>Beli Kendaraan</strong><small>Mobil / motor</small></button>
+        <button type="button" class="goal-card" data-goal="Dana Darurat" data-default-years="1"><span>04</span><strong>Dana Darurat</strong><small>Likuiditas & proteksi</small></button>
+        <button type="button" class="goal-card" data-goal="Pensiun" data-default-years="15"><span>05</span><strong>Dana Pensiun</strong><small>Tujuan jangka panjang</small></button>
+        <button type="button" class="goal-card" data-goal="Custom" data-default-years="5"><span>06</span><strong>Rencana Kustom</strong><small>Tentukan target sendiri</small></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="risk-profile">
+    <div class="container">
+      <div class="wm-section-head">
+        <div><div class="kicker">02 / RISK PROFILE</div><h2>Profil risiko yang lebih lengkap.</h2></div>
+        <p>Penilaian memisahkan <b>risk tolerance</b> dan <b>capacity for loss</b>, lalu mempertimbangkan tujuan, horizon, likuiditas, kondisi keuangan, serta pengalaman investasi.</p>
+      </div>
+
+      <div class="risk-layout">
+        <form class="risk-form" id="riskForm">
+          <div class="risk-question" data-q="1">
+            <h3>1. Berapa lama dana ini dapat diinvestasikan sebelum kemungkinan besar digunakan?</h3>
+            <label><input type="radio" name="q1" value="1"> Kurang dari 1 tahun</label>
+            <label><input type="radio" name="q1" value="2"> 1–3 tahun</label>
+            <label><input type="radio" name="q1" value="3"> &gt;3–5 tahun</label>
+            <label><input type="radio" name="q1" value="4"> Lebih dari 5 tahun</label>
+          </div>
+
+          <div class="risk-question" data-q="2">
+            <h3>2. Apa tujuan utama dari investasi ini?</h3>
+            <label><input type="radio" name="q2" value="1"> Menjaga nilai dana dan likuiditas</label>
+            <label><input type="radio" name="q2" value="2"> Pendapatan yang relatif stabil</label>
+            <label><input type="radio" name="q2" value="3"> Pertumbuhan seimbang</label>
+            <label><input type="radio" name="q2" value="4"> Pertumbuhan modal jangka panjang</label>
+          </div>
+
+          <div class="risk-question" data-q="3">
+            <h3>3. Jika nilai investasi turun sekitar 10–15% dalam waktu singkat, apa respons Anda?</h3>
+            <label><input type="radio" name="q3" value="1"> Menjual untuk menghentikan kerugian</label>
+            <label><input type="radio" name="q3" value="2"> Mengurangi sebagian posisi</label>
+            <label><input type="radio" name="q3" value="3"> Menahan dan menunggu pemulihan</label>
+            <label><input type="radio" name="q3" value="4"> Menambah secara bertahap jika fundamental/strategi tetap sesuai</label>
+          </div>
+
+          <div class="risk-question" data-q="4">
+            <h3>4. Seberapa besar kebutuhan likuiditas dari dana ini?</h3>
+            <label><input type="radio" name="q4" value="1"> Bisa dibutuhkan sewaktu-waktu</label>
+            <label><input type="radio" name="q4" value="2"> Kemungkinan dibutuhkan dalam 1 tahun</label>
+            <label><input type="radio" name="q4" value="3"> Tidak dibutuhkan setidaknya 1–3 tahun</label>
+            <label><input type="radio" name="q4" value="4"> Tidak dibutuhkan lebih dari 3 tahun</label>
+          </div>
+
+          <div class="risk-question" data-q="5">
+            <h3>5. Berapa porsi aset likuid Anda yang akan ditempatkan untuk tujuan ini?</h3>
+            <label><input type="radio" name="q5" value="4"> Kurang dari 20%</label>
+            <label><input type="radio" name="q5" value="3"> 20–40%</label>
+            <label><input type="radio" name="q5" value="2"> &gt;40–60%</label>
+            <label><input type="radio" name="q5" value="1"> Lebih dari 60%</label>
+          </div>
+
+          <div class="risk-question" data-q="6">
+            <h3>6. Bagaimana kondisi dana darurat Anda saat ini?</h3>
+            <label><input type="radio" name="q6" value="1"> Belum tersedia</label>
+            <label><input type="radio" name="q6" value="2"> Kurang dari 3 bulan pengeluaran</label>
+            <label><input type="radio" name="q6" value="3"> Sekitar 3–6 bulan pengeluaran</label>
+            <label><input type="radio" name="q6" value="4"> Lebih dari 6 bulan pengeluaran</label>
+          </div>
+
+          <div class="risk-question" data-q="7">
+            <h3>7. Seberapa stabil sumber penghasilan dan kemampuan menabung Anda?</h3>
+            <label><input type="radio" name="q7" value="1"> Tidak tetap / sulit menyisihkan dana</label>
+            <label><input type="radio" name="q7" value="2"> Cukup stabil, surplus terbatas</label>
+            <label><input type="radio" name="q7" value="3"> Stabil dan rutin memiliki surplus</label>
+            <label><input type="radio" name="q7" value="4"> Sangat stabil dengan surplus yang kuat</label>
+          </div>
+
+          <div class="risk-question" data-q="8">
+            <h3>8. Produk investasi apa yang pernah Anda gunakan dan pahami?</h3>
+            <label><input type="radio" name="q8" value="1"> Belum pernah / hanya tabungan-deposito</label>
+            <label><input type="radio" name="q8" value="2"> Reksa Dana Pasar Uang / instrumen konservatif</label>
+            <label><input type="radio" name="q8" value="3"> Obligasi / RD Pendapatan Tetap / RD Campuran</label>
+            <label><input type="radio" name="q8" value="4"> Saham / RD Saham dan memahami volatilitas tinggi</label>
+          </div>
+
+          <div class="risk-question" data-q="9">
+            <h3>9. Jika target investasi belum tercapai saat pasar sedang turun, seberapa fleksibel Anda menunda penggunaan dana?</h3>
+            <label><input type="radio" name="q9" value="1"> Tidak bisa ditunda</label>
+            <label><input type="radio" name="q9" value="2"> Bisa ditunda beberapa bulan</label>
+            <label><input type="radio" name="q9" value="3"> Bisa ditunda 1–2 tahun</label>
+            <label><input type="radio" name="q9" value="4"> Sangat fleksibel / &gt;2 tahun</label>
+          </div>
+
+          <button class="wm-primary" type="submit">Hitung Profil Risiko</button>
+        </form>
+
+        <aside class="risk-result" id="riskResult" aria-live="polite">
+          <small>HASIL ANALISIS</small>
+          <h3>Lengkapi 9 pertanyaan</h3>
+          <p>Hasil akan menampilkan profil risiko indikatif, dimensi utama yang memengaruhi skor, model alokasi edukatif, dan batas kelas produk.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="product-fit">
+    <div class="container">
+      <div class="wm-section-head">
+        <div><div class="kicker">03 / PRODUCT FIT</div><h2>Cocokkan kebutuhan dengan kelas produk.</h2></div>
+        <p>Product Fit tidak memilih produk individual. Engine hanya menyaring kelas produk berdasarkan profil risiko, horizon, dan kebutuhan likuiditas.</p>
+      </div>
+
+      <div class="product-fit-grid">
+        <div class="fit-inputs">
+          <div class="field"><label>Horizon tujuan</label><select id="fitHorizon"><option value="1">&lt; 1 tahun</option><option value="2">1–3 tahun</option><option value="3">&gt;3–5 tahun</option><option value="4">&gt;5 tahun</option></select></div>
+          <div class="field"><label>Kebutuhan likuiditas</label><select id="fitLiquidity"><option value="1">Tinggi / sewaktu-waktu</option><option value="2">Cukup tinggi</option><option value="3">Menengah</option><option value="4">Rendah / jangka panjang</option></select></div>
+          <div class="field"><label>Preferensi tujuan</label><select id="fitGoal"><option value="preserve">Preservasi dana</option><option value="income">Pendapatan</option><option value="balanced">Seimbang</option><option value="growth">Pertumbuhan</option></select></div>
+          <div class="field"><label>Preferensi prinsip</label><select id="fitPrinciple"><option value="any">Konvensional / Syariah</option><option value="syariah">Syariah</option><option value="conventional">Konvensional</option></select></div>
+          <button type="button" class="wm-primary" id="fitButton">Analisis Product Fit</button>
+        </div>
+
+        <div class="fit-results" id="fitResults">
+          <div class="fit-empty"><strong>Belum dianalisis.</strong><span>Isi profil risiko terlebih dahulu untuk hasil yang lebih relevan.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="financial-calculator">
+    <div class="container">
+      <div class="wm-section-head">
+        <div><div class="kicker">04 / FINANCIAL CALCULATOR</div><h2>Hitung target, gap, dan kebutuhan bulanan.</h2></div>
+        <p>Kalkulator menggunakan bunga majemuk untuk ilustrasi. Anda dapat memasukkan inflasi agar target masa depan tidak menggunakan nominal hari ini.</p>
+      </div>
+
+      <div class="finance-layout">
+        <div class="finance-form">
+          <div class="field"><label>Target dana hari ini (Rp)</label><input id="fpTarget" type="number" min="0" value="500000000"></div>
+          <div class="field"><label>Dana awal tersedia (Rp)</label><input id="fpInitial" type="number" min="0" value="50000000"></div>
+          <div class="field"><label>Waktu menuju target (tahun)</label><input id="fpYears" type="number" min="0.1" step="0.1" value="5"></div>
+          <div class="field"><label>Ekspektasi return per tahun (%)</label><input id="fpReturn" type="number" step="0.1" value="7"></div>
+          <div class="field"><label>Asumsi inflasi per tahun (%)</label><input id="fpInflation" type="number" step="0.1" value="3"></div>
+          <div class="field"><label>Setoran bulanan yang direncanakan (Rp)</label><input id="fpMonthly" type="number" min="0" value="5000000"></div>
+          <div class="field"><label>Waktu setoran</label><select id="fpTiming"><option value="end">Akhir bulan</option><option value="begin">Awal bulan</option></select></div>
+          <button type="button" class="wm-primary" id="fpCalculate">Hitung Rencana Finansial</button>
+        </div>
+
+        <div class="finance-result" id="financeResult">
+          <div class="finance-result-head"><small>HASIL RENCANA</small><strong id="fpGoalName">Dana Pendidikan</strong></div>
+          <div class="finance-kpis">
+            <div><span>Target masa depan</span><b id="fpFutureTarget">—</b></div>
+            <div><span>Proyeksi dana</span><b id="fpProjected">—</b></div>
+            <div><span>Kebutuhan / bulan</span><b id="fpRequired">—</b></div>
+            <div><span>Funding ratio</span><b id="fpFundingRatio">—</b></div>
+          </div>
+          <div class="finance-bar"><span id="fpBar"></span></div>
+          <div class="finance-note" id="fpNote">Klik hitung untuk melihat proyeksi.</div>
+          <div class="finance-chart-wrap"><canvas id="fpChart" width="760" height="260" aria-label="Grafik proyeksi pertumbuhan investasi"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="wm-methodology">
+        <div><div class="kicker">METHODOLOGY</div><h2>Empat lapis suitability.</h2></div>
+        <div class="method-grid">
+          <article><b>Tujuan & horizon</b><p>Kapan dana akan digunakan dan seberapa penting target harus tercapai tepat waktu.</p></article>
+          <article><b>Risk tolerance</b><p>Respons psikologis terhadap volatilitas dan kerugian sementara.</p></article>
+          <article><b>Capacity for loss</b><p>Kondisi keuangan, dana darurat, stabilitas arus kas, dan konsentrasi aset.</p></article>
+          <article><b>Product fit</b><p>Kelas produk disaring berdasarkan risiko, likuiditas, dan horizon, bukan sekadar return historis.</p></article>
+        </div>
+        <div class="wm-disclaimer">Penting: seluruh hasil di halaman ini bersifat ilustratif dan edukatif. Profil risiko resmi, kesesuaian produk, serta keputusan transaksi tetap harus mengikuti proses KYC/suitability, dokumen produk, dan ketentuan pihak berizin yang relevan.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer-grid">
+    <div><div class="brand">analisaku<span>.com</span></div><p>Market direction, technical analysis, wealth planning, tools investasi, dan edukasi pasar modal.</p></div>
+    <div><b>Explore</b><a href="technical.html">Technical</a><a href="wealth.html">Wealth</a><a href="tools.html">Tools</a></div>
+    <div><b>Analisaku</b><a href="edukasi.html">Edukasi</a><a href="about.html">About</a><a href="about.html#disclaimer">Disclaimer</a></div>
+  </div>
+  <div class="container footer-note">Wealth tools bersifat ilustratif dan bukan rekomendasi personal. © <span id="year"></span> Analisaku.com.</div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/wealth.js?v=20260915-1345"></script>
+</body>
+</html>
