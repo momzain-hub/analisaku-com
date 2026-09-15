@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.4 bootstrap */
+/* Analisaku Wealth Management v1.5 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -42,30 +42,27 @@
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
     }catch(error){
-      console.warn('Product overview Wealth belum termuat',error);
+      console.warn('Informasi produk Wealth belum termuat',error);
     }
 
     try{
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',{crossorigin:'anonymous',referrerpolicy:'no-referrer'});
     }catch(error){
-      console.warn('jsPDF belum termuat',error);
+      console.warn('Generator PDF belum termuat',error);
     }
 
     try{
-      // Mode dipilih lebih dulu, questionnaire v1.4 menyesuaikan pertanyaan, lalu user wajib menjawab eksplisit sebelum core menghitung.
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.4-20260915-2245'));
       await loadScript(url('wealth-questionnaire-required.js?v=1.4-20260915-2250'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
+      await loadScript(url('wealth-customer-copy.js?v=1.5-20260915-2257'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
-      window.ANALISAKU_WEALTH_QUESTIONNAIRE && setTimeout(()=>{
-        const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='ENGINE v1.4';
-      },40);
+      setTimeout(()=>window.ANALISAKU_WEALTH_COPY?.apply?.(),40);
     }catch(error){
-      console.error('Wealth Management v1.4 gagal dimuat',error);
+      console.error('Wealth Management v1.5 gagal dimuat',error);
     }
   }
 
