@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.2 bootstrap */
+/* Analisaku Wealth Management v1.3 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -36,6 +36,7 @@
     loadCss(url('../css/wealth-future-value.css?v=20260915-2145'),'wealthFutureValue');
     loadCss(url('../css/wealth-yearly-breakdown.css?v=1.1-20260915-2155'),'wealthYearlyBreakdown');
     loadCss(url('../css/wealth-equity-sleeve.css?v=1.2-20260915-2205'),'wealthEquitySleeve');
+    loadCss(url('../css/wealth-planning-mode.css?v=1.3-20260915-2225'),'wealthPlanningMode');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -50,11 +51,14 @@
     }
 
     try{
+      // Planning mode dimuat sebelum core agar dapat menyiapkan input sesuai mode sebelum kalkulasi berjalan.
+      await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
+      window.ANALISAKU_WEALTH_MODE_API?.apply?.();
     }catch(error){
-      console.error('Wealth Management v1.2 gagal dimuat',error);
+      console.error('Wealth Management v1.3 gagal dimuat',error);
     }
   }
 
