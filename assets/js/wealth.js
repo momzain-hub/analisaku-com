@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.5 bootstrap */
+/* Analisaku Wealth Management v1.6 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -38,6 +38,7 @@
     loadCss(url('../css/wealth-equity-sleeve.css?v=1.2-20260915-2205'),'wealthEquitySleeve');
     loadCss(url('../css/wealth-planning-mode.css?v=1.3-20260915-2225'),'wealthPlanningMode');
     loadCss(url('../css/wealth-mode-questionnaire.css?v=1.4-20260915-2245'),'wealthModeQuestionnaire');
+    loadCss(url('../css/wealth-buffer-result.css?v=1.6-20260915-2315'),'wealthBufferResult');
 
     try{
       await loadScript(url('wealth-product-intro.js?v=20260915-2115'));
@@ -52,17 +53,24 @@
     }
 
     try{
+      await loadScript(url('wealth-route-init.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
+      await loadScript(url('wealth-mode-navigation.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.4-20260915-2245'));
       await loadScript(url('wealth-questionnaire-required.js?v=1.4-20260915-2250'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
+      await loadScript(url('wealth-buffer-result.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-customer-copy.js?v=1.5-20260915-2300'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
-      setTimeout(()=>window.ANALISAKU_WEALTH_COPY?.apply?.(),40);
+      setTimeout(()=>{
+        window.ANALISAKU_WEALTH_COPY?.apply?.();
+        const badge=document.querySelector('.wm-version-badge');
+        if(badge)badge.textContent='WEALTH v1.6';
+      },70);
     }catch(error){
-      console.error('Wealth Management v1.5 gagal dimuat',error);
+      console.error('Wealth Management v1.6 gagal dimuat',error);
     }
   }
 
