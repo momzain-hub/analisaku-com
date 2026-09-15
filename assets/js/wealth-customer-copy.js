@@ -51,7 +51,7 @@
   function patchHero(){
     text('.wealth-hero .kicker','WEALTH MANAGEMENT');
     const badge=document.querySelector('.wm-version-badge');
-    if(badge&&badge.textContent!==`ENGINE v${VERSION}`)badge.textContent=`ENGINE v${VERSION}`;
+    if(badge&&badge.textContent!==`WEALTH v${VERSION}`)badge.textContent=`WEALTH v${VERSION}`;
   }
 
   function patchProductIntro(){
