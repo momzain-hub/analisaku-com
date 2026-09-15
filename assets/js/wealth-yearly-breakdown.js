@@ -1,8 +1,10 @@
-/* Wealth v7 — per-asset market value + yearly breakdown */
+/* Wealth Management v1.1 — per-asset market value + effective return % + yearly breakdown */
 (function(){
+  const VERSION='1.1';
   const $=id=>document.getElementById(id);
   const rupiah=v=>'Rp '+Math.round(Number(v)||0).toLocaleString('id-ID');
   const pct=v=>`${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1})}%`;
+  const signedPct=v=>`${Number(v)>=0?'+':''}${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2})}%`;
   const signedRp=v=>`${Number(v)>=0?'+':'-'}${rupiah(Math.abs(Number(v)||0))}`;
   const signedPp=v=>`${Number(v)>=0?'+':''}${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2})} pp`;
   const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -51,12 +53,17 @@
     return {custom,values};
   }
 
+  /* Monthly contribution model: each monthly purchase only compounds from its own purchase month. */
   function futureValue(initial,monthly,annualRate,months){
     const safeRate=Math.max(-99.9,Number(annualRate)||0);
     const r=Math.pow(1+safeRate/100,1/12)-1;
     const growth=Math.pow(1+r,months);
     if(Math.abs(r)<1e-12)return initial+(monthly*months);
     return (initial*growth)+(monthly*((growth-1)/r));
+  }
+
+  function effectiveReturnPct(returnRp,invested){
+    return Math.abs(invested)>1e-9?(returnRp/invested)*100:0;
   }
 
   function snapshot(allocation,returns,initial,monthly,months){
@@ -67,17 +74,19 @@
       const invested=assetInitial+(assetMonthly*months);
       const marketValue=futureValue(assetInitial,assetMonthly,rate,months);
       const estimatedReturn=marketValue-invested;
+      const effectiveReturn=effectiveReturnPct(estimatedReturn,invested);
       return {
-        name,weight,rate,assetInitial,assetMonthly,invested,marketValue,estimatedReturn,
+        name,weight,rate,assetInitial,assetMonthly,invested,marketValue,estimatedReturn,effectiveReturn,
         returnContribution:(weight/100)*rate
       };
     });
     const totalInvested=assets.reduce((s,a)=>s+a.invested,0);
     const totalMarket=assets.reduce((s,a)=>s+a.marketValue,0);
     const totalReturn=totalMarket-totalInvested;
+    const totalReturnPct=effectiveReturnPct(totalReturn,totalInvested);
     const weightedReturn=assets.reduce((s,a)=>s+a.returnContribution,0);
     assets.forEach(a=>{a.growthShare=Math.abs(totalReturn)>1e-9?(a.estimatedReturn/totalReturn)*100:null;});
-    return {assets,totalInvested,totalMarket,totalReturn,weightedReturn};
+    return {assets,totalInvested,totalMarket,totalReturn,totalReturnPct,weightedReturn};
   }
 
   function buildTimeline(allocation,returns,initial,monthly,totalMonths){
@@ -94,6 +103,16 @@
     return points;
   }
 
+  function ensureVersionBadge(){
+    if(document.querySelector('.wm-version-badge'))return;
+    const kicker=document.querySelector('.wealth-hero .kicker');
+    if(!kicker)return;
+    const badge=document.createElement('span');
+    badge.className='wm-version-badge';
+    badge.textContent=`ENGINE v${VERSION}`;
+    kicker.appendChild(badge);
+  }
+
   function assetCardHtml(asset){
     const share=asset.growthShare===null?'—':pct(asset.growthShare);
     const growthClass=asset.estimatedReturn>=0?'positive':'negative';
@@ -105,11 +124,11 @@
       <div class="wm-fv-asset-rate"><span>Asumsi return / tahun</span><b>${pct(asset.rate)}</b></div>
       <div class="wm-fv-asset-metrics">
         <div><small>DANA DISETOR</small><b>${rupiah(asset.invested)}</b></div>
-        <div><small>ESTIMASI RETURN</small><b class="${growthClass}">${signedRp(asset.estimatedReturn)}</b></div>
+        <div><small>ESTIMASI RETURN</small><b class="${growthClass}">${signedRp(asset.estimatedReturn)}</b><em class="${growthClass}">${signedPct(asset.effectiveReturn)} dari dana disetor</em></div>
         <div class="market"><small>NILAI PASAR PROYEKSI</small><b>${rupiah(asset.marketValue)}</b></div>
       </div>
       <div class="wm-fv-asset-foot">
-        <span>Kontribusi ke return portofolio <b>${signedPp(asset.returnContribution)}</b></span>
+        <span>Kontribusi ke expected return portofolio <b>${signedPp(asset.returnContribution)}</b></span>
         <span>Kontribusi ke pertumbuhan rupiah <b>${share}</b></span>
       </div>
     </article>`;
@@ -121,29 +140,30 @@
         <div class="wm-year-card-head"><div><small>${point.final?'PERIODE AKHIR':'PROYEKSI TAHUNAN'}</small><strong>${esc(point.label)}</strong></div><b>${rupiah(point.totalMarket)}</b></div>
         <div class="wm-year-card-summary">
           <div><small>DANA DISETOR</small><b>${rupiah(point.totalInvested)}</b></div>
-          <div><small>EST. RETURN</small><b class="${point.totalReturn>=0?'positive':'negative'}">${signedRp(point.totalReturn)}</b></div>
+          <div><small>EST. RETURN</small><b class="${point.totalReturn>=0?'positive':'negative'}">${signedRp(point.totalReturn)}</b><em class="${point.totalReturn>=0?'positive':'negative'}">${signedPct(point.totalReturnPct)} dari dana disetor</em></div>
           <div><small>NILAI PASAR</small><b>${rupiah(point.totalMarket)}</b></div>
         </div>
-        <div class="wm-year-assets">${point.assets.map(a=>`<div><span>${esc(shortName[a.name]||a.name)}</span><b>${rupiah(a.marketValue)}</b><small>${signedRp(a.estimatedReturn)} return</small></div>`).join('')}</div>
+        <div class="wm-year-assets">${point.assets.map(a=>`<div><span>${esc(shortName[a.name]||a.name)}</span><b>${rupiah(a.marketValue)}</b><small>${signedRp(a.estimatedReturn)} return • <strong class="${a.estimatedReturn>=0?'positive':'negative'}">${signedPct(a.effectiveReturn)}</strong></small><small>Asumsi ${pct(a.rate)}/tahun</small></div>`).join('')}</div>
       </article>`).join('')}</div>`;
   }
 
   function yearlyTableHtml(timeline,assets){
     const assetHeads=assets.map(a=>`<th>${esc(shortName[a.name]||a.name)}</th>`).join('');
     const rows=timeline.map(point=>{
-      const assetCells=point.assets.map(a=>`<td><b>${rupiah(a.marketValue)}</b><small>${signedRp(a.estimatedReturn)} return</small></td>`).join('');
+      const assetCells=point.assets.map(a=>`<td><b>${rupiah(a.marketValue)}</b><small>${signedRp(a.estimatedReturn)} • ${signedPct(a.effectiveReturn)}</small><small>Asumsi ${pct(a.rate)}/th</small></td>`).join('');
       return `<tr class="${point.final?'final':''}">
         <td><b>${esc(point.label)}</b>${point.final?'<small>Periode akhir</small>':''}</td>
         <td>${rupiah(point.totalInvested)}</td>
-        <td class="${point.totalReturn>=0?'positive':'negative'}"><b>${signedRp(point.totalReturn)}</b></td>
+        <td class="${point.totalReturn>=0?'positive':'negative'}"><b>${signedRp(point.totalReturn)}</b><small>${signedPct(point.totalReturnPct)} dari dana disetor</small></td>
         <td class="market-value"><b>${rupiah(point.totalMarket)}</b></td>
         ${assetCells}
       </tr>`;
     }).join('');
     return `<section class="wm-yearly-section">
       <div class="wm-yearly-head">
-        <div><small>RINCIAN TAHUNAN</small><h3>Dari tahun pertama sampai akhir.</h3><p>Nilai pasar proyeksi diperbarui setiap tahun berdasarkan setoran kumulatif dan return masing-masing instrumen.</p></div>
+        <div><small>RINCIAN TAHUNAN</small><h3>Dari tahun pertama sampai akhir.</h3><p>Setoran dihitung masuk setiap bulan. Karena dana masuk bertahap, return kumulatif terhadap dana yang sudah disetor tidak otomatis sama dengan asumsi return tahunan.</p></div>
       </div>
+      <div class="wm-yearly-explainer"><b>Contoh:</b> asumsi RDPU 5%/tahun bukan berarti seluruh setoran tahun pertama mendapat 5%. Setoran Januari bekerja lebih lama daripada setoran Desember. Persentase yang tampil pada kartu adalah <b>estimasi return kumulatif ÷ dana kumulatif yang sudah disetor</b>.</div>
       <div class="wm-yearly-table-wrap">
         <table class="wm-yearly-table">
           <thead><tr><th>PERIODE</th><th>DANA DISETOR</th><th>EST. RETURN</th><th>NILAI PASAR</th>${assetHeads}</tr></thead>
@@ -151,7 +171,7 @@
         </table>
       </div>
       ${yearlyMobileCardsHtml(timeline)}
-      <div class="wm-fv-note"><b>Catatan:</b> angka “Nilai Pasar” adalah nilai proyeksi berdasarkan asumsi return yang dipilih, bukan harga pasar aktual atau jaminan hasil investasi.</div>
+      <div class="wm-fv-note"><b>Catatan:</b> “Nilai Pasar” adalah nilai proyeksi berdasarkan asumsi return yang dipilih, bukan harga pasar aktual atau jaminan hasil. Setoran bulanan dimodelkan pada akhir setiap bulan dan memperoleh bunga majemuk hanya selama periode dana tersebut sudah diinvestasikan.</div>
     </section>`;
   }
 
@@ -171,21 +191,22 @@
 
     panel.innerHTML=`
       <div class="wm-fv-head">
-        <div><small>FUTURE VALUE & NILAI PASAR PER INSTRUMEN</small><h3>Dana disetor, return, dan nilai pasar terlihat terpisah.</h3><p>Setiap instrumen dihitung sendiri. Dengan begitu terlihat berapa modal yang masuk, berapa estimasi return yang terbentuk, dan berapa nilai pasar proyeksinya pada akhir periode.</p></div>
-        <span class="wm-fv-mode">${mode}</span>
+        <div><small>FUTURE VALUE & NILAI PASAR PER INSTRUMEN</small><h3>Dana disetor, return, dan nilai pasar terlihat terpisah.</h3><p>Setiap instrumen dihitung dengan setoran bulanan bertahap. Jadi return rupiah dan persentasenya mencerminkan lamanya setiap setoran benar-benar berada di pasar.</p></div>
+        <span class="wm-fv-mode">${mode} • v${VERSION}</span>
       </div>
       <div class="wm-fv-summary">
         <div><small>TOTAL DANA DISETOR</small><b>${rupiah(final.totalInvested)}</b><span>Modal awal + setoran bulanan</span></div>
-        <div><small>ESTIMASI RETURN TOTAL</small><b class="${final.totalReturn>=0?'positive':'negative'}">${signedRp(final.totalReturn)}</b><span>Nilai pasar dikurangi dana disetor</span></div>
+        <div><small>ESTIMASI RETURN TOTAL</small><b class="${final.totalReturn>=0?'positive':'negative'}">${signedRp(final.totalReturn)}</b><span class="${final.totalReturn>=0?'positive':'negative'}">${signedPct(final.totalReturnPct)} dari dana disetor</span></div>
         <div><small>NILAI PASAR PROYEKSI</small><b>${rupiah(final.totalMarket)}</b><span>Akhir ${years.toLocaleString('id-ID',{maximumFractionDigits:1})} tahun</span></div>
-        <div><small>WEIGHTED AVG RETURN</small><b>${pct(final.weightedReturn)}</b><span>Σ bobot × return aset</span></div>
+        <div><small>WEIGHTED AVG RETURN</small><b>${pct(final.weightedReturn)}</b><span>Asumsi tahunan: Σ bobot × return aset</span></div>
       </div>
       <div class="wm-fv-assets">${final.assets.map(assetCardHtml).join('')}</div>
-      <div class="wm-fv-note"><b>Cara baca:</b> “Estimasi Return” adalah keuntungan/kerugian rupiah dari instrumen tersebut. “Nilai Pasar Proyeksi” = dana yang telah disetor + estimasi return. Kontribusi return menunjukkan dampak asumsi return aset terhadap expected return portofolio.</div>
+      <div class="wm-fv-note"><b>Cara baca:</b> asumsi return tahunan adalah tingkat pertumbuhan yang dipakai mesin. Persentase “dari dana disetor” adalah hasil proyeksi aktual terhadap modal yang sudah masuk sampai titik waktu tersebut; karena setoran dilakukan bulanan, angkanya tidak harus sama dengan asumsi tahunan.</div>
       ${yearlyTableHtml(timeline,final.assets)}`;
   }
 
   function bind(){
+    ensureVersionBadge();
     const build=$('wmBuildPlan');
     if(build)build.addEventListener('click',()=>setTimeout(renderEnhancedBreakdown,0));
   }
