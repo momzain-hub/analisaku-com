@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.9.2.9 bootstrap */
+/* Analisaku Wealth Management v1.10.0 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -33,7 +33,7 @@
     try{
       await loadScript(url('wealth-route-init.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-planning-mode.js?v=1.3-20260915-2225'));
-      await loadScript(url('wealth-mode-navigation.js?v=1.9-20260916-0022'));
+      await loadScript(url('wealth-mode-navigation.js?v=1.10.0-20260916-1205'));
       await loadScript(url('wealth-mode-questionnaire.js?v=1.9-20260916-0015'));
       await loadScript(url('wealth-questionnaire-required.js?v=1.9.2-20260916-0110'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
@@ -41,7 +41,7 @@
       await loadScript(url('wealth-equity-sleeve.js?v=1.2.1-20260916-1110'));
       await loadScript(url('wealth-equity-projection-live.js?v=1.9.2.9-20260916-1135'));
       await loadScript(url('wealth-buffer-result.js?v=1.6-20260915-2315'));
-      await loadScript(url('wealth-customer-copy.js?v=1.9-20260916-0022'));
+      await loadScript(url('wealth-customer-copy.js?v=1.10.0-20260916-1205'));
       await loadScript(url('wealth-product-allocation-sync.js?v=1.9.2.7-20260916-1055'));
       await loadScript(url('wealth-pdf-download.js?v=1.9.2.5-20260916-1018'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
@@ -51,9 +51,9 @@
         window.ANALISAKU_WEALTH_PRODUCT_SYNC?.sync?.();
         window.ANALISAKU_WEALTH_EQUITY_PROJECTION?.refresh?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.9.2.9';
+        if(badge)badge.textContent='WEALTH v1.10.0';
       },100);
-    }catch(error){console.error('Wealth Management v1.9.2.9 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.10.0 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
