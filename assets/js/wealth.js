@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.9.2 bootstrap */
+/* Analisaku Wealth Management v1.9.2.1 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -23,6 +23,7 @@
     loadCss(url('../css/wealth-equity-sleeve.css?v=1.2-20260915-2205'),'wealthEquitySleeve');
     loadCss(url('../css/wealth-planning-mode.css?v=1.3-20260915-2225'),'wealthPlanningMode');
     loadCss(url('../css/wealth-mode-questionnaire.css?v=1.4-20260915-2245'),'wealthModeQuestionnaire');
+    loadCss(url('../css/wealth-questionnaire-dedupe.css?v=1.9.2.1-20260916-0935'),'wealthQuestionnaireDedupe');
     loadCss(url('../css/wealth-buffer-result.css?v=1.6-20260915-2315'),'wealthBufferResult');
     loadCss(url('../css/wealth-v19.css?v=1.9.2-20260916-0110'),'wealthV19');
 
@@ -45,9 +46,9 @@
         window.ANALISAKU_WEALTH_ANSWER_STATE?.restore?.();
         window.ANALISAKU_WEALTH_COPY?.apply?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.9.2';
+        if(badge)badge.textContent='WEALTH v1.9.2.1';
       },80);
-    }catch(error){console.error('Wealth Management v1.9.2 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.9.2.1 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
