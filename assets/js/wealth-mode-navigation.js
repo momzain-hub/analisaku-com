@@ -1,17 +1,39 @@
-/* Wealth v1.9 mode navigation — professional landing + smooth dedicated planner tabs */
+/* Wealth v1.10.0 mode navigation — clearer professional customer language */
 (function(){
-  const VERSION='1.9';
+  const VERSION='1.10.0';
   const route=window.ANALISAKU_WEALTH_ROUTE?.mode||'';
-  const routeLabel={goal:'Kejar Target',lump:'Dana Sudah Ada',buffer:'Investor / Trader + Cash Buffer'};
+  const routeLabel={
+    goal:'Kejar Target',
+    lump:'Alokasi Dana yang Sudah Tersedia',
+    buffer:'Investasi + Cadangan Likuid'
+  };
   const routeCopy={
-    goal:'Membangun dana secara bertahap untuk tujuan dengan waktu yang jelas.',
-    lump:'Mengalokasikan modal yang sudah tersedia sejak awal.',
-    buffer:'Memisahkan likuiditas dari modal aktif investasi atau trading.'
+    goal:'Untuk tujuan yang ingin dicapai dalam jangka waktu tertentu melalui dana awal dan investasi berkala.',
+    lump:'Untuk dana yang sudah tersedia saat ini dan ingin dialokasikan sesuai jangka waktu, kebutuhan likuiditas, dan tingkat risiko.',
+    buffer:'Untuk investor atau trader yang ingin memisahkan cadangan likuid dari modal aktif agar fungsi masing-masing dana tetap jelas.'
   };
   const cardData={
-    goal:{no:'01',title:'Kejar Target',desc:'Untuk pendidikan, rumah, kendaraan, pensiun, atau tujuan lain yang dibangun dengan dana awal dan investasi berkala.',benefits:['Hitung target & kebutuhan investasi bulanan','Sesuaikan risiko dengan deadline tujuan','Lihat proyeksi sampai tahun target']},
-    lump:{no:'02',title:'Dana Sudah Ada',desc:'Untuk cash atau modal yang sudah tersedia sekarang dan ingin langsung dialokasikan ke beberapa instrumen.',benefits:['Alokasi berdasarkan horizon & kebutuhan likuiditas','Proyeksi pertumbuhan dana sekaligus','Tambahan bulanan tetap opsional']},
-    buffer:{no:'03',title:'Investor / Trader + Cash Buffer',desc:'Untuk investor aktif yang ingin menjaga dana likuid terpisah dari modal yang digunakan di pasar.',benefits:['Pisahkan cash buffer & modal aktif','Buffer fokus pada instrumen likuid/defensif','Modal aktif tidak diberi asumsi return trading tetap']}
+    goal:{
+      no:'01',
+      title:'Kejar Target',
+      desc:'Untuk pendidikan, rumah, kendaraan, pensiun, atau kebutuhan lain yang ingin dicapai dalam jangka waktu tertentu.',
+      benefits:['Tentukan target dan jangka waktu','Hitung kebutuhan investasi berkala','Lihat proyeksi hingga tahun target'],
+      cta:'Susun Rencana Target'
+    },
+    lump:{
+      no:'02',
+      title:'Alokasikan Dana yang Sudah Tersedia',
+      desc:'Untuk dana yang sudah tersedia saat ini dan ingin dibagi ke beberapa instrumen sesuai kebutuhan Anda.',
+      benefits:['Susun alokasi dana yang tersedia','Sesuaikan dengan horizon dan kebutuhan pencairan','Lihat proyeksi pertumbuhan portofolio'],
+      cta:'Susun Alokasi Dana'
+    },
+    buffer:{
+      no:'03',
+      title:'Investasi + Cadangan Likuid',
+      desc:'Untuk investor atau trader yang ingin menjaga sebagian dana tetap likuid dan memisahkannya dari modal aktif di pasar.',
+      benefits:['Pisahkan cadangan likuid dan modal aktif','Jaga fleksibilitas tanpa mencampur fungsi dana','Susun porsi modal aktif sesuai risiko'],
+      cta:'Atur Portofolio & Cash Buffer'
+    }
   };
 
   function currentMode(){return route||window.ANALISAKU_WEALTH_MODE_API?.getState?.().mode||window.ANALISAKU_WEALTH_MODE?.mode||'goal';}
@@ -20,7 +42,7 @@
     const label=routeLabel[mode]||'Wealth Plan';
     try{
       win.document.open();
-      win.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} | Analisaku.com</title><style>html,body{margin:0;background:#07111b;color:#eef3f7;font-family:Arial,sans-serif;height:100%}.w{height:100%;display:grid;place-items:center;padding:24px;box-sizing:border-box}.c{text-align:center;max-width:420px}.s{width:40px;height:40px;border:3px solid #394451;border-top-color:#f3c95c;border-radius:50%;margin:0 auto 18px;animation:r .7s linear infinite}.k{font-size:11px;letter-spacing:1.2px;color:#f3c95c;font-weight:800}.t{font-size:24px;font-weight:800;margin-top:8px}.p{font-size:13px;line-height:1.6;color:#91a0ad;margin-top:8px}@keyframes r{to{transform:rotate(360deg)}}</style></head><body><div class="w"><div class="c"><div class="s"></div><div class="k">ANALISAKU WEALTH</div><div class="t">${label}</div><div class="p">Menyiapkan pertanyaan dan perhitungan yang sesuai dengan jenis rencana Anda.</div></div></div></body></html>`);
+      win.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>${label} | Analisaku.com</title><style>html,body{margin:0;background:#07111b;color:#eef3f7;font-family:Arial,sans-serif;height:100%}.w{height:100%;display:grid;place-items:center;padding:24px;box-sizing:border-box}.c{text-align:center;max-width:440px}.s{width:40px;height:40px;border:3px solid #394451;border-top-color:#f3c95c;border-radius:50%;margin:0 auto 18px;animation:r .7s linear infinite}.k{font-size:11px;letter-spacing:1.2px;color:#f3c95c;font-weight:800}.t{font-size:24px;font-weight:800;margin-top:8px}.p{font-size:13px;line-height:1.6;color:#91a0ad;margin-top:8px}@keyframes r{to{transform:rotate(360deg)}}</style></head><body><div class="w"><div class="c"><div class="s"></div><div class="k">ANALISAKU WEALTH</div><div class="t">${label}</div><div class="p">Menyiapkan rencana berdasarkan kebutuhan yang Anda pilih.</div></div></div></body></html>`);
       win.document.close();
     }catch(_){ }
   }
@@ -56,16 +78,16 @@
     const hero=document.querySelector('.wealth-hero');
     if(!hero)return;
     const h1=hero.querySelector('h1'),p=hero.querySelector('p'),card=hero.querySelector('.wealth-hero-card');
-    if(h1)h1.innerHTML='Mulai dari kebutuhan Anda. <span>Pilih jalur yang tepat.</span>';
-    if(p)p.textContent='Tiga kondisi awal membutuhkan cara perencanaan yang berbeda. Pilih satu jenis rencana, lalu lanjutkan di planner khusus agar pertanyaan dan perhitungannya tetap fokus.';
+    if(h1)h1.innerHTML='Mulai dari kondisi Anda. Susun <span>rencana investasi yang lebih terarah.</span>';
+    if(p)p.textContent='Pilih kebutuhan yang paling sesuai dengan kondisi dana Anda saat ini. Setiap rencana akan mempertimbangkan jangka waktu, kondisi keuangan, kebutuhan likuiditas, pengalaman, dan kenyamanan Anda terhadap risiko.';
     const flow=[...hero.querySelectorAll('.wm-flowline span')];
     flow.forEach((el,i)=>{el.hidden=i>0;});
-    if(flow[0])flow[0].textContent='01 Pilih Jenis Rencana';
+    if(flow[0])flow[0].textContent='01 Pilih Kebutuhan';
     if(card){
       const small=card.querySelector('small'),strong=card.querySelector('strong'),cp=card.querySelector('p');
-      if(small)small.textContent='WEALTH PLAN SELECTOR';
-      if(strong)strong.textContent='Satu pilihan di awal, satu alur yang konsisten.';
-      if(cp)cp.textContent='Kejar Target, Dana Sudah Ada, dan Cash Buffer memiliki tujuan, pertanyaan, serta logika proyeksi yang berbeda.';
+      if(small)small.textContent='ANALISAKU WEALTH';
+      if(strong)strong.textContent='Mulai sesuai kondisi dana Anda';
+      if(cp)cp.textContent='Pilih apakah Anda sedang membangun dana untuk sebuah target, mengalokasikan dana yang sudah tersedia, atau menyiapkan portofolio investasi dengan cadangan likuid untuk kebutuhan investor maupun trader.';
     }
   }
 
@@ -76,19 +98,19 @@
     const head=panel.querySelector('.wm-plan-mode-head');
     if(head){
       const small=head.querySelector('small'),strong=head.querySelector('strong'),p=head.querySelector('p');
-      if(small)small.textContent='01 • PILIH JENIS RENCANA';
+      if(small)small.textContent='01 • PILIH KEBUTUHAN';
       if(strong)strong.textContent='Kondisi mana yang paling sesuai dengan dana Anda saat ini?';
-      if(p)p.textContent='Setelah dipilih, planner khusus akan terbuka di tab baru dan langsung menggunakan mode tersebut. Anda tidak perlu memilih ulang.';
+      if(p)p.textContent='Pilih satu jenis rencana. Setelah itu Anda akan masuk langsung ke planner yang sesuai, tanpa perlu memilih ulang.';
     }
     [...panel.querySelectorAll('[data-plan-mode]')].forEach(btn=>{
       const mode=btn.dataset.planMode,c=cardData[mode];
       if(!c)return;
       btn.classList.remove('active');
-      btn.title=`Buka ${c.title} di tab baru`;
-      btn.setAttribute('aria-label',`${c.title}. Buka planner di tab baru.`);
-      if(btn.dataset.v19Card!==mode){
-        btn.dataset.v19Card=mode;
-        btn.innerHTML=`<span>${c.no}</span><div class="wm-mode-card-copy"><strong>${c.title}</strong><small>${c.desc}</small><div class="wm-mode-benefits">${c.benefits.map(x=>`<em>${x}</em>`).join('')}</div><div class="wm-mode-open">Buka planner khusus <b>↗</b></div></div>`;
+      btn.title=`Buka ${c.title}`;
+      btn.setAttribute('aria-label',`${c.title}. Buka rencana investasi.`);
+      if(btn.dataset.v110Card!==mode){
+        btn.dataset.v110Card=mode;
+        btn.innerHTML=`<span>${c.no}</span><div class="wm-mode-card-copy"><strong>${c.title}</strong><small>${c.desc}</small><div class="wm-mode-benefits">${c.benefits.map(x=>`<em>${x}</em>`).join('')}</div><div class="wm-mode-open">${c.cta} <b>↗</b></div></div>`;
       }
     });
     const buffer=document.getElementById('wmBufferSetting');if(buffer)buffer.hidden=true;
@@ -97,8 +119,8 @@
     if(head1){
       const small=head1.querySelector('small'),h2=head1.querySelector('h2'),p=head1.querySelector('p');
       if(small)small.textContent='LANGKAH 01';
-      if(h2)h2.textContent='Pilih cara Anda memulai.';
-      if(p)p.textContent='Halaman Wealth berhenti di langkah ini. Setelah memilih, Anda akan masuk ke planner khusus dengan pertanyaan dan hasil yang lebih relevan.';
+      if(h2)h2.textContent='Pilih kebutuhan investasi Anda.';
+      if(p)p.textContent='Setiap pilihan menggunakan pertanyaan dan perhitungan yang disesuaikan dengan kondisi dana Anda.';
     }
     setPlannerVisibility(false);
     if(step1)step1.hidden=false;
@@ -117,9 +139,9 @@
       const small=head.querySelector('small'),strong=head.querySelector('strong'),p=head.querySelector('p');
       if(small)small.textContent='JENIS RENCANA TERPILIH';
       if(strong)strong.textContent=routeLabel[mode]||'Wealth Plan';
-      if(p)p.textContent=`${routeCopy[mode]||''} Pertanyaan, alokasi, dan proyeksi di halaman ini hanya mengikuti kebutuhan tersebut.`;
+      if(p)p.textContent=routeCopy[mode]||'';
       if(!head.querySelector('.wm-mode-back')){
-        const back=document.createElement('a');back.className='wm-product-start wm-mode-back';back.href='wealth.html';back.textContent='← Pilih jenis rencana lain';back.style.cssText='display:inline-flex;margin-top:12px';head.appendChild(back);
+        const back=document.createElement('a');back.className='wm-product-start wm-mode-back';back.href='wealth.html';back.textContent='← Pilih kebutuhan lain';back.style.cssText='display:inline-flex;margin-top:12px';head.appendChild(back);
       }
     }
 
@@ -132,11 +154,17 @@
     if(head1){
       const small=head1.querySelector('small'),h2=head1.querySelector('h2'),p=head1.querySelector('p');
       if(mode==='goal'){
-        if(small)small.textContent='01 • TARGET & KONDISI AWAL';if(h2)h2.textContent='Apa target yang ingin Anda capai?';if(p)p.textContent='Masukkan target dana, dana awal, jangka waktu, dan investasi bulanan. Proyeksi akan mengikuti tujuan tersebut.';
+        if(small)small.textContent='01 • TUJUAN & KONDISI AWAL';
+        if(h2)h2.textContent='Apa tujuan utama investasi Anda?';
+        if(p)p.textContent='Tentukan tujuan, target dana, dana awal, jangka waktu, dan investasi bulanan. Informasi ini menjadi dasar penyusunan rencana investasi Anda.';
       }else if(mode==='lump'){
-        if(small)small.textContent='01 • MODAL YANG TERSEDIA';if(h2)h2.textContent='Berapa dana yang siap dialokasikan?';if(p)p.textContent='Masukkan modal yang sudah tersedia dan horizon investasi. Tambahan bulanan hanya digunakan bila memang direncanakan.';
+        if(small)small.textContent='01 • DANA YANG TERSEDIA';
+        if(h2)h2.textContent='Berapa dana yang siap Anda alokasikan?';
+        if(p)p.textContent='Masukkan dana yang sudah tersedia dan jangka waktu investasinya. Tambahan bulanan hanya digunakan bila memang direncanakan.';
       }else if(mode==='buffer'){
-        if(small)small.textContent='01 • STRUKTUR MODAL';if(h2)h2.textContent='Berapa modal yang ingin dipisahkan?';if(p)p.textContent='Masukkan total modal dan porsi cash buffer. Dana likuid dan modal aktif akan dihitung terpisah.';
+        if(small)small.textContent='01 • MODAL & CADANGAN LIKUID';
+        if(h2)h2.textContent='Bagaimana dana Anda ingin dibagi?';
+        if(p)p.textContent='Tentukan total modal dan bagian yang ingin dijaga tetap likuid. Cadangan likuid dan modal aktif akan dihitung sesuai fungsi masing-masing.';
       }
     }
 
@@ -144,9 +172,18 @@
     if(hero){
       const h1=hero.querySelector('h1'),p=hero.querySelector('p'),flow=[...hero.querySelectorAll('.wm-flowline span')];
       flow.forEach(el=>el.hidden=false);
-      if(mode==='goal'){if(h1)h1.innerHTML='Bangun dana secara terukur untuk <span>mencapai target.</span>';if(p)p.textContent='Planner untuk tujuan yang memiliki deadline, investasi berkala, dan kebutuhan dana yang jelas.';}
-      if(mode==='lump'){if(h1)h1.innerHTML='Optimalkan modal yang <span>sudah tersedia.</span>';if(p)p.textContent='Planner untuk dana yang sudah tersedia sejak awal dengan fokus pada alokasi, likuiditas, dan ketahanan modal.';}
-      if(mode==='buffer'){if(h1)h1.innerHTML='Jaga likuiditas, kelola <span>modal aktif.</span>';if(p)p.textContent='Planner investor/trader yang memisahkan cash buffer dari modal aktif agar fungsi keduanya tidak tercampur.';}
+      if(mode==='goal'){
+        if(h1)h1.innerHTML='Susun langkah investasi untuk <span>mencapai target.</span>';
+        if(p)p.textContent='Rencana untuk tujuan yang memiliki target dana dan jangka waktu yang jelas, dengan investasi awal maupun berkala.';
+      }
+      if(mode==='lump'){
+        if(h1)h1.innerHTML='Susun alokasi untuk dana yang <span>sudah tersedia.</span>';
+        if(p)p.textContent='Rencana untuk dana yang sudah tersedia saat ini dengan fokus pada alokasi, likuiditas, dan tingkat risiko.';
+      }
+      if(mode==='buffer'){
+        if(h1)h1.innerHTML='Pisahkan cadangan likuid dari <span>modal aktif.</span>';
+        if(p)p.textContent='Rencana untuk investor atau trader yang ingin menjaga likuiditas sambil tetap mengelola modal aktif di pasar.';
+      }
     }
 
     const products=document.getElementById('wealth-products');if(products)products.hidden=true;
