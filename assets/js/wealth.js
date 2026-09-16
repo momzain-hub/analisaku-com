@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.9.2.5 bootstrap */
+/* Analisaku Wealth Management v1.9.2.6 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -41,15 +41,17 @@
       await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
       await loadScript(url('wealth-buffer-result.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-customer-copy.js?v=1.9-20260916-0022'));
+      await loadScript(url('wealth-product-allocation-sync.js?v=1.9.2.6-20260916-1040'));
       await loadScript(url('wealth-pdf-download.js?v=1.9.2.5-20260916-1018'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
       setTimeout(()=>{
         window.ANALISAKU_WEALTH_ANSWER_STATE?.restore?.();
         window.ANALISAKU_WEALTH_COPY?.apply?.();
+        window.ANALISAKU_WEALTH_PRODUCT_SYNC?.sync?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.9.2.5';
+        if(badge)badge.textContent='WEALTH v1.9.2.6';
       },80);
-    }catch(error){console.error('Wealth Management v1.9.2.5 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.9.2.6 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
