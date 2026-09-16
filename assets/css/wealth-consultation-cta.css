@@ -1,0 +1,73 @@
+/* Wealth v1.10.1 — consultation CTA */
+.wm-consult-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:22px;
+  margin:16px 0 12px;
+  padding:18px 20px;
+  border:1px solid color-mix(in srgb,var(--gold) 42%,var(--line));
+  border-radius:18px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 7%,var(--surface2)),color-mix(in srgb,var(--surface) 96%,transparent));
+  box-shadow:0 14px 34px rgba(0,0,0,.06);
+}
+.wm-consult-copy{min-width:0;max-width:760px}
+.wm-consult-copy small{
+  display:block;
+  color:var(--gold);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.wm-consult-copy h3{
+  margin:5px 0 5px;
+  color:var(--text);
+  font-size:18px;
+  line-height:1.2;
+  letter-spacing:-.25px;
+}
+.wm-consult-copy p{
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.6;
+}
+.wm-consult-button{
+  flex:0 0 auto;
+  min-height:46px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 17px;
+  border:1px solid color-mix(in srgb,var(--gold) 80%,#fff);
+  border-radius:13px;
+  background:var(--gold);
+  color:#16120a;
+  text-decoration:none;
+  font-size:10px;
+  font-weight:900;
+  box-shadow:0 10px 24px color-mix(in srgb,var(--gold) 18%,transparent);
+  transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;
+}
+.wm-consult-button span,.wm-consult-button b{color:#16120a}
+.wm-consult-button b{font-size:14px}
+.wm-consult-button:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.04);
+  box-shadow:0 14px 30px color-mix(in srgb,var(--gold) 24%,transparent);
+}
+.wm-consult-button:active{transform:translateY(0) scale(.985)}
+
+[data-theme="light"] .wm-consult-card,
+.light-theme .wm-consult-card{
+  background:linear-gradient(135deg,#fffdf7,#ffffff);
+  box-shadow:0 10px 28px rgba(15,23,42,.06);
+}
+
+@media(max-width:720px){
+  .wm-consult-card{align-items:stretch;flex-direction:column;padding:16px;gap:14px}
+  .wm-consult-copy h3{font-size:17px}
+  .wm-consult-copy p{font-size:9.5px}
+  .wm-consult-button{width:100%;min-height:48px}
+}
