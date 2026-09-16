@@ -1,12 +1,17 @@
-/* Wealth Management v1.2 — Equity Sleeve / Stock Style Mix */
+/* Wealth Management v1.2.1 — Equity Sleeve / Stock Style Mix + projection sync */
 (function(){
-  const VERSION='1.2';
+  const VERSION='1.2.1';
   const $=id=>document.getElementById(id);
   const rupiah=v=>'Rp '+Math.round(Number(v)||0).toLocaleString('id-ID');
-  const pct=v=>`${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:1})}%`;
-  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const pct=v=>`${Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2})}%`;
+  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 
   const STORAGE_KEY='analisaku_wealth_equity_sleeve_v12';
+
+  /* Planning assumptions for each stock sleeve. These are illustrative return assumptions,
+     not forecasts or guarantees. The blended result becomes the equity return assumption. */
+  const SLEEVE_RETURNS={core:9,dividend:8,growth:13,tactical:15};
+
   const PRESETS={
     stable:{label:'Stabil',copy:'Core dan dividend menjadi fondasi utama.',mix:{core:60,dividend:30,growth:10,tactical:0}},
     balanced:{label:'Balanced',copy:'Seimbang antara kualitas, income, dan pertumbuhan.',mix:{core:50,dividend:20,growth:25,tactical:5}},
@@ -21,6 +26,7 @@
   ];
 
   let state=loadState();
+  let internalRebuild=false;
 
   function cloneMix(mix){return {core:Number(mix.core)||0,dividend:Number(mix.dividend)||0,growth:Number(mix.growth)||0,tactical:Number(mix.tactical)||0};}
   function loadState(){
@@ -32,7 +38,7 @@
   }
   function saveState(){
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(_){ }
-    window.ANALISAKU_EQUITY_SLEEVE={version:VERSION,mode:state.mode,mix:cloneMix(state.mix)};
+    window.ANALISAKU_EQUITY_SLEEVE={version:VERSION,mode:state.mode,mix:cloneMix(state.mix),equityReturn:blendedEquityReturn(currentMix())};
   }
   function parseNumber(text){
     const cleaned=String(text||'').replace(/[^0-9,.-]/g,'').replace(',','.');
@@ -50,6 +56,11 @@
     if(state.mode!=='custom'&&PRESETS[state.mode])return cloneMix(PRESETS[state.mode].mix);
     return cloneMix(state.mix);
   }
+  function blendedEquityReturn(mix=currentMix()){
+    const total=totalMix(mix);
+    if(total<=0)return 10;
+    return SLEEVES.reduce((sum,s)=>sum+((Number(mix[s.key])||0)/total)*(SLEEVE_RETURNS[s.key]||0),0);
+  }
   function updateVersionBadge(){
     let badge=document.querySelector('.wm-version-badge');
     if(!badge){
@@ -59,7 +70,7 @@
       badge.className='wm-version-badge';
       kicker.appendChild(badge);
     }
-    badge.textContent=`ENGINE v${VERSION}`;
+    badge.textContent='WEALTH v1.9.2.8';
   }
   function ensurePanel(){
     let panel=$('wmEquitySleeve');
@@ -106,7 +117,7 @@
           <span><small>SETORAN BULANAN</small><b>${rupiah(monthlyRp)}</b></span>
           <span><small>ALOKASI DANA AWAL</small><b>${rupiah(initialRp)}</b></span>
         </div>
-        <div class="wm-equity-risk">${esc(s.risk)}</div>
+        <div class="wm-equity-risk">${esc(s.risk)} • asumsi ${pct(SLEEVE_RETURNS[s.key])}/tahun</div>
       </article>`;
     }).join('');
   }
@@ -122,17 +133,52 @@
     saveState();
     const valid=Math.abs(totalMix(mix)-100)<0.01;
     const equityMonthly=Number($('wmMonthly')?.value||0)*equityWeight/100;
+    const equityReturn=blendedEquityReturn(mix);
     panel.innerHTML=`
       <div class="wm-equity-head">
-        <div><small>EQUITY SLEEVE • v${VERSION}</small><h3>Bagaimana porsi saham ingin dikelola?</h3><p>Total porsi ekuitas tetap mengikuti hasil profil risiko. Pilihan di bawah hanya membagi <b>isi porsi saham</b>, sehingga nasabah bisa mengombinasikan blue chip, dividend, second liner, dan trading tanpa menaikkan batas risiko total.</p></div>
-        <div class="wm-equity-cap"><small>PORSI EKUITAS DARI SISTEM</small><b>${pct(equityWeight)}</b><span>${rupiah(equityMonthly)}/bulan diarahkan ke ekuitas</span></div>
+        <div><small>PENGATURAN PORSI SAHAM • v${VERSION}</small><h3>Bagaimana Anda ingin membagi porsi saham?</h3><p>Total porsi ekuitas tetap mengikuti hasil rencana Anda. Pilihan di bawah hanya membagi <b>isi porsi saham</b> dan sekaligus menyesuaikan asumsi return ekuitas pada proyeksi.</p></div>
+        <div class="wm-equity-cap"><small>PORSI EKUITAS DALAM RENCANA</small><b>${pct(equityWeight)}</b><span>${rupiah(equityMonthly)}/bulan diarahkan ke ekuitas</span></div>
       </div>
       ${presetButtonsHtml()}
       ${customInputsHtml(mix)}
-      <div class="wm-equity-visual"><div><small>KOMPOSISI PILIHAN</small><strong>${state.mode==='custom'?'Custom':PRESETS[state.mode]?.label||'Balanced'}</strong></div>${mixBarHtml(mix)}</div>
+      <div class="wm-equity-visual"><div><small>KOMPOSISI PILIHAN</small><strong>${state.mode==='custom'?'Custom':PRESETS[state.mode]?.label||'Balanced'}</strong><span style="display:block;margin-top:4px;color:var(--muted2);font-size:8px">Asumsi return ekuitas gabungan: <b style="color:var(--wm-green)">${pct(equityReturn)}/tahun</b></span></div>${mixBarHtml(mix)}</div>
       <div class="wm-equity-rows ${valid?'':'invalid'}">${sleeveRowsHtml(mix,equityWeight)}</div>
-      <div class="wm-equity-guardrail"><b>Guardrail:</b> total ekuitas <b>${pct(equityWeight)}</b> tidak berubah. “Custom” hanya mengatur distribusi di dalam ekuitas dan harus berjumlah 100%. Tactical/Trading diperlakukan sebagai sleeve aktif, bukan pengganti seluruh portofolio saham.</div>`;
+      <div class="wm-equity-guardrail"><b>Catatan:</b> total ekuitas <b>${pct(equityWeight)}</b> tetap sama. Pilihan gaya saham hanya mengubah pembagian di dalam porsi ekuitas dan asumsi return ekuitas untuk simulasi. Return bersifat ilustratif, bukan jaminan hasil.</div>`;
   }
+
+  function syncEquityReturnAndRebuild(){
+    const mix=currentMix();
+    if(Math.abs(totalMix(mix)-100)>=0.01)return;
+    const equityReturn=blendedEquityReturn(mix);
+    const toggle=$('wmUseCustomReturns');
+    const equityInput=$('wmReturnEquity');
+    if(!toggle||!equityInput)return;
+
+    /* Turn on custom assumptions so the core engine and yearly projection both read this equity rate.
+       Other asset inputs remain at their current values, so existing user custom assumptions are preserved. */
+    toggle.checked=true;
+    toggle.dispatchEvent(new Event('change',{bubbles:true}));
+    equityInput.value=String(Math.round(equityReturn*100)/100);
+    equityInput.dispatchEvent(new Event('input',{bubbles:true}));
+    equityInput.dispatchEvent(new Event('change',{bubbles:true}));
+
+    const build=$('wmBuildPlan');
+    if(!build||internalRebuild)return;
+    internalRebuild=true;
+    const scrollTop=window.scrollY;
+    build.click();
+    /* buildPlan re-renders the result and the yearly module listens to the same click.
+       Restore the user's reading position so changing a stock style feels instant rather than jumping around. */
+    [0,80,220,420].forEach(delay=>setTimeout(()=>window.scrollTo({top:scrollTop,left:0,behavior:'auto'}),delay));
+    setTimeout(()=>{internalRebuild=false;renderPanel();window.ANALISAKU_WEALTH_PRODUCT_SYNC?.sync?.();},460);
+  }
+
+  function applySelection(){
+    saveState();
+    renderPanel();
+    syncEquityReturnAndRebuild();
+  }
+
   function bindPanel(panel){
     panel.addEventListener('click',event=>{
       const btn=event.target.closest('[data-equity-preset]');
@@ -144,8 +190,7 @@
         state.mode=mode;
         state.mix=cloneMix(PRESETS[mode].mix);
       }
-      saveState();
-      renderPanel();
+      applySelection();
     });
     panel.addEventListener('input',event=>{
       const input=event.target.closest('[data-equity-input]');
@@ -157,6 +202,7 @@
       renderPanel();
       const next=panel.querySelector(`[data-equity-input="${key}"]`);
       if(next){next.focus();next.setSelectionRange?.(String(value).length,String(value).length);}
+      if(Math.abs(totalMix(state.mix)-100)<0.01)syncEquityReturnAndRebuild();
     });
   }
   function bind(){
@@ -168,8 +214,10 @@
 
   window.ANALISAKU_EQUITY_SLEEVE_API={
     version:VERSION,
-    getState:()=>({mode:state.mode,mix:cloneMix(currentMix())}),
-    render:renderPanel
+    getState:()=>({mode:state.mode,mix:cloneMix(currentMix()),equityReturn:blendedEquityReturn(currentMix())}),
+    getEquityReturn:()=>blendedEquityReturn(currentMix()),
+    render:renderPanel,
+    apply:applySelection
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
