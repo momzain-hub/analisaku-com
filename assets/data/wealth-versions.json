@@ -1,5 +1,5 @@
 {
-  "current": "1.9.2.2",
+  "current": "1.9.2.3",
   "versions": {
     "1.0": {"baseline_commit":"2d8877882ed67c525b72dd57873e8667987dfb11","label":"Per-asset future value and yearly market-value breakdown","notes":"Baseline before effective return percentages were added to yearly projections. Use this commit as the rollback reference for Version 1.0."},
     "1.1": {"feature_commit":"64c71b3eb3653f4fd9eba3cb7e351f112034c870","rollback_state_commit":"d0203d2ad9e3d5d3013c7aa175857b79e11b64d9","label":"Monthly-contribution effective return percentages","notes":"Adds effective cumulative return percentages against contributed capital for total portfolio and each asset, while retaining monthly contribution compounding."},
@@ -15,6 +15,7 @@
     "1.9.2": {"answer_persistence_commit":"a529faaf0d032fb9afeb41ea3f8d9c7193779ff8","style_commit":"adb77632a53a91a6e0191be3e6e880245cb3d32c","loader_commit":"ed66cb3ac41ebf5f1a6572b0d85001a22528fcc1","rollback_to":"1.9.1","label":"Stable questionnaire answers and build validation","notes":"Preserves selected questionnaire answers during DOM updates and result calculation, adds a visible completion status, and only scrolls to the exact unanswered question when something is genuinely missing."},
     "1.9.2.1": {"dedupe_commit":"b9f1790097de24472bb4ed5982bc833a8abba137","loader_commit":"c2f39577627963c898378eae263ddbfb7b1cf1d3","rollback_to":"1.9.2","label":"Remove duplicate legacy questionnaire blocks","notes":"Keeps only the mode-specific questionnaire and hides the old duplicated question cards."},
     "1.9.2.2": {"pdf_download_commit":"a49146ef55ca22512029c913eb088b323505a583","loader_commit":"fefc034bbbbf292c7b69a21bbf4f4bf8ecde7f14","rollback_to":"1.9.2.1","label":"Robust mobile PDF blob download","notes":"Replaces the browser-dependent jsPDF save path with an explicit Blob URL and download anchor, with fallback to the original save method and visible mobile feedback."},
+    "1.9.2.3": {"pdf_viewer_commit":"8ed914de9350a39ba48564344a517de7ab5593ed","loader_commit":"a1d847a8a36b90bc0856de80057c104868e69e70","page_cache_commit":"6755539f391135ee4ae8536649847c0f698b7444","rollback_to":"1.9.2.2","label":"Mobile PDF download with viewer fallback","notes":"Attempts the direct Blob download and, on the same user click, opens a dedicated PDF viewer tab as a reliable Android fallback. Also refreshes the outer Wealth loader query so mobile browsers do not keep the older cached download code."},
     "1.9.3": {"pdf_feedback_style_commit":"3fbe833ea63aabd1de729e16ff01d01e04e3ba73","loader_commit":"2069bbc6563c3d419337034a9a27df86f5db5fd8","status":"rolled_back","rollback_to":"1.9.2","label":"Visible PDF download confirmation experiment","notes":"Rolled back after causing a Wealth loader regression. Retained only as historical reference."}
   }
 }
