@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.10.0 bootstrap */
+/* Analisaku Wealth Management v1.10.1 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -26,6 +26,7 @@
     loadCss(url('../css/wealth-questionnaire-dedupe.css?v=1.9.2.1-20260916-0935'),'wealthQuestionnaireDedupe');
     loadCss(url('../css/wealth-buffer-result.css?v=1.6-20260915-2315'),'wealthBufferResult');
     loadCss(url('../css/wealth-v19.css?v=1.9.2-20260916-0110'),'wealthV19');
+    loadCss(url('../css/wealth-consultation-cta.css?v=1.10.1-20260916-1220'),'wealthConsultationCta');
 
     try{await loadScript(url('wealth-product-intro.js?v=20260915-2115'));}catch(error){console.warn('Informasi produk Wealth belum termuat',error);}
     try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',{crossorigin:'anonymous',referrerpolicy:'no-referrer'});}catch(error){console.warn('Generator PDF belum termuat',error);}
@@ -44,16 +45,18 @@
       await loadScript(url('wealth-customer-copy.js?v=1.10.0-20260916-1205'));
       await loadScript(url('wealth-product-allocation-sync.js?v=1.9.2.7-20260916-1055'));
       await loadScript(url('wealth-pdf-download.js?v=1.9.2.5-20260916-1018'));
+      await loadScript(url('wealth-consultation-cta.js?v=1.10.1-20260916-1220'));
       window.ANALISAKU_WEALTH_MODE_API?.apply?.();
       setTimeout(()=>{
         window.ANALISAKU_WEALTH_ANSWER_STATE?.restore?.();
         window.ANALISAKU_WEALTH_COPY?.apply?.();
         window.ANALISAKU_WEALTH_PRODUCT_SYNC?.sync?.();
         window.ANALISAKU_WEALTH_EQUITY_PROJECTION?.refresh?.();
+        window.ANALISAKU_WEALTH_CONSULTATION?.refresh?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.10.0';
+        if(badge)badge.textContent='WEALTH v1.10.1';
       },100);
-    }catch(error){console.error('Wealth Management v1.10.0 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.10.1 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
