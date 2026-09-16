@@ -72,8 +72,17 @@ Setiap versi stabil wajib memiliki:
 
 ## 3. Wealth Management
 
-### WEALTH v1.9.2.9
+### WEALTH v1.10.0
 - Status: **ACTIVE**
+- Navigation/copy commit: `b29ee366f04631fa8964aa1a6b684380fcb96c96`
+- Customer-facing copy commit: `8a8bbcb12ffd63f5accf9ec3bbec563b57c55c44`
+- Bootstrap commit: `f5159b88369fd9e2d4c3cc3746f8a7040060ab38`
+- Scope: penyederhanaan bahasa Wealth Management untuk nasabah tanpa mengubah formula, scoring, alokasi, projection engine, atau metodologi investasi.
+- Perubahan utama: istilah internal seperti mode, kemampuan, kenyamanan, Product Fit, dan Future Value disederhanakan menjadi kebutuhan, kondisi keuangan, risiko & pengalaman, pilihan kelas aset, dan proyeksi nilai investasi.
+- Rollback functional reference: `WEALTH v1.9.2.9`.
+
+### WEALTH v1.9.2.9
+- Status: **SUPERSEDED BY v1.10.0 / STABLE FUNCTIONAL ROLLBACK**
 - Main loader commit: `44a81d7618cb0ba8bc734393381866140b61e217`
 - Live projection fix commit: `acd6e688c8916f04beeca0039c12bdd8759b479b`
 - Scope: live Equity Sleeve selection terhubung ke projection engine.
@@ -109,7 +118,8 @@ Setiap versi stabil wajib memiliki:
 | `v1.9.2.5` | Active PDF baseline | `1ec91aa430e2fbe62d3739576c680d8f51d3950c` | Polished PDF |
 | `v1.9.2.7` | Included current | `759519b4e394c837031a6f67921a8560279ee7d9` | Grouped asset sleeve |
 | `v1.9.2.8` | Superseded | `731cca010711eed956a9cab29e7942315fd66f94` | Equity Sleeve projection sync |
-| `v1.9.2.9` | Active | `44a81d7618cb0ba8bc734393381866140b61e217` | Hard live projection sync |
+| `v1.9.2.9` | Functional rollback | `44a81d7618cb0ba8bc734393381866140b61e217` | Hard live projection sync |
+| `v1.10.0` | Active | `f5159b88369fd9e2d4c3cc3746f8a7040060ab38` | Customer language refresh; logic unchanged |
 | `v1.9.3` | Rolled back | `2069bbc6563c3d419337034a9a27df86f5db5fd8` | PDF feedback introduced loader regression |
 | `v1.9.4` | Rolled back | `495174418d68e6872cdee5e7f4c34e326b5c091c` | Temporary bundle restore attempt |
 
@@ -162,7 +172,7 @@ Gunakan instruksi yang eksplisit supaya tidak salah scope:
 
 - **"Kembali ke SITE v1.0"** → seluruh source website ke snapshot full-site.
 - **"Kembali ke UI v1.0"** → hanya visual/theme/typography.
-- **"Kembali ke WEALTH v1.9.2"** → hanya modul Wealth ke stable rollback point tersebut.
+- **"Kembali ke WEALTH v1.9.2.9"** → Wealth functional baseline sebelum customer language refresh.
 - **"Kembali ke WEALTH-PDF v1.9.2.5"** → hanya PDF Wealth.
 - **"Kembali ke TECH Signal Monitor V2"** → hanya Technical Signal Monitor.
 - **"Kembali ke WORKER v3.2"** → hanya source Worker di repository; deployment production tetap perlu diverifikasi terpisah.
@@ -177,7 +187,7 @@ Jangan melakukan rollback silang antar-modul kecuali instruksi menyebutkannya se
 Setiap perubahan berikutnya harus diberi label versi sebelum dinyatakan final. Contoh:
 
 - perbaikan font → `UI v1.0.1` atau `UI v1.1` sesuai scope,
-- perubahan questionnaire Wealth → `WEALTH v1.9.3` / versi berikutnya,
+- perubahan questionnaire/copy Wealth → `WEALTH v1.10.1` / versi berikutnya,
 - perbaikan PDF saja → `WEALTH-PDF v1.9.2.6`,
 - update Worker → `WORKER v3.3`,
 - slider Weekly baru → `WEEKLY v1.1`,
