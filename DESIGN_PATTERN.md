@@ -1,5 +1,7 @@
 # Analisaku.com — UI Pattern Version Registry
 
+> Registry versi seluruh website sekarang berada di `VERSION_REGISTRY.md`. Dokumen ini khusus untuk baseline visual/UI.
+
 ## Current Baseline
 
 **Pattern Version: UI v1.0**  
@@ -81,6 +83,8 @@ Setiap update visual berikutnya sebaiknya menyebut versi pattern baru agar rollb
 - Wealth Engine: **v1.9.2.9**
 - Wealth instrument grouping consistency: **v1.9.2.7+**
 - Typography sharpness baseline: commit `fc47965`
+
+Untuk daftar lengkap versi SITE, Wealth, PDF, Technical, Signal, Worker, Market, Weekly, dan Data gunakan `VERSION_REGISTRY.md`.
 
 ## Rollback Reference
 
