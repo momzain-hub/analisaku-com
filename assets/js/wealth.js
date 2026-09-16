@@ -1,4 +1,4 @@
-/* Analisaku Wealth Management v1.9.2.7 bootstrap */
+/* Analisaku Wealth Management v1.9.2.8 bootstrap */
 (function(){
   const current=document.currentScript;
   const url=relative=>current?new URL(relative,current.src).href:relative;
@@ -38,7 +38,7 @@
       await loadScript(url('wealth-questionnaire-required.js?v=1.9.2-20260916-0110'));
       await loadScript(url('wealth-unified.js?v=20260915-2145'));
       await loadScript(url('wealth-yearly-breakdown.js?v=1.1-20260915-2155'));
-      await loadScript(url('wealth-equity-sleeve.js?v=1.2-20260915-2205'));
+      await loadScript(url('wealth-equity-sleeve.js?v=1.2.1-20260916-1110'));
       await loadScript(url('wealth-buffer-result.js?v=1.6-20260915-2315'));
       await loadScript(url('wealth-customer-copy.js?v=1.9-20260916-0022'));
       await loadScript(url('wealth-product-allocation-sync.js?v=1.9.2.7-20260916-1055'));
@@ -49,9 +49,9 @@
         window.ANALISAKU_WEALTH_COPY?.apply?.();
         window.ANALISAKU_WEALTH_PRODUCT_SYNC?.sync?.();
         const badge=document.querySelector('.wm-version-badge');
-        if(badge)badge.textContent='WEALTH v1.9.2.7';
+        if(badge)badge.textContent='WEALTH v1.9.2.8';
       },80);
-    }catch(error){console.error('Wealth Management v1.9.2.7 gagal dimuat',error);}
+    }catch(error){console.error('Wealth Management v1.9.2.8 gagal dimuat',error);}
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
