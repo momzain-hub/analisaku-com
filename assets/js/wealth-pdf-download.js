@@ -1,11 +1,11 @@
-/* Wealth v1.9.2.3 — Android/mobile PDF download + viewer fallback */
+/* Wealth v1.9.2.4 — direct DOM-based PDF generator for reliable mobile download */
 (function(){
-  const VERSION='1.9.2.3';
+  const VERSION='1.9.2.4';
+  const $=id=>document.getElementById(id);
   let toastTimer=null;
-  let pendingViewer=null;
 
   function ensureToast(){
-    let toast=document.getElementById('wmPdfDownloadToast');
+    let toast=$('wmPdfDownloadToast');
     if(toast)return toast;
     const style=document.createElement('style');
     style.textContent=`
@@ -33,113 +33,124 @@
   }
 
   function setPreparing(on){
-    const btn=document.getElementById('wmDownloadPdf');
+    const btn=$('wmDownloadPdf');
     if(!btn)return;
     if(!btn.dataset.defaultLabel)btn.dataset.defaultLabel=btn.textContent.trim();
     btn.classList.toggle('is-preparing',on);
     btn.textContent=on?'Menyiapkan PDF…':btn.dataset.defaultLabel;
   }
 
-  function openLoadingViewer(){
-    try{
-      const win=window.open('about:blank','_blank');
-      if(!win)return null;
-      win.document.write('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Menyiapkan PDF…</title><style>body{margin:0;background:#07111b;color:#fff;font-family:system-ui;display:grid;place-items:center;min-height:100vh}div{text-align:center;padding:24px}b{display:block;font-size:20px;margin-bottom:8px}span{color:#9eafc3;font-size:13px}</style></head><body><div><b>Menyiapkan Ringkasan PDF…</b><span>PDF akan terbuka di tab ini.</span></div></body></html>');
-      win.document.close();
-      return win;
-    }catch(_){return null;}
+  function clean(text){
+    return String(text||'')
+      .replace(/\u00a0/g,' ')
+      .replace(/[•·]/g,' - ')
+      .replace(/[→⇒]/g,' -> ')
+      .replace(/[–—]/g,'-')
+      .replace(/[Σ]/g,'Sum')
+      .replace(/[^\x20-\x7E\u00C0-\u017F]/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
   }
 
-  function triggerDownload(blob,filename){
-    const safeName=filename||`Analisaku-Wealth-Plan-${new Date().toISOString().slice(0,10)}.pdf`;
-    const url=URL.createObjectURL(blob);
-    let clicked=false;
-    try{
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=safeName;
-      a.rel='noopener';
-      a.style.display='none';
-      document.body.appendChild(a);
-      a.click();
-      clicked=true;
-      setTimeout(()=>a.remove(),1000);
-    }catch(_){clicked=false;}
+  function text(id){return clean($(id)?.textContent||'');}
 
-    if(pendingViewer&&!pendingViewer.closed){
-      try{pendingViewer.location.replace(url);}catch(_){try{pendingViewer.location.href=url;}catch(__){}}
-    }else{
-      try{
-        const viewer=window.open(url,'_blank');
-        if(!viewer)showToast('PDF sudah dibuat, tetapi browser memblokir tab PDF. Aktifkan pop-up untuk situs ini lalu coba lagi.',true);
-      }catch(_){ }
+  function buildPdf(){
+    const jsPDF=window.jspdf?.jsPDF;
+    if(!jsPDF)throw new Error('Generator PDF belum siap');
+    const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    const W=210,M=15,C=W-M*2;
+    let y=16;
+
+    const pageBreak=(need=12)=>{
+      if(y+need>282){doc.addPage();y=16;}
+    };
+    const write=(value,size=8,bold=false,color=[55,65,78],gap=4.2)=>{
+      const s=clean(value);if(!s)return;
+      doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...color);
+      const lines=doc.splitTextToSize(s,C);
+      pageBreak(lines.length*gap+2);
+      doc.text(lines,M,y);y+=lines.length*gap;
+    };
+    const section=title=>{pageBreak(12);y+=3;write(title,10,true,[28,38,52],5);y+=1;};
+    const kv=(label,value)=>{pageBreak(9);doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(112,122,135);doc.text(clean(label),M,y);doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(28,38,52);doc.text(clean(value||'-'),M+55,y);y+=6;};
+
+    doc.setFillColor(18,28,43);doc.roundedRect(M,y,C,28,4,4,'F');
+    doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('analisaku.com',M+7,y+9);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(215,224,235);doc.text('WEALTH MANAGEMENT PLAN',M+7,y+15);
+    const mode=document.body.dataset.wealthMode||'wealth';
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(230,184,91);doc.text(clean(text('resultGoalTitle')||mode.toUpperCase()),M+7,y+22);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(180,190,202);doc.text(new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}),W-M-7,y+9,{align:'right'});
+    y+=36;
+
+    section('RINGKASAN RENCANA');
+    kv('Tujuan / Mode',text('resultGoalTitle')||mode);
+    kv('Profil Investasi',text('resultProfile'));
+    kv('Tingkat Risiko',text('resultRiskLevel')?`Level ${text('resultRiskLevel')}/5`:'-');
+    kv('Target Masa Depan',text('resultFutureTarget'));
+    kv('Proyeksi Dana',text('resultProjected'));
+    kv('Tingkat Pencapaian',text('resultFunding'));
+    kv('Kebutuhan / Bulan',text('resultRequired'));
+    kv('Waktu',text('resultWhen'));
+    kv('Kemampuan',text('resultAble'));
+    kv('Kenyamanan',text('resultComfort'));
+
+    const profileCopy=text('resultProfileCopy');if(profileCopy){y+=2;write(profileCopy,7.5,false,[88,98,112],4.2);}
+    const next=text('resultNext');if(next){section('LANGKAH BERIKUTNYA');write(next,8.5,true,[45,55,66],4.7);}
+
+    const products=$('resultProducts');
+    if(products){section('PILIHAN PRODUK');[...products.children].forEach((el,i)=>write(`${i+1}. ${clean(el.textContent)}`,7.5,false,[55,65,78],4.2));}
+
+    const allocation=$('resultAllocation');
+    if(allocation){section('KOMPOSISI PORTOFOLIO');[...allocation.children].forEach(el=>write(clean(el.textContent),7.8,true,[55,65,78],4.3));}
+
+    const future=$('wmFutureValue');
+    if(future){
+      section('FUTURE VALUE & PROYEKSI PER INSTRUMEN');
+      const summary=future.querySelector('.wm-fv-summary');
+      if(summary){[...summary.children].forEach(el=>write(clean(el.textContent),7.5,false,[55,65,78],4.1));y+=1;}
+      const assets=[...future.querySelectorAll('.wm-fv-asset-card')];
+      assets.forEach((el,i)=>{pageBreak(18);write(`${i+1}. ${clean(el.textContent)}`,7.2,false,[55,65,78],4);y+=1;});
+      const years=[...future.querySelectorAll('.wm-year-card')];
+      if(years.length){section('RINCIAN TAHUNAN');years.forEach(el=>{pageBreak(20);write(clean(el.textContent),7,false,[55,65,78],3.9);y+=2;});}
     }
 
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
-    return clicked;
+    section('CATATAN');
+    write('Simulasi ini merupakan panduan awal dan bukan jaminan hasil investasi. Sebelum bertransaksi, pelajari karakteristik produk, prospektus atau fund fact sheet, biaya, pajak, likuiditas, serta risiko yang berlaku.',6.8,false,[105,112,122],3.7);
+    return doc;
   }
 
-  function patchJsPdf(){
-    const jsPDF=window.jspdf?.jsPDF;
-    const API=jsPDF?.API;
-    if(!API||API.__analisakuMobileDownloadPatchedV193)return false;
-    const originalSave=API.save;
-    if(typeof originalSave!=='function')return false;
-
-    API.__analisakuMobileDownloadPatchedV193=true;
-    API.save=function(filename,options){
-      try{
-        const blob=this.output('blob');
-        if(!(blob instanceof Blob)||blob.size===0)throw new Error('Blob PDF kosong');
-        triggerDownload(blob,filename);
-        setPreparing(false);
-        showToast('PDF sudah dibuat. Jika tidak otomatis tersimpan, PDF juga dibuka di tab baru — tekan ikon Download di viewer PDF.');
-        pendingViewer=null;
-        return this;
-      }catch(error){
-        try{
-          const result=originalSave.apply(this,arguments);
-          setPreparing(false);
-          showToast('PDF sedang diproses. Jika file tidak muncul, gunakan tab PDF yang terbuka untuk menyimpan manual.');
-          pendingViewer=null;
-          return result;
-        }catch(fallbackError){
-          setPreparing(false);
-          if(pendingViewer&&!pendingViewer.closed){try{pendingViewer.close();}catch(_){}}
-          pendingViewer=null;
-          showToast('PDF belum berhasil dibuat. Refresh halaman lalu coba kembali.',true);
-          console.error('Wealth PDF download failed',fallbackError||error);
-          throw fallbackError;
-        }
-      }
-    };
-    return true;
+  function saveDoc(doc){
+    const filename=`Analisaku-Wealth-Plan-${new Date().toISOString().slice(0,10)}.pdf`;
+    const blob=doc.output('blob');
+    if(!(blob instanceof Blob)||!blob.size)throw new Error('PDF kosong');
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;a.rel='noopener';a.style.display='none';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},15000);
   }
 
   function bind(){
     ensureToast();
-    patchJsPdf();
     document.addEventListener('click',event=>{
-      if(!event.target.closest('#wmDownloadPdf'))return;
+      const btn=event.target.closest('#wmDownloadPdf');
+      if(!btn)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
       setPreparing(true);
-      if(!pendingViewer||pendingViewer.closed)pendingViewer=openLoadingViewer();
-      if(!patchJsPdf()&&!window.jspdf?.jsPDF){
+      try{
+        const doc=buildPdf();
+        saveDoc(doc);
+        showToast('PDF berhasil dibuat dan proses unduh sudah dimulai. Cek folder Download.');
+      }catch(error){
+        console.error('Direct Wealth PDF failed',error);
+        showToast(`PDF belum berhasil dibuat: ${error?.message||'terjadi kesalahan'}.`,true);
+      }finally{
         setPreparing(false);
-        if(pendingViewer&&!pendingViewer.closed){try{pendingViewer.close();}catch(_){}}
-        pendingViewer=null;
-        showToast('Generator PDF belum siap. Refresh halaman lalu coba kembali.',true);
       }
-      setTimeout(()=>{
-        const btn=document.getElementById('wmDownloadPdf');
-        if(btn?.classList.contains('is-preparing')){
-          setPreparing(false);
-          showToast('Proses PDF terlalu lama. Refresh halaman lalu coba lagi.',true);
-        }
-      },10000);
     },true);
-    window.ANALISAKU_WEALTH_PDF_DOWNLOAD={version:VERSION,patch:patchJsPdf};
+    window.ANALISAKU_WEALTH_PDF_DOWNLOAD={version:VERSION,mode:'direct-dom'};
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});
-  else bind();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
