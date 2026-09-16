@@ -1,0 +1,5 @@
+/* Wealth v1.9.2.1 — hide legacy questionnaire once mode-specific questionnaire is active */
+.wm-step-body > .wm-lens[hidden],
+.wm-step-body > .wm-mode-questionnaire ~ .wm-lens{
+  display:none!important;
+}
