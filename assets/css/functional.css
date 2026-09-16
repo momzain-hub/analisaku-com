@@ -115,20 +115,20 @@ html[data-theme="light"]{
   --surface:#ffffff!important;
   --surface2:#f8fafc!important;
   --surface3:#f1f5f9!important;
-  --text:#172033!important;
+  --text:#111827!important;
   --heading:#020617!important;
-  --muted:#475569!important;
-  --muted2:#64748b!important;
+  --muted:#334155!important;
+  --muted2:#475569!important;
   --line:rgba(15,23,42,.12)!important;
   --line-strong:rgba(15,23,42,.20)!important;
   --frame:rgba(184,137,22,.18)!important;
   --frame-strong:rgba(184,137,22,.34)!important;
-  --gold:#b88916!important;
-  --gold2:#9f7612!important;
+  --gold:#a97508!important;
+  --gold2:#8f6306!important;
   --green:#087a46!important;
   --red:#cf3f4e!important;
   --field:#ffffff!important;
-  --header:rgba(255,255,255,.98)!important;
+  --header:rgba(255,255,255,.985)!important;
   --shadow:0 9px 24px rgba(15,23,42,.07)!important;
   --soft-shadow:0 4px 14px rgba(15,23,42,.05)!important;
   --shadow-soft:0 4px 14px rgba(15,23,42,.05)!important;
@@ -143,7 +143,7 @@ html[data-theme="light"] body:before,html[data-theme="light"] body:after{
   display:none!important;
   content:none!important;
 }
-html[data-theme="light"] .site-header{background:rgba(255,255,255,.98)!important}
+html[data-theme="light"] .site-header{background:rgba(255,255,255,.985)!important}
 html[data-theme="light"] .section.alt{background:#f8fafc!important}
 html[data-theme="light"] input,
 html[data-theme="light"] select,
@@ -159,13 +159,124 @@ html[data-theme="light"] .field input{
     --surface:#ffffff!important;
     --surface2:#f8fafc!important;
     --surface3:#f1f5f9!important;
-    --text:#172033!important;
+    --text:#111827!important;
     --heading:#020617!important;
-    --muted:#475569!important;
-    --muted2:#64748b!important;
+    --muted:#334155!important;
+    --muted2:#475569!important;
     --line:rgba(15,23,42,.12)!important;
     --line-strong:rgba(15,23,42,.20)!important;
     --field:#ffffff!important;
-    --header:rgba(255,255,255,.98)!important;
+    --header:rgba(255,255,255,.985)!important;
   }
+}
+
+/* ---------- GLOBAL TYPOGRAPHY SHARPNESS ----------
+   Uses native system fonts to avoid soft web-font rasterisation on mobile.
+   Higher-specificity !important rules keep this authoritative even though
+   design-system-v3.css loads after this file. */
+html body,
+html body button,
+html body input,
+html body select,
+html body textarea{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-synthesis:none!important;
+  font-kerning:normal!important;
+  text-rendering:geometricPrecision!important;
+  -webkit-font-smoothing:auto!important;
+  -moz-osx-font-smoothing:auto!important;
+}
+html body{font-weight:450!important}
+html body h1,
+html body h2,
+html body h3,
+html body h4,
+html body h5,
+html body h6{
+  font-weight:800!important;
+  letter-spacing:-.018em!important;
+  text-shadow:none!important;
+}
+html body strong,
+html body b{font-weight:750!important;text-shadow:none!important}
+html body p,
+html body li{font-weight:450!important}
+html body small,
+html body .helper,
+html body .data-note,
+html body .mc-updated,
+html body .breadcrumb,
+html body .article-meta,
+html body .article-byline{
+  font-weight:550!important;
+  line-height:1.5!important;
+  text-shadow:none!important;
+}
+html body button,
+html body .btn,
+html body .main-nav a,
+html body label{
+  font-weight:650!important;
+  text-shadow:none!important;
+}
+html[data-theme="light"] body,
+html[data-theme="light"] body p,
+html[data-theme="light"] body li,
+html[data-theme="light"] body span,
+html[data-theme="light"] body small{
+  text-shadow:none!important;
+}
+html[data-theme="light"] body p,
+html[data-theme="light"] body li{color:#334155!important}
+html[data-theme="light"] body small,
+html[data-theme="light"] body .helper,
+html[data-theme="light"] body .data-note,
+html[data-theme="light"] body .mc-updated,
+html[data-theme="light"] body .breadcrumb,
+html[data-theme="light"] body .article-meta,
+html[data-theme="light"] body .article-byline{color:#475569!important}
+html[data-theme="light"] body h1,
+html[data-theme="light"] body h2,
+html[data-theme="light"] body h3,
+html[data-theme="light"] body h4,
+html[data-theme="light"] body h5,
+html[data-theme="light"] body h6,
+html[data-theme="light"] body strong,
+html[data-theme="light"] body b{color:#020617!important}
+
+/* Lift very small UI text one step for readability without changing layout. */
+html body .pulse-card small,
+html body .pulse-card span,
+html body .context-result small,
+html body .context-axis,
+html body .framework-badge,
+html body .tech-progress-number span,
+html body .practice-step span,
+html body .practice-step small,
+html body .market-lens-item small,
+html body .market-lens-item span{
+  font-size:max(10px,.70rem)!important;
+  line-height:1.4!important;
+}
+
+/* Wealth / brokerage screens contain many compact labels; keep them crisp. */
+html body.wealth-page small,
+html body.wealth-page .wm-field small,
+html body.wealth-page .wm-result-card small,
+html body.wealth-page .wm-fv-asset-card small,
+html body.wealth-page .wm-year-card small,
+html body.wealth-page .wm-equity-row small,
+html body.wealth-page .wm-product-group small{
+  font-weight:600!important;
+  letter-spacing:.01em!important;
+  text-rendering:geometricPrecision!important;
+}
+html[data-theme="light"] body.wealth-page small,
+html[data-theme="light"] body.wealth-page .wm-field small,
+html[data-theme="light"] body.wealth-page .wm-result-card small,
+html[data-theme="light"] body.wealth-page .wm-fv-asset-card small,
+html[data-theme="light"] body.wealth-page .wm-year-card small,
+html[data-theme="light"] body.wealth-page .wm-equity-row small,
+html[data-theme="light"] body.wealth-page .wm-product-group small{
+  color:#475569!important;
 }
